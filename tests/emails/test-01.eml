@@ -1,0 +1,65 @@
+From 1axboes5ld001t4lgsbt8hpxno46gs3vee6cfc-ngrok=example.com@21124867m.ngrok.com  Wed Jul 22 20:34:47 2026
+Return-Path: <1axboes5ld001t4lgsbt8hpxno46gs3vee6cfc-ngrok=example.com@21124867m.ngrok.com>
+X-Original-To: ngrok@example.com
+Delivered-To: user@example.com
+Received-ASN: AS14618 Amazon.com, Inc. (client 158.247.26.177)
+DMARC-Filter: OpenDMARC Filter v1.4.2 mta-in.example.com 36744183FF40
+Authentication-Results: mta-in.example.com; dmarc=none (p=none dis=none) header.from=m.ngrok.com
+DKIM-Filter: OpenDKIM Filter v2.11.0 mta-in.example.com 36744183FF40
+Authentication-Results: mta-in.example.com;
+	dkim=pass (2048-bit key, unprotected) header.d=21124867m.ngrok.com header.i=@21124867m.ngrok.com header.a=rsa-sha256 header.s=hs1 header.b=ISa4FW2K;
+	dkim=pass (2048-bit key, unprotected) header.d=m.ngrok.com header.i=@m.ngrok.com header.a=rsa-sha256 header.s=hs1-21124867 header.b=zyWFdOIV
+Received-SPF: Pass (mailfrom) identity=mailfrom; client-ip=158.247.26.177; helo=bid48ar.21124867m.ngrok.com; envelope-from=1axboes5ld001t4lgsbt8hpxno46gs3vee6cfc-ngrok=example.com@21124867m.ngrok.com; receiver=example.com 
+Received: from bid48ar.21124867m.ngrok.com (bid48ar.21124867m.ngrok.com [158.247.26.177])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by mta-in.example.com (Postfix) with ESMTPS id 36744183FF40
+	for <ngrok@example.com>; Wed, 22 Jul 2026 20:34:45 +0300 (EEST)
+Received: by 172.16.243.6 with SMTP id a0tfyza0s969w5xm999pa8z5bfhwnl38za6mtle0sl;
+        Wed, 22 Jul 2026 17:34:44 GMT
+DKIM-Signature: v=1; s=hs1; d=21124867m.ngrok.com; 
+        i=@21124867m.ngrok.com; 
+        h=sender:from:from:reply-to:to:to:cc:cc:subject:subject:list-unsubscribe:list-id:form-sub:feedback-id:list-unsubscribe-post; 
+        a=rsa-sha256; c=relaxed/relaxed; 
+        bh=clRPc6pzYZeSemadPlsSmYYRidT72XGqBhdJYVsacOM=; 
+        b=ISa4FW2K+4d35Rj5MjqqqQzhMpCxUyrb+NABJUG86ISD/bHReS588kUwR0FJLZ
+         B9+nJRKBqUTNGxSDqnjdDX07JkkpEshmx4e/0ewJVBmSz8qlWS8JAYu4wZ2jRlw
+         wOS5GWaZOak4kqq8o9CO7/5cubn7m0cNX/9f/1222DZoslBqtu1N84dTg78G1XH
+         ZTj0o1+98ZI/CuD1wMDW4e9VtWqzQpHxZHhpmG1i3WekaPAmkbjqEWBbQuDxYqu
+         oNe/N0++XAj3mCg1o702KCYNKfqYerKrZdaVtC2BOY70dj8+0fk1AjEPkmDy+Nl
+         z+hU5vTV/pNWYTURVwVrzxnoq9pw==; q=dns/txt; t=1784740987; 
+        x=1785003787;
+DKIM-Signature: v=1; s=hs1-21124867; d=m.ngrok.com; 
+        i=@m.ngrok.com; 
+        h=sender:from:from:reply-to:to:to:cc:cc:subject:subject:list-unsubscribe:list-id:form-sub:feedback-id:list-unsubscribe-post; 
+        a=rsa-sha256; c=relaxed/relaxed; 
+        bh=clRPc6pzYZeSemadPlsSmYYRidT72XGqBhdJYVsacOM=; 
+        b=zyWFdOIVBoKuapB6wkdTa4tH+sJKsUSCCaHq/Ey+M4qilTXPWFlt5HuZNIeN/l
+         V022/4PbuQudKAGcNSKAErrmXlEGEeqG2TWoupDc0ePfy8PqSPiBemvovIw5pCl
+         FcCFG8QVHEwlU9VynGF2px8JYuYeADIRJ/Zb5qJ6cOzkdcW8jvSLSwAUNigw8+u
+         UX4cWlNQ6XPvlDsxuXBDCITpQzo/EGsdmOK/u1SAx4O88gFF7h95/o5vI3c1A2C
+         S6l4Lr8rwIqStXKJZ/HjmfeNfR8xbZCqkxgMMcJrsxsWhHhGqoPSP8uUY5MfBML
+         v2PQDmiJ4jQLFMGsfGvmK2g3L57w==; q=dns/txt; t=1784740987; 
+        x=1785003787;
+X-HS-Cid: 1axfhdagf3mrn7d3mnbel7bao6fnzet05orqlk
+List-Unsubscribe: <mailto:1axcojqflqw8cmtxz6y90kshj2n2fv6u10falk-ngrok=example.com@21124867m.ngrok.com?subject=unsubscribe>, <https://hs-21124867.s.hubspotemail.net/subscription-preferences/v2/unsubscribe-all?data=aM2L-Qv4QWq2W9glGFj4Hl17yW3x27MB1tZDJ2VBqWvb792rM1W8wclmv53h3d0V-BB2x2GLXx6W8xrhrV8gTtWXW5JHL0m51mWsSVjLkNK79N1NpW8sFx16145PTkW5Sp1dp7BMNgFMLQr381m_Nf1>
+Date: Wed, 22 Jul 2026 10:34:44 -0700
+From: "Joel @ ngrok" <team@m.ngrok.com>
+Reply-To: reply@ngrok.com
+To: ngrok@example.com
+Message-ID: <1784740984961.86b7d778-6afa-439d-aac2-d50a293c3b34@21124867m.ngrok.com>
+Subject: [ngrok news] One gateway for every model (even your own)
+MIME-Version: 1.0
+Content-Type: multipart/alternative; 
+	boundary="----=_Part_407998_560360014.1784740987314"
+X-Report-Abuse-To: abuse@hubspot.com (see
+ https://policy.hubspot.com/abuse-complaints)
+List-Unsubscribe-Post: List-Unsubscribe=One-Click
+Feedback-ID: aemu2b5:aihd2jfl:aipuz:HubSpot
+
+------=_Part_407998_560360014.1784740987314
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Route it, secure it, and see what every call costs. Plus a certified slop-f=
+ree Kubernetes port.

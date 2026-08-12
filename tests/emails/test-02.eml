@@ -1,0 +1,60 @@
+From notification@facebookmail.com  Wed Jul 22 21:15:40 2026
+Return-Path: <notification@facebookmail.com>
+X-Original-To: facebook@example.com
+Delivered-To: user@example.com
+Received-ASN: AS32934 Facebook, Inc. (client 69.171.232.146)
+DMARC-Filter: OpenDMARC Filter v1.4.2 mta-in.example.com 41C88183FF40
+Authentication-Results: mta-in.example.com; dmarc=pass (p=reject dis=none) header.from=facebookmail.com
+DKIM-Filter: OpenDKIM Filter v2.11.0 mta-in.example.com 41C88183FF40
+Authentication-Results: mta-in.example.com;
+	dkim=pass (1024-bit key, unprotected) header.d=facebookmail.com header.i=@facebookmail.com header.a=rsa-sha256 header.s=s1024-2013-q3 header.b=HtUtIgqP
+Received-SPF: Pass (mailfrom) identity=mailfrom; client-ip=69.171.232.146; helo=69-171-232-146.mail-mail.facebook.com; envelope-from=notification@facebookmail.com; receiver=example.com 
+Received: from 69-171-232-146.mail-mail.facebook.com (69-171-232-146.mail-mail.facebook.com [69.171.232.146])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange x25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mta-in.example.com (Postfix) with ESMTPS id 41C88183FF40
+	for <facebook@example.com>; Wed, 22 Jul 2026 21:15:38 +0300 (EEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=facebookmail.com;
+	s=s1024-2013-q3; t=1784744136;
+	bh=CS2AxLUNynhivx7uN2AFpqW1Qd0dImbqo4MlpwhypEg=;
+	h=Date:To:Subject:From:MIME-Version:Content-Type;
+	b=HtUtIgqPGJIXlud4d2ApAGyO9fQGLF2N2f/IF1PAsB95DUjWkl9Ie9H9GsbbQLGCp
+	 +8DSIHdbZtYlUJxajC0H7Sr7SiGZcS/wfrzu25ttFJrNSauAMa1qIt3DjZrWoh3aCL
+	 LgpRx3ZUIr1QAXFkjDpj9NOkvbKR0YPKsS8W2PbA=
+X-Facebook: from 2803:6082:d18c:50d3:e4ec:a32f:151c:a00 ([MTI3LjAuMC4x]) 
+	by thrift.facebook.com with HTTPS (ZuckMail);
+Date: Wed, 22 Jul 2026 11:15:36 -0700
+To: Joe User <facebook@example.com>
+Subject: Did you just remove an email address?
+X-Priority: 3
+X-Mailer: ZuckMail [version 1.00]
+From: "Facebook" <notification@facebookmail.com>
+Reply-to: noreply <noreply@facebookmail.com>
+Errors-To: notification@facebookmail.com
+X-Facebook-Notify: email_removed; mailid=U1U65736d6a73cb2G5af41e09dc2dG65737203d3f84G18f
+List-Unsubscribe: <https://www.facebook.com/email/oneclick/unsubscribe?identifier=Afn0aKOEDJxk23zzEtKHQrQz6I-O64864aAqPyGIKs1-V5lJDwsJd1e8GwX8gxSWxazi2SaseVJo8zo1h9YN21yILs0xm67qfk08_40DCZXkKFx02y-MM9Tltn2rtNrWPmPB1oox54FaNUofgTEuGmL0Cy5T0KWQ8YRjKP8y3T2CWFJRhX_b_9hysEgzx6_BvAXFQlpQU0bYbHvExp_1TI4uV_ithwW66wdY1sdsX95p5Q3VGtDU4vHKeFb7s8MeskSF3M6RVHa_v1XSKJvApR0k7fV2B2y5gyJQtQBjA_NcZD-AWQyYaZ5s3BmMYBlaQj3OaeYivJwxR32iyg>
+List-Unsubscribe-Post: List-Unsubscribe=One-Click
+X-FB-Internal-Notiftype: email_removed
+BIMI-Selector: v=BIMI1; s=fb2023q1v3;
+Feedback-ID: email_removed:Facebook
+X-FB-Internal-MID: U1U65736d6a73cb2G5af41e09dc2dG65737203d3f84G18f
+X-FB-Internal-NotifID: 1784744135966596
+X-FB-Internal-RecipID: 100004522482733
+X-FACEBOOK-PRIORITY: 0
+X-Auto-Response-Suppress: All
+MIME-Version: 1.0
+Content-Type: multipart/alternative;
+	boundary="b1_5cadc597e14490b71460f398d7e2edbe"
+Message-ID: <34af4419-7381-43ce-ae86-35c31660996b@facebookmail.com>
+
+
+--b1_5cadc597e14490b71460f398d7e2edbe
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+Was this you?
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D

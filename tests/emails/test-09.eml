@@ -1,0 +1,892 @@
+From v-6-bounce-12008-1-961856-388283711-2884214@rm.mailat24.fi  Sun Aug  9 20:02:25 2026
+Return-Path: <v-6-bounce-12008-1-961856-388283711-2884214@rm.mailat24.fi>
+X-Original-To: mailat24@example.com
+Delivered-To: user@example.com
+Received-ASN: AS42708 Glesys AB (client 192.176.241.8)
+DMARC-Filter: OpenDMARC Filter v1.4.2 mta-in.example.com B9692183FF40
+Authentication-Results: mta-in.example.com; dmarc=pass (p=none dis=none) header.from=mailat24.fi
+DKIM-Filter: OpenDKIM Filter v2.11.0 mta-in.example.com B9692183FF40
+Authentication-Results: mta-in.example.com;
+	dkim=pass (2048-bit key, unprotected) header.d=rulemailer.se header.i=@rulemailer.se header.a=rsa-sha256 header.s=keyse header.b=WnnNRpHE;
+	dkim=pass (2048-bit key, unprotected) header.d=mailat24.fi header.i=@mailat24.fi header.a=rsa-sha256 header.s=keyse header.b=eOeq+1jE
+Received-SPF: Pass (mailfrom) identity=mailfrom; client-ip=192.176.241.8; helo=8241.rulemailer.se; envelope-from=v-6-bounce-12008-1-961856-388283711-2884214@rm.mailat24.fi; receiver=example.com 
+Received: from 8241.rulemailer.se (8241.rulemailer.se [192.176.241.8])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange x25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mta-in.example.com (Postfix) with ESMTPS id B9692183FF40
+	for <mailat24@example.com>; Sun, 09 Aug 2026 20:02:22 +0300 (EEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=rulemailer.se; s=keyse;
+	h=content-type:message-id:mime-version:reply-to:from:to:subject:feedback-id:
+	 list-unsubscribe-post:list-unsubscribe:subject:from:to:cc;
+	bh=soGYVwpmSuITCTfTfox1ZT3hEWRNRCPIpPPx42lJBdc=;
+	b=WnnNRpHEl4fMtUGs5U2Kjb6qnJbXywmkuJ+iKNfgAufJk9zQXVf32l1iOaovq1xbUy1ymejL+pv1j
+	 A8NUEvizeLmXntj8JC7MatUWJa/Th4KZhXF0ypetozMJj+LM1m2MWSSRwc8DumVcR9JCg5p6lFJDQO
+	 AiXGrA3a6NjEXtgsJl/Die1ZAhZmJsJX7xpyuT9U4Gzly7f2qKBuhnI1EXc1Rplzhj85qZqD6GW/UT
+	 PKMNlESCV5M3DzkbHjJ2fn2603r7w6WVjveNrWYQtrnlK4C3lDfCximyBS14Q3kFFzifovtFF7il35
+	 E3Q81eo/v71IFJlLhu5eNifE6men84g==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=mailat24.fi; s=keyse;
+	h=content-type:message-id:mime-version:reply-to:from:to:subject:feedback-id:
+	 list-unsubscribe-post:list-unsubscribe:subject:from:to:cc;
+	bh=soGYVwpmSuITCTfTfox1ZT3hEWRNRCPIpPPx42lJBdc=;
+	b=eOeq+1jEhVB+DV7tZSC2g5z7T/3bh2O67YM7qrekBvHpjqbbQLQQL7Bva10A/yHV24Ww53/0xG+sG
+	 39kBtrNGQyVk7T+ipgfyaYKZoCLiGt32mVq6hAE3lMLla4Ei/l69lvWkTy53herbgJr8U0ab7bOB2i
+	 J0uv5P09v8Fj9T/ANpXl9Q6z6d3f2YVToqhk7hC9BCU4IuKU4UdPRw51LImb3LkWVgVdNevNMrRiWi
+	 yNlLQXbndU3Zp0Qorq3pZSUVYW3tRhsi7lMQFBGSxruePinUjbuFn4o0IqayrletyDoQjTSOa00VKd
+	 Lvc8/KpG76BQ3lcNMrzy3jbyMcHeeSg==
+X-Complaints-To: abuse@rulemailer.se
+X-Mailer: RuleMailer
+X-Job: pool_good-12008-2884214
+X-Sender: v-6-bounce-12008-1-961856-388283711-2884214@rm.mailat24.fi
+X-Receiver: mailat24@example.com
+List-Unsubscribe: <https://app.rule.io/unsubscribe/eyJpdiI6InEvS2pDdHlFLzFPM1dzVFBSdHZjeUE9PSIsInZhbHVlIjoiekFJa0tOMmdtcDd4QlNDdkpiaytmTklQQU1mTEFPeUE0dng2WFVQU3FVTzJPYWs1WElrMFlHd3ZhYlM0cVlURU5zQ1JQVkg5R3dyYXRPdi9KV1A0NFE9PSIsIm1hYyI6IjNlMTBlM2NiYzYyZDZjMmEwN2ZhNDZlMmI0YjM0NmY0NDM5ODYxZGE3OTNlNjM4MjI4ZWYyMTcyMmQyNzkwMDciLCJ0YWciOiIifQ%3D%3D?confirm=1>,
+ <mailto:v-6-bounce-12008-1-961856-388283711-2884214@unsub.rulemailer.se>
+List-Unsubscribe-Post: List-Unsubscribe=One-Click
+Feedback-ID: 2884214:388283711:rulemailer
+Subject: =?utf-8?Q?Myydyimm=C3=A4t?= sulkapallomailat
+To: mailat24@example.com
+From: Mailat24 <info@mailat24.fi>
+Reply-To: Mailat24 <info@mailat24.fi>
+MIME-Version: 1.0
+Date: Sun, 09 Aug 2026 19:02:12 +0200
+Message-ID: <3c211301490a1d182167c58116affa21@mailat24.fi>
+Content-Type: multipart/alternative; boundary=1pMnpTyx
+
+--1pMnpTyx
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Klicka h=C3=A4r f=C3=B6r att l=C3=A4sa mailet p=C3=A5 webben: %Link:WebBrow=
+ser%
+
+Lorem ipsum dolor sit amet
+
+Lorem ipsum dolor sit amet, conse=
+ctetuer adipiscing elit. Maecenas feugiat consequat diam. Maecenas metus. V=
+ivamus diam purus, cursus a, commodo non, facilisis vitae, nulla. Aenean di=
+ctum lacinia tortor. Nunc iaculis, nibh non iaculis aliquam, orci felis eui=
+smod neque, sed ornare massa mauris sed velit.
+
+---
+Klicka h=C3=A4r f=
+=C3=B6r att avregistrera dig fr=C3=A5n detta nyhetsbrev: %Link:Unsubscribe%=
+
+skickat med Rule - http://www.rule.se
+--1pMnpTyx
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<!doctype html>
+<html lang=3D"und" dir=3D"auto" xmlns=3D"http://www.w3.or=
+g/1999/xhtml">
+<head>
+    <title>Myydyimm=C3=A4t sulkapallomailat</titl=
+e>
+    <!--[if !mso]><!-->
+    <meta http-equiv=3D"X-UA-Compatible" con=
+tent=3D"IE=3Dedge">
+    <!--<![endif]-->
+    <meta http-equiv=3D"Conten=
+t-Type" content=3D"text/html; charset=3DUTF-8">
+    <meta name=3D"viewpor=
+t" content=3D"width=3Ddevice-width, initial-scale=3D1">
+   =20
+    <style=
+ type=3D"text/css">
+        #outlook a { padding:0; }
+        body { ma=
+rgin:0;padding:0;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%; }=
+
+        table, td { border-collapse:collapse;mso-table-lspace:0pt;mso-ta=
+ble-rspace:0pt; }
+        img { border:0;height:auto;line-height:100%; ou=
+tline:none;text-decoration:none;-ms-interpolation-mode:bicubic; }
+       =
+ p { display:block;margin:13px 0; }
+    </style>
+    <!--[if mso]>
+  =
+  <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+   =
+             <o:AllowPNG/>
+                <o:PixelsPerInch>96</o:PixelsP=
+erInch>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </=
+noscript>
+    <![endif]-->
+    <!--[if lte mso 11]>
+    <style type=
+=3D"text/css">
+        .rc-outlook-group-fix { width:100% !important; }=
+
+    </style>
+    <![endif]-->
+    <!--[if !mso]><!--><link href=3D"h=
+ttps://app.rule.io/brand-style/7987/font/2783/css" rel=3D"stylesheet" type=
+=3D"text/css">
+<link href=3D"https://app.rule.io/brand-style/7987/font/28=
+03/css" rel=3D"stylesheet" type=3D"text/css"><style type=3D"text/css">@impo=
+rt url(https://app.rule.io/brand-style/7987/font/2783/css);
+@import url(h=
+ttps://app.rule.io/brand-style/7987/font/2803/css);</style><!--<![endif]-->=
+
+
+    <style type=3D"text/css">@media only screen and (min-width:480px)=
+ {.rc-column-per-100 { width:100% !important; max-width:100%; }
+.rc-colum=
+n-per-33-333333333333 { width:33.333333333333% !important; max-width:33.333=
+333333333%; }}</style><style media=3D"screen and (min-width:480px)">.moz-te=
+xt-html .rc-column-per-100 { width:100% !important; max-width:100%; }
+.mo=
+z-text-html .rc-column-per-33-333333333333 { width:33.333333333333% !import=
+ant; max-width:33.333333333333%; }</style>
+    <style type=3D"text/css">@=
+media only screen and (max-width:479px) {
+.rc-section-6e32c7da3c2634fc61f=
+130d763d2dfca > table > tbody > tr > td { padding: 0px 0px 0px 0px !importa=
+nt; }
+.rc-column-6e32c7da3c2634fc61f130d763d2dfca > table > tbody > tr > =
+td { padding: 0px 0px 0px 0px !important; }
+.rc-logo-7005c2ecc4b60186c103=
+f087b0abd727 { padding: 10px 0px 10px 20px !important; }
+.rc-text-0f33429=
+a8a296ea95e8db01c07641335 { padding: 0px 30px 0px 30px !important; }
+.rc-=
+button-5118355f602df5e85a72e3b104fcdaf2 { padding: 20px 0px 40px 0px !impor=
+tant; }
+.rc-section-953f9006b534f903341f15193cd862da > table > tbody > tr=
+ > td { padding: 10px 0px 20px 0px !important; }
+.rc-text-24c79578634aef9=
+dd5495c5c6b00fc30 { padding: 0px 0px 10px 0px !important; }
+.rc-button-6e=
+32c7da3c2634fc61f130d763d2dfca { padding: 0px 0px 0px 0px !important; }
+.=
+rc-section-6c7af36371f80f3d9c9fceaa44f4f304 > table > tbody > tr > td { pad=
+ding: 10px 0px 50px 0px !important; }
+.rc-text-e95e303b4a06ca9f553201374d=
+2a252d { padding: 0px 20px 0px 20px !important; }
+.rc-column-2156c1f02cf4=
+4e93d01e300384daf10c > table > tbody > tr > td { padding: 0 20px !important=
+; }
+}</style>
+</head>
+<body style=3D"word-spacing:normal;background-c=
+olor:#FFFFFF;">
+            <div style=3D"display:none;font-size:1px;colo=
+r:#ffffff;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:h=
+idden;">Tutustu sulkapalloilijoiden suosikkeihin kampanjahinnoin.</div><div=
+ style=3D"display:none;max-height:0px;overflow:hidden;">&nbsp;&zwnj;&nbsp;&=
+zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwn=
+j;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&=
+nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbs=
+p;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&=
+zwnj;&nbsp;&zwnj;<wbr>&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp=
+;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&z=
+wnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj=
+;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&n=
+bsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;<wbr>&nbsp;&zwnj;=
+&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nb=
+sp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;=
+&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zw=
+nj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;=
+&nbsp;&zwnj;&nbsp;&zwnj;<wbr>&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwn=
+j;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&=
+nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbs=
+p;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&=
+zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;<wbr>&nbsp=
+;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&z=
+wnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj=
+;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&n=
+bsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp=
+;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;<wbr>&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nb=
+sp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;=
+&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zw=
+nj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;=
+&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;<wb=
+r>&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&=
+nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbs=
+p;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&=
+zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwn=
+j;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;<wbr>&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&z=
+wnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj=
+;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&n=
+bsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp=
+;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&z=
+wnj;<wbr>&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;=
+&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zw=
+nj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;=
+&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nb=
+sp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;<wbr>&nbsp;&zwnj;&nbsp;&zwnj;&=
+nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbs=
+p;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&=
+zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwn=
+j;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&=
+nbsp;&zwnj;</div>
+        <div style=3D"background-color:#FFFFFF;" lang=
+=3D"und" dir=3D"auto"><!--[if mso | IE]><table align=3D"center" border=3D"0=
+" cellpadding=3D"0" cellspacing=3D"0" class=3D"rc-section-6e32c7da3c2634fc6=
+1f130d763d2dfca-outlook" role=3D"presentation" style=3D"width:600px;" width=
+=3D"600" bgcolor=3D"#000000"><tr><td style=3D"line-height:0px;font-size:0px=
+;mso-line-height-rule:exactly;"><![endif]--><div class=3D"rc-section-6e32c7=
+da3c2634fc61f130d763d2dfca" style=3D"background:#000000;background-color:#0=
+00000;margin:0px auto;max-width:600px;"><table align=3D"center" border=3D"0=
+" cellpadding=3D"0" cellspacing=3D"0" role=3D"presentation" style=3D"backgr=
+ound:#000000;background-color:#000000;width:100%;border-collapse:separate;"=
+><tbody><tr><td style=3D"direction:ltr;font-size:0px;padding:0px 0px 0px 0p=
+x;text-align:center;mso-padding-left-alt:0;mso-padding-right-alt:0;"><!--[i=
+f mso | IE]><table role=3D"presentation" border=3D"0" cellpadding=3D"0" cel=
+lspacing=3D"0"><tr><td class=3D"rc-column-6e32c7da3c2634fc61f130d763d2dfca-=
+outlook" style=3D"vertical-align:top;width:600px;"><![endif]--><div style=
+=3D"font-size:0px;text-align:left;direction:ltr;display:inline-block;vertic=
+al-align:top;width:100%;" class=3D"rc-column-per-100 rc-outlook-group-fix r=
+c-column-6e32c7da3c2634fc61f130d763d2dfca"><table border=3D"0" cellpadding=
+=3D"0" cellspacing=3D"0" role=3D"presentation" width=3D"100%" style=3D"bord=
+er-collapse:separate;"><tbody><tr><td style=3D"background-color:#FFFFFF;ver=
+tical-align:top;padding:0px 0px 0px 0px;"><table border=3D"0" cellpadding=
+=3D"0" cellspacing=3D"0" role=3D"presentation" style=3D"border-collapse:sep=
+arate;" width=3D"100%"><tbody><tr><td align=3D"left" class=3D"rc-logo-7005c=
+2ecc4b60186c103f087b0abd727" style=3D"background:#000000;font-size:0px;padd=
+ing:20px 20px 20px 20px;word-break:break-word;"><table border=3D"0" cellpad=
+ding=3D"0" cellspacing=3D"0" role=3D"presentation" style=3D"border-collapse=
+:separate;border-spacing:0px;"><tbody><tr><td style=3D"width:96px;overflow:=
+hidden;"><a href=3D"https://app.rule.io/link/eyJpdiI6Im9QbU5DTnp5NXhDTmZlRF=
+RuaURHRlE9PSIsInZhbHVlIjoiTmJNM2xwdzY4bEw0UTYwcEE2UlpZUkdtemRReVBTT3BwKzk1Z=
+TRwWUVScEw2eGxzQ0hQaXd0MGNDNmQwRUtncDhvUXJBV1VieDlwYTlGcXphK01OSUhQZjNPVm42=
+alpTU2dNMTZoL1dxSjV4eFVydVAvWkQzaGp1cHBGK2JQUEh4UVZDUFMzZWovbG5Ja28xV3FDZEJ=
+EZkpMRko0QndFM3h2ZW0yMlE0ejNVM3JrRWRMazNTZWt1VFJwUnVDeS9CV0VSSk04T1RYUG4rK2=
+VyOFZvWUV2UT09IiwibWFjIjoiZTNjZTgyZjAxNjMyNzNiMTQyY2NkNzJjZGFjYWM0YmYzYWY5M=
+zFlMWZiM2MxNjBkNmE0Yzg0NjYxZjkzNmQyOSIsInRhZyI6IiJ9" target=3D"_blank"><img=
+ alt=3D"City" src=3D"https://img.rule.io/12008/6811f3b6cfda6" style=3D"bord=
+er:0;display:block;outline:none;text-decoration:none;height:9px;width:100%;=
+font-size:14px;" width=3D"96" height=3D"9"/></a></td></tr></tbody></table><=
+/td></tr><tr><td align=3D"center" style=3D"font-size:0px;padding:0 0 20px;w=
+ord-break:break-word;"><table border=3D"0" cellpadding=3D"0" cellspacing=3D=
+"0" role=3D"presentation" style=3D"border-collapse:separate;border-spacing:=
+0px;"><tbody><tr><td style=3D"width:600px;overflow:hidden;"><a href=3D"http=
+s://app.rule.io/link/eyJpdiI6IjBwSWVYRFM4ODhRQWdaVDhvelBkQkE9PSIsInZhbHVlIj=
+oieWdBWTNXOS94QWFzWHhvQkVJTXhXaUZVYjBLM0xkZndCWk1yTFlsSlJTQ3FaRDM5dnE3QmdhZ=
+nJsV3d5N3hQcGtWMloydzVrUEU5VDJoa2Zxb3RiNS8vVjUwdUhUdk9Uc3VTYVR4UkpzUnpDS2lJ=
+SlRyTElraGtlWnlBanAzYnBmVGZCT2M4Rk5iRWs5VVBuR0NPSUNCejNMM05NUFQ5TXlXVjBPZnZ=
+RZURMUnBWKzhsTHFZVGsvWjljU2V4b0hpYmdpMlhoS3VNbGUzbXJpUWpOKzErQT09IiwibWFjIj=
+oiYmJjZjA4OWI0M2ZkMjA3YzI1ZmRhYTY5MzVhNWIxNzg2YzdjZjMwNDBhNmJlY2QzOTFhMDNjZ=
+mYzMzFmZTIxMyIsInRhZyI6IiJ9" target=3D"_blank"><img alt=3D"Boy" src=3D"http=
+s://img.rule.io/12008/6a7467e538741" style=3D"border:0;display:block;outlin=
+e:none;text-decoration:none;height:auto;width:100%;font-size:14px;" width=
+=3D"600" height=3D"auto"/></a></td></tr></tbody></table></td></tr><tr><td a=
+lign=3D"center" class=3D"rc-text-0f33429a8a296ea95e8db01c07641335" style=3D=
+"background:#FFFFFF;font-size:0px;padding:10px 40px 15px 40px;word-break:br=
+eak-word;"><div style=3D"font-family:'Inter Regular',                      =
+                                                                           =
+      sans-serif;font-size:14px;font-style:normal;font-weight:400;letter-sp=
+acing:0em;line-height:120%;text-decoration:none;color:#FFFFFF;"><p style=3D=
+"margin:0;"><br></p><p style=3D"margin:0;"><span style=3D"font-family:'Inte=
+r Bold', sans-serif;font-size:18px;font-style:normal;font-weight:700;color:=
+#000000;">Suosituimmat myyntihitit</span></p><p style=3D"margin:0;"><br></p=
+><p style=3D"margin:0;"><span style=3D"line-height:140%;color:#000000;">Kun=
+ moni sulkapalloilija valitsee saman mailan, siihen on yleens=C3=A4 hyv=
+=C3=A4 syy. Tutustu myydyimpiin sulkapallomailoihimme ja l=C3=B6yd=C3=A4 om=
+a suosikkisi.</span></p></div></td></tr><tr><td align=3D"center" class=3D"r=
+c-button-5118355f602df5e85a72e3b104fcdaf2" style=3D"background:#FFFFFF;font=
+-size:0px;padding:10px 20px 0px 20px;word-break:break-word;"><table border=
+=3D"0" cellpadding=3D"0" cellspacing=3D"0" role=3D"presentation" style=3D"b=
+order-collapse:separate;line-height:100%;"><tbody><tr><td align=3D"center" =
+bgcolor=3D"#0F8852" role=3D"presentation" style=3D"border:none;border-radiu=
+s:2px 2px 2px 2px;cursor:auto;font-style:normal;mso-padding-alt:8px 15px 8p=
+x 15px;text-align:center;background:#0F8852;" valign=3D"middle"><a href=3D"=
+https://app.rule.io/link/eyJpdiI6IjBwSWVYRFM4ODhRQWdaVDhvelBkQkE9PSIsInZhbH=
+VlIjoieWdBWTNXOS94QWFzWHhvQkVJTXhXaUZVYjBLM0xkZndCWk1yTFlsSlJTQ3FaRDM5dnE3Q=
+mdhZnJsV3d5N3hQcGtWMloydzVrUEU5VDJoa2Zxb3RiNS8vVjUwdUhUdk9Uc3VTYVR4UkpzUnpD=
+S2lJSlRyTElraGtlWnlBanAzYnBmVGZCT2M4Rk5iRWs5VVBuR0NPSUNCejNMM05NUFQ5TXlXVjB=
+PZnZRZURMUnBWKzhsTHFZVGsvWjljU2V4b0hpYmdpMlhoS3VNbGUzbXJpUWpOKzErQT09IiwibW=
+FjIjoiYmJjZjA4OWI0M2ZkMjA3YzI1ZmRhYTY5MzVhNWIxNzg2YzdjZjMwNDBhNmJlY2QzOTFhM=
+DNjZmYzMzFmZTIxMyIsInRhZyI6IiJ9" style=3D"display:inline-block;background-c=
+olor:#0F8852;color:#FFFFFF;font-family:'Inter Regular',                    =
+                                          sans-serif;font-size:14px;font-st=
+yle:normal;font-weight:400;line-height:120%;letter-spacing:0em;margin:0;tex=
+t-decoration:none;text-transform:none;padding:8px 15px 8px 15px;mso-padding=
+-alt:0px;border-radius:2px 2px 2px 2px;" target=3D"_blank"><span style=3D"m=
+argin:0;"><span style=3D"font-size:12px;">Tutustu kampanjamailoihin</span><=
+/span></a></td></tr></tbody></table></td></tr></tbody></table></td></tr></t=
+body></table></div><!--[if mso | IE]></td></tr></table><![endif]--></td></t=
+r></tbody></table></div><!--[if mso | IE]></td></tr></table><table align=3D=
+"center" border=3D"0" cellpadding=3D"0" cellspacing=3D"0" class=3D"rc-secti=
+on-953f9006b534f903341f15193cd862da-outlook" role=3D"presentation" style=3D=
+"width:600px;" width=3D"600" bgcolor=3D"#FFFFFF"><tr><td style=3D"line-heig=
+ht:0px;font-size:0px;mso-line-height-rule:exactly;"><![endif]--><div class=
+=3D"rc-section-953f9006b534f903341f15193cd862da" style=3D"background:#FFFFF=
+F;background-color:#FFFFFF;margin:0px auto;max-width:600px;"><table align=
+=3D"center" border=3D"0" cellpadding=3D"0" cellspacing=3D"0" role=3D"presen=
+tation" style=3D"background:#FFFFFF;background-color:#FFFFFF;width:100%;bor=
+der-collapse:separate;"><tbody><tr><td style=3D"direction:ltr;font-size:0px=
+;padding:20px 0;text-align:center;mso-padding-left-alt:0;mso-padding-right-=
+alt:0;"><!--[if mso | IE]><table role=3D"presentation" border=3D"0" cellpad=
+ding=3D"0" cellspacing=3D"0"><tr><td style=3D"width:600px;"><![endif]--><di=
+v style=3D"font-size:0px;line-height:0px;text-align:left;direction:ltr;disp=
+lay:inline-block;width:100%;" class=3D"rc-column-per-100 rc-outlook-group-f=
+ix"><!--[if mso | IE]><table border=3D"0" cellpadding=3D"0" cellspacing=3D"=
+0" role=3D"presentation"><tr><td style=3D"vertical-align:top;width:200px;">=
+<![endif]--><div style=3D"font-size:0px;text-align:left;direction:ltr;displ=
+ay:inline-block;vertical-align:top;width:33%;" class=3D"rc-column-per-33-33=
+3333333333 rc-outlook-group-fix rc-column-6e32c7da3c2634fc61f130d763d2dfca"=
+><table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" role=3D"presentati=
+on" width=3D"100%" style=3D"border-collapse:separate;"><tbody><tr><td style=
+=3D"vertical-align:top;padding:0px 0px 0px 0px;"><table border=3D"0" cellpa=
+dding=3D"0" cellspacing=3D"0" role=3D"presentation" style=3D"border-collaps=
+e:separate;" width=3D"100%"><tbody><tr><td align=3D"center" style=3D"font-s=
+ize:0px;padding:0px 0px 0px 0px;word-break:break-word;"><table border=3D"0"=
+ cellpadding=3D"0" cellspacing=3D"0" role=3D"presentation" style=3D"border-=
+collapse:separate;border-spacing:0px;"><tbody><tr><td style=3D"width:200px;=
+overflow:hidden;"><a href=3D"https://app.rule.io/link/eyJpdiI6ImpLTHhpODZQM=
+mhLRFJEbkNHMlNxOXc9PSIsInZhbHVlIjoiQndLQzAveXRzRFB2OE56WDJHN0FQR0JIK3NEVDJ3=
+VHMzT2xkLzBxRnA0RTR2Rlk1OWVuTlg1K3FvSGRBRlpqMU5aTVR4WUJQUFJzdWFFUjZTWnQzSEo=
+0UVF5U0NmVzRrRGJmOTFnNzVoY0tHM1NkRUM3NVdJaVpQckRFRWcvWDU0NHZSWEd6QTlKUXpuSD=
+ZrekhRRFpjUS9jUmhldTZDZjU2Nko4cXhIQmxBaG9TVDZaK2dpcVVCcVg1dzJnOEVpNDlVNko4O=
+FZPR2RiMHdPV3crSjVWZz09IiwibWFjIjoiNWNmN2MwZTYyM2U5YmMwZjI5ZjEzNGYzMGMwYzBl=
+ODdjNzIwOTJjODAzYTA3MGUxNWQzODQwZjQ3ZDc2MjEwNyIsInRhZyI6IiJ9" target=3D"_bl=
+ank"><img alt=3D"Racket" src=3D"https://img.rule.io/12008/69e9fac01c091" st=
+yle=3D"border:0;display:block;outline:none;text-decoration:none;height:auto=
+;width:100%;font-size:14px;" width=3D"200" height=3D"auto"/></a></td></tr><=
+/tbody></table></td></tr><tr><td align=3D"left" style=3D"font-size:0px;padd=
+ing:0px 0px 10px 0px;word-break:break-word;"><div style=3D"font-family:'Int=
+er Regular',                                                               =
+                                    sans-serif;font-size:12px;font-style:no=
+rmal;font-weight:400;letter-spacing:0em;line-height:120%;text-decoration:no=
+ne;color:#0F0F1F;"><div style=3D"text-align:center;"><p style=3D"margin:0;"=
+>FZ Forza Light 6.0</p><p style=3D"margin:0;"><br></p></div></div></td></tr=
+><tr><td align=3D"left" class=3D"rc-text-24c79578634aef9dd5495c5c6b00fc30" =
+style=3D"font-size:0px;padding:0px 0px 10px 0px;word-break:break-word;"><di=
+v style=3D"font-family:'Inter Regular',                                    =
+                                                               sans-serif;f=
+ont-size:12px;font-style:normal;font-weight:400;letter-spacing:0em;line-hei=
+ght:120%;text-decoration:none;color:#0F0F1F;"><div style=3D"text-align:cent=
+er;"><p style=3D"margin:0;"><span style=3D"font-family:'Inter Bold', sans-s=
+erif;font-weight:700;color:#E62419;">69</span><span style=3D"font-family:'I=
+nter Bold', sans-serif;font-weight:700;color:#DF2419;">=C2=A0</span><span s=
+tyle=3D"font-family:'Inter Bold', sans-serif;font-style:normal;font-weight:=
+700;color:#DF2419;">=E2=82=AC</span></p><p style=3D"margin:0;"><span style=
+=3D"text-decoration:line-through;">145 =E2=82=AC</span></p><p style=3D"marg=
+in:0;"><span style=3D"font-weight:700;color:#E62419;">  </span></p></div></=
+div></td></tr><tr><td align=3D"center" class=3D"rc-button-6e32c7da3c2634fc6=
+1f130d763d2dfca" style=3D"font-size:0px;padding:0 0 20px 0;padding-bottom:2=
+0px;word-break:break-word;"><table border=3D"0" cellpadding=3D"0" cellspaci=
+ng=3D"0" role=3D"presentation" style=3D"border-collapse:separate;line-heigh=
+t:100%;"><tbody><tr><td align=3D"center" bgcolor=3D"#1C955F" role=3D"presen=
+tation" style=3D"border:none;border-radius:2px 2px 2px 2px;cursor:auto;font=
+-style:normal;mso-padding-alt:8px 30px 8px 30px;text-align:center;backgroun=
+d:#1C955F;" valign=3D"middle"><a href=3D"https://app.rule.io/link/eyJpdiI6I=
+mpLTHhpODZQMmhLRFJEbkNHMlNxOXc9PSIsInZhbHVlIjoiQndLQzAveXRzRFB2OE56WDJHN0FQ=
+R0JIK3NEVDJ3VHMzT2xkLzBxRnA0RTR2Rlk1OWVuTlg1K3FvSGRBRlpqMU5aTVR4WUJQUFJzdWF=
+FUjZTWnQzSEo0UVF5U0NmVzRrRGJmOTFnNzVoY0tHM1NkRUM3NVdJaVpQckRFRWcvWDU0NHZSWE=
+d6QTlKUXpuSDZrekhRRFpjUS9jUmhldTZDZjU2Nko4cXhIQmxBaG9TVDZaK2dpcVVCcVg1dzJnO=
+EVpNDlVNko4OFZPR2RiMHdPV3crSjVWZz09IiwibWFjIjoiNWNmN2MwZTYyM2U5YmMwZjI5ZjEz=
+NGYzMGMwYzBlODdjNzIwOTJjODAzYTA3MGUxNWQzODQwZjQ3ZDc2MjEwNyIsInRhZyI6IiJ9" s=
+tyle=3D"display:inline-block;background-color:#1C955F;color:#FFFFFF;font-fa=
+mily:'Inter Regular',                   sans-serif;font-size:14px;font-styl=
+e:normal;font-weight:400;line-height:120%;letter-spacing:0em;margin:0;text-=
+decoration:none;text-transform:none;padding:8px 30px 8px 30px;mso-padding-a=
+lt:0px;border-radius:2px 2px 2px 2px;" target=3D"_blank"><span style=3D"mar=
+gin:0;"><span style=3D"font-size:12px;">Osta nyt</span></span></a></td></tr=
+></tbody></table></td></tr></tbody></table></td></tr></tbody></table></div>=
+<!--[if mso | IE]></td><td style=3D"vertical-align:top;width:200px;"><![end=
+if]--><div style=3D"font-size:0px;text-align:left;direction:ltr;display:inl=
+ine-block;vertical-align:top;width:33%;" class=3D"rc-column-per-33-33333333=
+3333 rc-outlook-group-fix rc-column-6e32c7da3c2634fc61f130d763d2dfca"><tabl=
+e border=3D"0" cellpadding=3D"0" cellspacing=3D"0" role=3D"presentation" wi=
+dth=3D"100%" style=3D"border-collapse:separate;"><tbody><tr><td style=3D"ve=
+rtical-align:top;padding:0px 0px 0px 0px;"><table border=3D"0" cellpadding=
+=3D"0" cellspacing=3D"0" role=3D"presentation" style=3D"border-collapse:sep=
+arate;" width=3D"100%"><tbody><tr><td align=3D"center" style=3D"font-size:0=
+px;padding:0px 0px 0px 0px;word-break:break-word;"><table border=3D"0" cell=
+padding=3D"0" cellspacing=3D"0" role=3D"presentation" style=3D"border-colla=
+pse:separate;border-spacing:0px;"><tbody><tr><td style=3D"width:200px;overf=
+low:hidden;"><a href=3D"https://app.rule.io/link/eyJpdiI6IjZRSkt0SDFlUzlmMl=
+kxdkVjd29qU3c9PSIsInZhbHVlIjoiWGlvdSt1ajhNT001NTNYSndIbHNOWDZMWkM0R2JXUE83L=
+2RvZW1IcjArRlR5ak1LczZlRjJMeUV1cEJRM08xWElPaW01YW1lWWI4Si9WNUNGNElMbk5LczV6=
+LzFWTlVPNmVCOStxUzBlNmhLbnFUVEdjUktKK2xGWDhrbWZBcTU3S0s3ZUw1MEFydWVqeUczQ0Z=
+LZk5LNzllalhkWmFESE40OUMvWFpmMGE5SEpQa1J1U1Fod29LMzFHWlYrak05SE9hVmdQMWNBeG=
+NiQXU1d3U4NER5QT09IiwibWFjIjoiODY3YzFhOGQwMThhZjA3NjhjY2U1MzU2OGY1MGI0YWYxM=
+2NmMTYzMjc3OWZhMjhjZTAxMjE4MzYwNWU2MDUwMyIsInRhZyI6IiJ9" target=3D"_blank">=
+<img alt=3D"Racket" src=3D"https://img.rule.io/12008/6a733f42a32a4" style=
+=3D"border:0;display:block;outline:none;text-decoration:none;height:auto;wi=
+dth:100%;font-size:14px;" width=3D"200" height=3D"auto"/></a></td></tr></tb=
+ody></table></td></tr><tr><td align=3D"left" style=3D"font-size:0px;padding=
+:0px 0px 10px 0px;word-break:break-word;"><div style=3D"font-family:'Inter =
+Regular',                                                                  =
+                                 sans-serif;font-size:12px;font-style:norma=
+l;font-weight:400;letter-spacing:0em;line-height:120%;text-decoration:none;=
+color:#0F0F1F;"><div style=3D"text-align:center;"><p style=3D"margin:0;">FZ=
+ Forza Furious X</p><p style=3D"margin:0;"><br></p></div></div></td></tr><t=
+r><td align=3D"left" class=3D"rc-text-24c79578634aef9dd5495c5c6b00fc30" sty=
+le=3D"font-size:0px;padding:0px 0px 10px 0px;word-break:break-word;"><div s=
+tyle=3D"font-family:'Inter Regular',                                       =
+                                                            sans-serif;font=
+-size:12px;font-style:normal;font-weight:400;letter-spacing:0em;line-height=
+:120%;text-decoration:none;color:#0F0F1F;"><div style=3D"text-align:center;=
+"><p style=3D"margin:0;"><span style=3D"font-family:'Inter Bold', sans-seri=
+f;font-weight:700;color:#E62419;">55</span><span style=3D"font-family:'Inte=
+r Bold', sans-serif;font-weight:700;color:#DF2419;">=C2=A0</span><span styl=
+e=3D"font-family:'Inter Bold', sans-serif;font-style:normal;font-weight:700=
+;color:#DF2419;">=E2=82=AC</span></p><p style=3D"margin:0;"><span style=3D"=
+text-decoration:line-through;">100 =E2=82=AC</span></p></div></div></td></t=
+r><tr><td align=3D"center" class=3D"rc-button-6e32c7da3c2634fc61f130d763d2d=
+fca" style=3D"font-size:0px;padding:0 0 20px 0;padding-bottom:20px;word-bre=
+ak:break-word;"><table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" rol=
+e=3D"presentation" style=3D"border-collapse:separate;line-height:100%;"><tb=
+ody><tr><td align=3D"center" bgcolor=3D"#1C955F" role=3D"presentation" styl=
+e=3D"border:none;border-radius:2px 2px 2px 2px;cursor:auto;font-style:norma=
+l;mso-padding-alt:8px 30px 8px 30px;text-align:center;background:#1C955F;" =
+valign=3D"middle"><a href=3D"https://app.rule.io/link/eyJpdiI6IjZRSkt0SDFlU=
+zlmMlkxdkVjd29qU3c9PSIsInZhbHVlIjoiWGlvdSt1ajhNT001NTNYSndIbHNOWDZMWkM0R2JX=
+UE83L2RvZW1IcjArRlR5ak1LczZlRjJMeUV1cEJRM08xWElPaW01YW1lWWI4Si9WNUNGNElMbk5=
+LczV6LzFWTlVPNmVCOStxUzBlNmhLbnFUVEdjUktKK2xGWDhrbWZBcTU3S0s3ZUw1MEFydWVqeU=
+czQ0ZLZk5LNzllalhkWmFESE40OUMvWFpmMGE5SEpQa1J1U1Fod29LMzFHWlYrak05SE9hVmdQM=
+WNBeGNiQXU1d3U4NER5QT09IiwibWFjIjoiODY3YzFhOGQwMThhZjA3NjhjY2U1MzU2OGY1MGI0=
+YWYxM2NmMTYzMjc3OWZhMjhjZTAxMjE4MzYwNWU2MDUwMyIsInRhZyI6IiJ9" style=3D"disp=
+lay:inline-block;background-color:#1C955F;color:#FFFFFF;font-family:'Inter =
+Regular',                   sans-serif;font-size:14px;font-style:normal;fon=
+t-weight:400;line-height:120%;letter-spacing:0em;margin:0;text-decoration:n=
+one;text-transform:none;padding:8px 30px 8px 30px;mso-padding-alt:0px;borde=
+r-radius:2px 2px 2px 2px;" target=3D"_blank"><span style=3D"margin:0;"><spa=
+n style=3D"font-size:12px;">Osta nyt</span></span></a></td></tr></tbody></t=
+able></td></tr></tbody></table></td></tr></tbody></table></div><!--[if mso =
+| IE]></td><td style=3D"vertical-align:top;width:200px;"><![endif]--><div s=
+tyle=3D"font-size:0px;text-align:left;direction:ltr;display:inline-block;ve=
+rtical-align:top;width:33%;" class=3D"rc-column-per-33-333333333333 rc-outl=
+ook-group-fix rc-column-6e32c7da3c2634fc61f130d763d2dfca"><table border=3D"=
+0" cellpadding=3D"0" cellspacing=3D"0" role=3D"presentation" width=3D"100%"=
+ style=3D"border-collapse:separate;"><tbody><tr><td style=3D"vertical-align=
+:top;padding:0px 0px 0px 0px;"><table border=3D"0" cellpadding=3D"0" cellsp=
+acing=3D"0" role=3D"presentation" style=3D"border-collapse:separate;" width=
+=3D"100%"><tbody><tr><td align=3D"center" style=3D"font-size:0px;padding:0p=
+x 0px 0px 0px;word-break:break-word;"><table border=3D"0" cellpadding=3D"0"=
+ cellspacing=3D"0" role=3D"presentation" style=3D"border-collapse:separate;=
+border-spacing:0px;"><tbody><tr><td style=3D"width:200px;overflow:hidden;">=
+<a href=3D"https://app.rule.io/link/eyJpdiI6IkhGbWlmYTNSK21paGlhd21qcVpWWVE=
+9PSIsInZhbHVlIjoiTU9FQjlPQkFLRHFyQ3N1RDJoU3hKcUV3bTVEd2hCRzl1M3NaQVZqN3NucE=
+ZHYVpHdVF5SlFGdHkyVDA1dysvZ0JiWnQ2UUF4WSs2TzRIVTEvL0c2RmVZU2ZOc1hsYUc2VExvU=
+U80eTlMaG01K21ha0FURmJnWGNVS3dUUk40eFkvbGFsUkJpUjljRk50dFdHR0pXMWNDRC81TEVF=
+MUJmNVZRY2RtZ3lxMFV4dFJYcWNMRFVGTEJ2dXZBWUlHZFpoYjFJWGRsK1hDZlBSUDdyYjhWUWd=
+NUT09IiwibWFjIjoiMDBmZDBmMTMyMzFkOGI4YzBiZjRmZTZhYWI1NmZjNmIyODNiM2MxODcxNz=
+ZiYjc0ZTdhZDE3YjljYTI3OGI2YyIsInRhZyI6IiJ9" target=3D"_blank"><img alt=3D"R=
+acket" src=3D"https://img.rule.io/12008/6a733f42a3599" style=3D"border:0;di=
+splay:block;outline:none;text-decoration:none;height:auto;width:100%;font-s=
+ize:14px;" width=3D"200" height=3D"auto"/></a></td></tr></tbody></table></t=
+d></tr><tr><td align=3D"left" style=3D"font-size:0px;padding:0px 0px 10px 0=
+px;word-break:break-word;"><div style=3D"font-family:'Inter Regular',      =
+                                                                           =
+                  sans-serif;font-size:12px;font-style:normal;font-weight:4=
+00;letter-spacing:0em;line-height:120%;text-decoration:none;color:#0F0F1F;"=
+><div style=3D"text-align:center;"><p style=3D"margin:0;">Yonex Astrox TX <=
+/p><p style=3D"margin:0;"><br></p></div></div></td></tr><tr><td align=3D"le=
+ft" class=3D"rc-text-24c79578634aef9dd5495c5c6b00fc30" style=3D"font-size:0=
+px;padding:0px 0px 10px 0px;word-break:break-word;"><div style=3D"font-fami=
+ly:'Inter Regular',                                                        =
+                                           sans-serif;font-size:12px;font-s=
+tyle:normal;font-weight:400;letter-spacing:0em;line-height:120%;text-decora=
+tion:none;color:#0F0F1F;"><div style=3D"text-align:center;"><p style=3D"mar=
+gin:0;"><span style=3D"font-family:'Inter Bold', sans-serif;font-weight:700=
+;color:#E62419;">90</span><span style=3D"font-family:'Inter Bold', sans-ser=
+if;font-weight:700;color:#DF2419;">=C2=A0</span><span style=3D"font-family:=
+'Inter Bold', sans-serif;font-style:normal;font-weight:700;color:#DF2419;">=
+=E2=82=AC</span></p><p style=3D"margin:0;"><span style=3D"text-decoration:l=
+ine-through;">165 =E2=82=AC</span></p></div></div></td></tr><tr><td align=
+=3D"center" class=3D"rc-button-6e32c7da3c2634fc61f130d763d2dfca" style=3D"f=
+ont-size:0px;padding:0 0 20px 0;padding-bottom:20px;word-break:break-word;"=
+><table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" role=3D"presentati=
+on" style=3D"border-collapse:separate;line-height:100%;"><tbody><tr><td ali=
+gn=3D"center" bgcolor=3D"#1C955F" role=3D"presentation" style=3D"border:non=
+e;border-radius:2px 2px 2px 2px;cursor:auto;font-style:normal;mso-padding-a=
+lt:8px 30px 8px 30px;text-align:center;background:#1C955F;" valign=3D"middl=
+e"><a href=3D"https://app.rule.io/link/eyJpdiI6IkhGbWlmYTNSK21paGlhd21qcVpW=
+WVE9PSIsInZhbHVlIjoiTU9FQjlPQkFLRHFyQ3N1RDJoU3hKcUV3bTVEd2hCRzl1M3NaQVZqN3N=
+ucEZHYVpHdVF5SlFGdHkyVDA1dysvZ0JiWnQ2UUF4WSs2TzRIVTEvL0c2RmVZU2ZOc1hsYUc2VE=
+xvUU80eTlMaG01K21ha0FURmJnWGNVS3dUUk40eFkvbGFsUkJpUjljRk50dFdHR0pXMWNDRC81T=
+EVFMUJmNVZRY2RtZ3lxMFV4dFJYcWNMRFVGTEJ2dXZBWUlHZFpoYjFJWGRsK1hDZlBSUDdyYjhW=
+UWdNUT09IiwibWFjIjoiMDBmZDBmMTMyMzFkOGI4YzBiZjRmZTZhYWI1NmZjNmIyODNiM2MxODc=
+xNzZiYjc0ZTdhZDE3YjljYTI3OGI2YyIsInRhZyI6IiJ9" style=3D"display:inline-bloc=
+k;background-color:#1C955F;color:#FFFFFF;font-family:'Inter Regular',      =
+             sans-serif;font-size:14px;font-style:normal;font-weight:400;li=
+ne-height:120%;letter-spacing:0em;margin:0;text-decoration:none;text-transf=
+orm:none;padding:8px 30px 8px 30px;mso-padding-alt:0px;border-radius:2px 2p=
+x 2px 2px;" target=3D"_blank"><span style=3D"margin:0;"><span style=3D"font=
+-size:12px;">Osta nyt</span></span></a></td></tr></tbody></table></td></tr>=
+</tbody></table></td></tr></tbody></table></div><!--[if mso | IE]></td></tr=
+></table><![endif]--></div><!--[if mso | IE]></td></tr></table><![endif]-->=
+</td></tr></tbody></table></div><!--[if mso | IE]></td></tr></table><table =
+align=3D"center" border=3D"0" cellpadding=3D"0" cellspacing=3D"0" class=3D"=
+rc-section-6c7af36371f80f3d9c9fceaa44f4f304-outlook" role=3D"presentation" =
+style=3D"width:600px;" width=3D"600" bgcolor=3D"#FFFFFF"><tr><td style=3D"l=
+ine-height:0px;font-size:0px;mso-line-height-rule:exactly;"><![endif]--><di=
+v class=3D"rc-section-6c7af36371f80f3d9c9fceaa44f4f304" style=3D"background=
+:#FFFFFF;background-color:#FFFFFF;margin:0px auto;max-width:600px;"><table =
+align=3D"center" border=3D"0" cellpadding=3D"0" cellspacing=3D"0" role=3D"p=
+resentation" style=3D"background:#FFFFFF;background-color:#FFFFFF;width:100=
+%;border-collapse:separate;"><tbody><tr><td style=3D"direction:ltr;font-siz=
+e:0px;padding:20px 0px 50px 0px;text-align:center;mso-padding-left-alt:0;ms=
+o-padding-right-alt:0;"><!--[if mso | IE]><table role=3D"presentation" bord=
+er=3D"0" cellpadding=3D"0" cellspacing=3D"0"><tr><td style=3D"width:600px;"=
+><![endif]--><div style=3D"font-size:0px;line-height:0px;text-align:left;di=
+rection:ltr;display:inline-block;width:100%;" class=3D"rc-column-per-100 rc=
+-outlook-group-fix"><!--[if mso | IE]><table border=3D"0" cellpadding=3D"0"=
+ cellspacing=3D"0" role=3D"presentation"><tr><td style=3D"vertical-align:to=
+p;width:200px;"><![endif]--><div style=3D"font-size:0px;text-align:left;dir=
+ection:ltr;display:inline-block;vertical-align:top;width:33%;" class=3D"rc-=
+column-per-33-333333333333 rc-outlook-group-fix rc-column-6e32c7da3c2634fc6=
+1f130d763d2dfca"><table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" ro=
+le=3D"presentation" width=3D"100%" style=3D"border-collapse:separate;"><tbo=
+dy><tr><td style=3D"vertical-align:top;padding:0px 0px 0px 0px;"><table bor=
+der=3D"0" cellpadding=3D"0" cellspacing=3D"0" role=3D"presentation" style=
+=3D"border-collapse:separate;" width=3D"100%"><tbody><tr><td align=3D"cente=
+r" style=3D"font-size:0px;padding:0px 0px 0px 0px;word-break:break-word;"><=
+table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" role=3D"presentation=
+" style=3D"border-collapse:separate;border-spacing:0px;"><tbody><tr><td sty=
+le=3D"width:200px;overflow:hidden;"><a href=3D"https://app.rule.io/link/eyJ=
+pdiI6Ii81dVRVaDRZb1pTbnNuOTZXdmxxa3c9PSIsInZhbHVlIjoiVTJxdXozWmhRTTNJNzJleG=
+lXWi9kNm5VRWc5S2NXdUtISkZFU0t3bGFUS1lBOVNMK0RKZG5WdE5IaVd3ZUJxOFQrZGZudXdRY=
+UI5aW1FSnFNeUp0WGdualQ3dTNzWlZEUm91NHhDemZDLzJOZUhqSHF0bGNaTTFNS2lwbmltc1Zk=
+eHJUbUlZbFQ0TUhqZmhBc2t1KzF0dEhidEg2S1dPUVBGM0FqRmpZNVgzckxtbS8xN1c1ZU1semU=
+wMVV3MTJ5eFZyeHF2bFlsZU9pUjE3cEVya1MvUT09IiwibWFjIjoiMjgxMjEwNzhiZDQ3YzY5Mj=
+c5ZWVhNzAxYTkwYzdlNjU1MGFmYmEyMjE0YzcwNmM1MmE0OGZiYzVhZTRjNmE2MiIsInRhZyI6I=
+iJ9" target=3D"_blank"><img alt=3D"Racket" src=3D"https://img.rule.io/12008=
+/6a733f42a46af" style=3D"border:0;display:block;outline:none;text-decoratio=
+n:none;height:auto;width:100%;font-size:14px;" width=3D"200" height=3D"auto=
+"/></a></td></tr></tbody></table></td></tr><tr><td align=3D"left" style=3D"=
+font-size:0px;padding:0px 0px 10px 0px;word-break:break-word;"><div style=
+=3D"font-family:'Inter Regular',                                           =
+                                                        sans-serif;font-siz=
+e:12px;font-style:normal;font-weight:400;letter-spacing:0em;line-height:120=
+%;text-decoration:none;color:#0F0F1F;"><div style=3D"text-align:center;"><p=
+ style=3D"margin:0;">Yonex Nanoflare </p><p style=3D"margin:0;">DS</p><p st=
+yle=3D"margin:0;"> </p></div></div></td></tr><tr><td align=3D"left" class=
+=3D"rc-text-24c79578634aef9dd5495c5c6b00fc30" style=3D"font-size:0px;paddin=
+g:0px 0px 10px 0px;word-break:break-word;"><div style=3D"font-family:'Inter=
+ Regular',                                                                 =
+                                  sans-serif;font-size:12px;font-style:norm=
+al;font-weight:400;letter-spacing:0em;line-height:120%;text-decoration:none=
+;color:#0F0F1F;"><div style=3D"text-align:center;"><p style=3D"margin:0;"><=
+span style=3D"font-family:'Inter Bold', sans-serif;font-weight:700;color:#E=
+62419;">55</span><span style=3D"font-family:'Inter Bold', sans-serif;font-w=
+eight:700;color:#DF2419;">=C2=A0</span><span style=3D"font-family:'Inter Bo=
+ld', sans-serif;font-style:normal;font-weight:700;color:#DF2419;">=E2=82=
+=AC</span></p><p style=3D"margin:0;"><span style=3D"text-decoration:line-th=
+rough;">100 =E2=82=AC</span></p><p style=3D"margin:0;"><span style=3D"font-=
+weight:700;color:#E62419;">  </span></p></div></div></td></tr><tr><td align=
+=3D"center" class=3D"rc-button-6e32c7da3c2634fc61f130d763d2dfca" style=3D"f=
+ont-size:0px;padding:0 0 20px 0;padding-bottom:20px;word-break:break-word;"=
+><table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" role=3D"presentati=
+on" style=3D"border-collapse:separate;line-height:100%;"><tbody><tr><td ali=
+gn=3D"center" bgcolor=3D"#1C955F" role=3D"presentation" style=3D"border:non=
+e;border-radius:2px 2px 2px 2px;cursor:auto;font-style:normal;mso-padding-a=
+lt:8px 30px 8px 30px;text-align:center;background:#1C955F;" valign=3D"middl=
+e"><a href=3D"https://app.rule.io/link/eyJpdiI6Ii81dVRVaDRZb1pTbnNuOTZXdmxx=
+a3c9PSIsInZhbHVlIjoiVTJxdXozWmhRTTNJNzJleGlXWi9kNm5VRWc5S2NXdUtISkZFU0t3bGF=
+US1lBOVNMK0RKZG5WdE5IaVd3ZUJxOFQrZGZudXdRYUI5aW1FSnFNeUp0WGdualQ3dTNzWlZEUm=
+91NHhDemZDLzJOZUhqSHF0bGNaTTFNS2lwbmltc1ZkeHJUbUlZbFQ0TUhqZmhBc2t1KzF0dEhid=
+Eg2S1dPUVBGM0FqRmpZNVgzckxtbS8xN1c1ZU1semUwMVV3MTJ5eFZyeHF2bFlsZU9pUjE3cEVy=
+a1MvUT09IiwibWFjIjoiMjgxMjEwNzhiZDQ3YzY5Mjc5ZWVhNzAxYTkwYzdlNjU1MGFmYmEyMjE=
+0YzcwNmM1MmE0OGZiYzVhZTRjNmE2MiIsInRhZyI6IiJ9" style=3D"display:inline-bloc=
+k;background-color:#1C955F;color:#FFFFFF;font-family:'Inter Regular',      =
+             sans-serif;font-size:14px;font-style:normal;font-weight:400;li=
+ne-height:120%;letter-spacing:0em;margin:0;text-decoration:none;text-transf=
+orm:none;padding:8px 30px 8px 30px;mso-padding-alt:0px;border-radius:2px 2p=
+x 2px 2px;" target=3D"_blank"><span style=3D"margin:0;"><span style=3D"font=
+-size:12px;">Osta nyt</span></span></a></td></tr></tbody></table></td></tr>=
+</tbody></table></td></tr></tbody></table></div><!--[if mso | IE]></td><td =
+style=3D"vertical-align:top;width:200px;"><![endif]--><div style=3D"font-si=
+ze:0px;text-align:left;direction:ltr;display:inline-block;vertical-align:to=
+p;width:33%;" class=3D"rc-column-per-33-333333333333 rc-outlook-group-fix r=
+c-column-6e32c7da3c2634fc61f130d763d2dfca"><table border=3D"0" cellpadding=
+=3D"0" cellspacing=3D"0" role=3D"presentation" width=3D"100%" style=3D"bord=
+er-collapse:separate;"><tbody><tr><td style=3D"vertical-align:top;padding:0=
+px 0px 0px 0px;"><table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" ro=
+le=3D"presentation" style=3D"border-collapse:separate;" width=3D"100%"><tbo=
+dy><tr><td align=3D"center" style=3D"font-size:0px;padding:0px 0px 0px 0px;=
+word-break:break-word;"><table border=3D"0" cellpadding=3D"0" cellspacing=
+=3D"0" role=3D"presentation" style=3D"border-collapse:separate;border-spaci=
+ng:0px;"><tbody><tr><td style=3D"width:200px;overflow:hidden;"><a href=3D"h=
+ttps://app.rule.io/link/eyJpdiI6IldFV1dqYTVCMisvTzRYMitPRXd2TUE9PSIsInZhbHV=
+lIjoib3QrMFFRbGVLWHVGajB6d25lUlNITWMrcVk5UmYvNzJ6TjJGVDcrd2RZa1doSFpSTXAva3=
+dzK0dLODQ1WW1RTGNpaW9tRk1jS1FYSWFRcS9FOU41aUUxRDhRbzg1Y0JqV1ZJU2JlSTkvV1JvU=
+DN4bjNoUXVwdDVyc3dSOEtRT2ZESjl4TnVweXlNNjR5Y0JFclRZTWRUdG9mS1d5V0w2OXNBQW95=
+NGhHR2svN0tYdmNPNE1ucDI0aWVJOVd3UVpuL1k4eU1CM0I0WW1YRjBBMEt2b2dxZz09IiwibWF=
+jIjoiZTA0M2JkY2Y2MTVjNTlmMmI0MmZiZDYyODc0YmNmY2Q2MTUyZWNkY2M0NTgzNDI1OWE2Mz=
+c2NmY2MzAxNWNkMiIsInRhZyI6IiJ9" target=3D"_blank"><img alt=3D"Racket" src=
+=3D"https://img.rule.io/12008/69e9fab3b8d02" style=3D"border:0;display:bloc=
+k;outline:none;text-decoration:none;height:auto;width:100%;font-size:14px;"=
+ width=3D"200" height=3D"auto"/></a></td></tr></tbody></table></td></tr><tr=
+><td align=3D"left" style=3D"font-size:0px;padding:0px 0px 10px 0px;word-br=
+eak:break-word;"><div style=3D"font-family:'Inter Regular',                =
+                                                                           =
+        sans-serif;font-size:12px;font-style:normal;font-weight:400;letter-=
+spacing:0em;line-height:120%;text-decoration:none;color:#0F0F1F;"><div styl=
+e=3D"text-align:center;"><p style=3D"margin:0;">Yonex Arcsaber</p><p style=
+=3D"margin:0;"> CS</p><p style=3D"margin:0;"> </p></div></div></td></tr><tr=
+><td align=3D"left" class=3D"rc-text-24c79578634aef9dd5495c5c6b00fc30" styl=
+e=3D"font-size:0px;padding:0px 0px 10px 0px;word-break:break-word;"><div st=
+yle=3D"font-family:'Inter Regular',                                        =
+                                                           sans-serif;font-=
+size:12px;font-style:normal;font-weight:400;letter-spacing:0em;line-height:=
+120%;text-decoration:none;color:#0F0F1F;"><div style=3D"text-align:center;"=
+><p style=3D"margin:0;"><span style=3D"font-family:'Inter Bold', sans-serif=
+;font-weight:700;color:#E62419;">70</span><span style=3D"font-family:'Inter=
+ Bold', sans-serif;font-weight:700;color:#DF2419;">=C2=A0</span><span style=
+=3D"font-family:'Inter Bold', sans-serif;font-style:normal;font-weight:700;=
+color:#DF2419;">=E2=82=AC</span></p><p style=3D"margin:0;"><span style=3D"t=
+ext-decoration:line-through;">119 =E2=82=AC</span></p></div></div></td></tr=
+><tr><td align=3D"center" class=3D"rc-button-6e32c7da3c2634fc61f130d763d2df=
+ca" style=3D"font-size:0px;padding:0 0 20px 0;padding-bottom:20px;word-brea=
+k:break-word;"><table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" role=
+=3D"presentation" style=3D"border-collapse:separate;line-height:100%;"><tbo=
+dy><tr><td align=3D"center" bgcolor=3D"#1C955F" role=3D"presentation" style=
+=3D"border:none;border-radius:2px 2px 2px 2px;cursor:auto;font-style:normal=
+;mso-padding-alt:8px 30px 8px 30px;text-align:center;background:#1C955F;" v=
+align=3D"middle"><a href=3D"https://app.rule.io/link/eyJpdiI6IldFV1dqYTVCMi=
+svTzRYMitPRXd2TUE9PSIsInZhbHVlIjoib3QrMFFRbGVLWHVGajB6d25lUlNITWMrcVk5UmYvN=
+zJ6TjJGVDcrd2RZa1doSFpSTXAva3dzK0dLODQ1WW1RTGNpaW9tRk1jS1FYSWFRcS9FOU41aUUx=
+RDhRbzg1Y0JqV1ZJU2JlSTkvV1JvUDN4bjNoUXVwdDVyc3dSOEtRT2ZESjl4TnVweXlNNjR5Y0J=
+FclRZTWRUdG9mS1d5V0w2OXNBQW95NGhHR2svN0tYdmNPNE1ucDI0aWVJOVd3UVpuL1k4eU1CM0=
+I0WW1YRjBBMEt2b2dxZz09IiwibWFjIjoiZTA0M2JkY2Y2MTVjNTlmMmI0MmZiZDYyODc0YmNmY=
+2Q2MTUyZWNkY2M0NTgzNDI1OWE2Mzc2NmY2MzAxNWNkMiIsInRhZyI6IiJ9" style=3D"displ=
+ay:inline-block;background-color:#1C955F;color:#FFFFFF;font-family:'Inter R=
+egular',                   sans-serif;font-size:14px;font-style:normal;font=
+-weight:400;line-height:120%;letter-spacing:0em;margin:0;text-decoration:no=
+ne;text-transform:none;padding:8px 30px 8px 30px;mso-padding-alt:0px;border=
+-radius:2px 2px 2px 2px;" target=3D"_blank"><span style=3D"margin:0;"><span=
+ style=3D"font-size:12px;">Osta nyt</span></span></a></td></tr></tbody></ta=
+ble></td></tr></tbody></table></td></tr></tbody></table></div><!--[if mso |=
+ IE]></td><td style=3D"vertical-align:top;width:200px;"><![endif]--><div st=
+yle=3D"font-size:0px;text-align:left;direction:ltr;display:inline-block;ver=
+tical-align:top;width:33%;" class=3D"rc-column-per-33-333333333333 rc-outlo=
+ok-group-fix rc-column-6e32c7da3c2634fc61f130d763d2dfca"><table border=3D"0=
+" cellpadding=3D"0" cellspacing=3D"0" role=3D"presentation" width=3D"100%" =
+style=3D"border-collapse:separate;"><tbody><tr><td style=3D"vertical-align:=
+top;padding:0px 0px 0px 0px;"><table border=3D"0" cellpadding=3D"0" cellspa=
+cing=3D"0" role=3D"presentation" style=3D"border-collapse:separate;" width=
+=3D"100%"><tbody><tr><td align=3D"center" style=3D"font-size:0px;padding:0p=
+x 0px 0px 0px;word-break:break-word;"><table border=3D"0" cellpadding=3D"0"=
+ cellspacing=3D"0" role=3D"presentation" style=3D"border-collapse:separate;=
+border-spacing:0px;"><tbody><tr><td style=3D"width:200px;overflow:hidden;">=
+<a href=3D"https://app.rule.io/link/eyJpdiI6InA0T3J4NDhTRXRZUUdLU1FPa3dLVnc=
+9PSIsInZhbHVlIjoiU2JLR0RKckJSL1F6MCtDVmFLYlQydjFFZEZ4b1ZzWExLUUhoTlJNYTRCb2=
+M1aVVBMlI3R2dsaVZEMTk2NU1Id1pubjA4SlpWYjZlc09lUDFXWnN2Tit1QmdPdGVtKytOQ2hGQ=
+29lMng3M0hQYng3UzE3ZWw1U1dwN3FwVkgyM25tMlMvQXkzWTdqUGJ6UFM2K3VweFhFNHFRMTNL=
+eElqVm96eHB4TjZrVEV6ZXVKZ0x4V1JnYlBrQy8wYzBLbWhKTzdERUlZVnZtdXNsaUZuZWpXM0Z=
+2UT09IiwibWFjIjoiNzUwZWNhMThmZWU3YjMzNjAzZGU4MGE3NDdiMzhhYjFmZWQxYjI0OTQxYT=
+M3MmM1ZjhkZmFjZjc5YzlhZDRkMiIsInRhZyI6IiJ9" target=3D"_blank"><img alt=3D"R=
+acket" src=3D"https://img.rule.io/12008/6a733f42a34e3" style=3D"border:0;di=
+splay:block;outline:none;text-decoration:none;height:auto;width:100%;font-s=
+ize:14px;" width=3D"200" height=3D"auto"/></a></td></tr></tbody></table></t=
+d></tr><tr><td align=3D"left" style=3D"font-size:0px;padding:0px 0px 10px 0=
+px;word-break:break-word;"><div style=3D"font-family:'Inter Regular',      =
+                                                                           =
+                  sans-serif;font-size:12px;font-style:normal;font-weight:4=
+00;letter-spacing:0em;line-height:120%;text-decoration:none;color:#0F0F1F;"=
+><div style=3D"text-align:center;"><div style=3D"text-align:center;"><p sty=
+le=3D"margin:0;">Yonex Arcsaber 7 </p><p style=3D"margin:0;">Play 2026 </p>=
+</div></div></div></td></tr><tr><td align=3D"left" class=3D"rc-text-24c7957=
+8634aef9dd5495c5c6b00fc30" style=3D"font-size:0px;padding:0px 0px 10px 0px;=
+word-break:break-word;"><div style=3D"font-family:'Inter Regular',         =
+                                                                           =
+               sans-serif;font-size:12px;font-style:normal;font-weight:400;=
+letter-spacing:0em;line-height:120%;text-decoration:none;color:#0F0F1F;"><d=
+iv style=3D"text-align:center;"><p style=3D"margin:0;"><span style=3D"font-=
+family:'Inter Bold', sans-serif;font-weight:700;color:#E62419;">70</span><s=
+pan style=3D"font-family:'Inter Bold', sans-serif;font-weight:700;color:#DF=
+2419;">=C2=A0</span><span style=3D"font-family:'Inter Bold', sans-serif;fon=
+t-style:normal;font-weight:700;color:#DF2419;">=E2=82=AC</span></p><p style=
+=3D"margin:0;"><span style=3D"text-decoration:line-through;">95 =E2=82=
+=AC</span></p></div></div></td></tr><tr><td align=3D"center" class=3D"rc-bu=
+tton-6e32c7da3c2634fc61f130d763d2dfca" style=3D"font-size:0px;padding:0 0 2=
+0px 0;padding-bottom:20px;word-break:break-word;"><table border=3D"0" cellp=
+adding=3D"0" cellspacing=3D"0" role=3D"presentation" style=3D"border-collap=
+se:separate;line-height:100%;"><tbody><tr><td align=3D"center" bgcolor=3D"#=
+1C955F" role=3D"presentation" style=3D"border:none;border-radius:2px 2px 2p=
+x 2px;cursor:auto;font-style:normal;mso-padding-alt:8px 30px 8px 30px;text-=
+align:center;background:#1C955F;" valign=3D"middle"><a href=3D"https://app.=
+rule.io/link/eyJpdiI6InA0T3J4NDhTRXRZUUdLU1FPa3dLVnc9PSIsInZhbHVlIjoiU2JLR0=
+RKckJSL1F6MCtDVmFLYlQydjFFZEZ4b1ZzWExLUUhoTlJNYTRCb2M1aVVBMlI3R2dsaVZEMTk2N=
+U1Id1pubjA4SlpWYjZlc09lUDFXWnN2Tit1QmdPdGVtKytOQ2hGQ29lMng3M0hQYng3UzE3ZWw1=
+U1dwN3FwVkgyM25tMlMvQXkzWTdqUGJ6UFM2K3VweFhFNHFRMTNLeElqVm96eHB4TjZrVEV6ZXV=
+KZ0x4V1JnYlBrQy8wYzBLbWhKTzdERUlZVnZtdXNsaUZuZWpXM0Z2UT09IiwibWFjIjoiNzUwZW=
+NhMThmZWU3YjMzNjAzZGU4MGE3NDdiMzhhYjFmZWQxYjI0OTQxYTM3MmM1ZjhkZmFjZjc5YzlhZ=
+DRkMiIsInRhZyI6IiJ9" style=3D"display:inline-block;background-color:#1C955F=
+;color:#FFFFFF;font-family:'Inter Regular',                   sans-serif;fo=
+nt-size:14px;font-style:normal;font-weight:400;line-height:120%;letter-spac=
+ing:0em;margin:0;text-decoration:none;text-transform:none;padding:8px 30px =
+8px 30px;mso-padding-alt:0px;border-radius:2px 2px 2px 2px;" target=3D"_bla=
+nk"><span style=3D"margin:0;"><span style=3D"font-size:12px;">Osta nyt</spa=
+n></span></a></td></tr></tbody></table></td></tr></tbody></table></td></tr>=
+</tbody></table></div><!--[if mso | IE]></td></tr></table><![endif]--></div=
+><!--[if mso | IE]></td></tr></table><![endif]--></td></tr></tbody></table>=
+</div><!--[if mso | IE]></td></tr></table><table align=3D"center" border=3D=
+"0" cellpadding=3D"0" cellspacing=3D"0" role=3D"presentation" style=3D"widt=
+h:600px;" width=3D"600" bgcolor=3D"#000000"><tr><td style=3D"line-height:0p=
+x;font-size:0px;mso-line-height-rule:exactly;"><![endif]--><div style=3D"ba=
+ckground:#000000;background-color:#000000;margin:0px auto;max-width:600px;"=
+><table align=3D"center" border=3D"0" cellpadding=3D"0" cellspacing=3D"0" r=
+ole=3D"presentation" style=3D"background:#000000;background-color:#000000;w=
+idth:100%;border-collapse:separate;"><tbody><tr><td style=3D"direction:ltr;=
+font-size:0px;padding:0px 0px 0px 0px;text-align:center;mso-padding-left-al=
+t:0;mso-padding-right-alt:0;"><!--[if mso | IE]><table role=3D"presentation=
+" border=3D"0" cellpadding=3D"0" cellspacing=3D"0"><tr><td style=3D"vertica=
+l-align:top;width:600px;"><![endif]--><div style=3D"font-size:0px;text-alig=
+n:left;direction:ltr;display:inline-block;vertical-align:top;width:100%;" c=
+lass=3D"rc-column-per-100 rc-outlook-group-fix"><table border=3D"0" cellpad=
+ding=3D"0" cellspacing=3D"0" role=3D"presentation" width=3D"100%" style=3D"=
+border-collapse:separate;"><tbody><tr><td style=3D"vertical-align:top;paddi=
+ng:0 20px;"><table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" role=3D=
+"presentation" style=3D"border-collapse:separate;" width=3D"100%"><tbody><t=
+r><td align=3D"center" class=3D"rc-text-e95e303b4a06ca9f553201374d2a252d" s=
+tyle=3D"background:#000000;font-size:0px;padding:10px 40px 15px 40px;word-b=
+reak:break-word;"><div style=3D"font-family:'Inter Regular',               =
+                                                                           =
+              sans-serif;font-size:14px;font-style:normal;font-weight:400;l=
+etter-spacing:0em;line-height:120%;text-decoration:none;color:#303030;"><p =
+style=3D"margin:0;"><br></p><p style=3D"margin:0;"><br></p><p style=3D"marg=
+in:0;"><br></p><p style=3D"margin:0;"><span style=3D"font-family:'Inter Bol=
+d', sans-serif;font-size:18px;line-height:140%;font-style:normal;font-weigh=
+t:700;color:#FFFFFF;">15% alennusta kaikista normaalihintaisista mailoista<=
+/span></p><p style=3D"margin:0;"><br></p><p style=3D"margin:0;"><span style=
+=3D"line-height:140%;color:#FFFFFF;">Etk=C3=B6 l=C3=B6yt=C3=A4nyt sopivaa m=
+ailaa kampanjatuotteista? Saat nyt 15% alennusta kaikista normaalihintaisis=
+ta mailoista koodilla </span><span style=3D"font-family:'Inter Bold', sans-=
+serif;line-height:140%;font-style:normal;font-weight:700;color:#FFFFFF;">RA=
+CKET15</span></p></div></td></tr></tbody></table></td></tr></tbody></table>=
+</div><!--[if mso | IE]></td></tr></table><![endif]--></td></tr></tbody></t=
+able></div><!--[if mso | IE]></td></tr></table><table align=3D"center" bord=
+er=3D"0" cellpadding=3D"0" cellspacing=3D"0" role=3D"presentation" style=3D=
+"width:600px;" width=3D"600" bgcolor=3D"#000000"><tr><td style=3D"line-heig=
+ht:0px;font-size:0px;mso-line-height-rule:exactly;"><![endif]--><div style=
+=3D"background:#000000;background-color:#000000;margin:0px auto;max-width:6=
+00px;"><table align=3D"center" border=3D"0" cellpadding=3D"0" cellspacing=
+=3D"0" role=3D"presentation" style=3D"background:#000000;background-color:#=
+000000;width:100%;border-collapse:separate;"><tbody><tr><td style=3D"direct=
+ion:ltr;font-size:0px;padding:20px 0;text-align:center;mso-padding-left-alt=
+:0;mso-padding-right-alt:0;"><!--[if mso | IE]><table role=3D"presentation"=
+ border=3D"0" cellpadding=3D"0" cellspacing=3D"0"><tr><td class=3D"rc-colum=
+n-2156c1f02cf44e93d01e300384daf10c-outlook" style=3D"vertical-align:top;wid=
+th:600px;"><![endif]--><div style=3D"font-size:0px;text-align:left;directio=
+n:ltr;display:inline-block;vertical-align:top;width:100%;" class=3D"rc-colu=
+mn-per-100 rc-outlook-group-fix rc-column-2156c1f02cf44e93d01e300384daf10c"=
+><table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" role=3D"presentati=
+on" width=3D"100%" style=3D"border-collapse:separate;"><tbody><tr><td style=
+=3D"vertical-align:top;padding:0 20px;"><table border=3D"0" cellpadding=3D"=
+0" cellspacing=3D"0" role=3D"presentation" style=3D"border-collapse:separat=
+e;" width=3D"100%"><tbody><tr><td align=3D"center" style=3D"font-size:0px;p=
+adding:0 0 20px 0;word-break:break-word;"><!--[if mso | IE]><table align=3D=
+"center" border=3D"0" cellpadding=3D"0" cellspacing=3D"0" role=3D"presentat=
+ion"><tr><td><![endif]--><table align=3D"center" border=3D"0" cellpadding=
+=3D"0" cellspacing=3D"0" role=3D"presentation" style=3D"float:none;display:=
+inline-table;"><tbody><tr><td style=3D"padding:4px;vertical-align:middle;">=
+<table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" role=3D"presentatio=
+n" style=3D"border-radius:3px;width:20px;"><tbody><tr><td style=3D"font-siz=
+e:0;height:20px;vertical-align:middle;width:20px;"><a href=3D"https://app.r=
+ule.io/link/eyJpdiI6IjFXYmNvS2t3YkRKN0ZJTUhLdGxFN0E9PSIsInZhbHVlIjoidkpCZE5=
+FRHdzQVZRNUVLSDFrOG1EUlhrbURFa09wbmYwQ0RESGlZRytDK2hrc1M0Nk92dnUrMENPWW8yK0=
+9BV1lKOHRKRk5EUmc5ZE1IOUJPdVNNNnYrQ0Y3bEdGRkFBOWs3cUlwMVQ3OWVPcGtNQ1B4QXFvT=
+mFjMFNhemtBUk13VnRkVExNSWYrajcvRnJnaGlsb2g5YVJwWGh3VG1XRzZmbTU5VFJQUnIxM1pl=
+czllaDZhQ2k1OXNwOWIwbzlBTG9SYnErbnVjbDNSdEV4bmtLRk1Fdz09IiwibWFjIjoiMjk0YTZ=
+kYmY0ODI3YjQ4MTgzN2I2YzAwM2UyMDJhNzFkODQyZDJjMTdhM2QwMzVlZWE0OTMyNDQ4NTBjOG=
+JlMyIsInRhZyI6IiJ9" target=3D"_blank"><img alt=3D"" height=3D"20" src=3D"ht=
+tps://app.rule.io/img/social_icons/instagram_white_original_32.png" style=
+=3D"border-radius:3px;display:block;" width=3D"20"/></a></td></tr></tbody><=
+/table></td></tr></tbody></table><!--[if mso | IE]></td><td><![endif]--><ta=
+ble align=3D"center" border=3D"0" cellpadding=3D"0" cellspacing=3D"0" role=
+=3D"presentation" style=3D"float:none;display:inline-table;"><tbody><tr><td=
+ style=3D"padding:4px 4px;vertical-align:middle;"><table border=3D"0" cellp=
+adding=3D"0" cellspacing=3D"0" role=3D"presentation" style=3D"border-radius=
+:3px;width:20px;"><tbody><tr><td style=3D"font-size:0;height:20px;vertical-=
+align:middle;width:20px;"><a href=3D"https://app.rule.io/link/eyJpdiI6IndKM=
+1Z5Kytub3NtcTBVT09ZN3EwL2c9PSIsInZhbHVlIjoiQ1dGdzFBUG5rRkdLWmtqakxhZ01XUld2=
+RXJpYkVwZlV4V0NZTXF3c2ZnVDJwVytEMVFMWHNGdk4reXZjOWRIVVNYNzlVNXZ0cGF3TVF6Qjd=
+rajdxKzIxWWwrT1RDVWN2N2VRWkUyelljSFFNWHp3M1FnajIwRHlLdTRkd1FxOTByaW5rakl0MH=
+NmSHhoazBObXpJdlhnZUNmZ09iSGZ6VmxWQzVtdVd5a3h1b0hVU3krdFlNMTBBV29sYThsWEFFc=
+EEyVDFlS1VMdVNrMDB6c1JpTDJNZz09IiwibWFjIjoiOGViMDhhYTMwNjJhNzI1YjEwZDllYTdj=
+M2VhZmY0YjU2OWFiMDQ0MDA1OTZmZDgwNzlmYzQzZjU4MzUwMDJhNiIsInRhZyI6IiJ9" targe=
+t=3D"_blank"><img alt=3D"" height=3D"20" src=3D"https://app.rule.io/img/soc=
+ial_icons/tiktok_white_original_32.png" style=3D"border-radius:3px;display:=
+block;" width=3D"20"/></a></td></tr></tbody></table></td></tr></tbody></tab=
+le><!--[if mso | IE]></td><td><![endif]--><table align=3D"center" border=3D=
+"0" cellpadding=3D"0" cellspacing=3D"0" role=3D"presentation" style=3D"floa=
+t:none;display:inline-table;"><tbody><tr><td style=3D"padding:4px 4px;verti=
+cal-align:middle;"><table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" =
+role=3D"presentation" style=3D"border-radius:3px;width:20px;"><tbody><tr><t=
+d style=3D"font-size:0;height:20px;vertical-align:middle;width:20px;"><a hr=
+ef=3D"https://app.rule.io/link/eyJpdiI6InV0d1M3VlQ1bTRkeEpSTko4M2FGT0E9PSIs=
+InZhbHVlIjoiUVFUODI0R2YrYUJwQkJtdnQzSTFqMjhmSG94UGt5K1I3RGpBQ3Z4Snd3YTR0Yit=
+uU3VPaC9na3dwNWVaRXp0bDdRaEVoTE1EMjZGM0FmcytYaHI1dG8zT25oWVc2MUtlM0dzQ0NzRW=
+cwUW9YWkdCenJwbmZGcEttNmRHSG02N2VhTTVSVmYrNjNSRGlEVXBCWDlTdGJvdEFMajBHYTlKO=
+VZyWFV0UERUWkIwY0V4MWd5NGNVZmlaSkp2a2VrK0ttMmFNOEl2L21GTDhtcWYzcDRzVkM2dz09=
+IiwibWFjIjoiMWVkMGEwMjA4ZTg4M2FhZTQ0NjFiZWM3YzYwNjExODI3MWE0MTlkNjc3Mzg4NzY=
+0YjE4YmUzODg1ZTg4ZGFkNCIsInRhZyI6IiJ9" target=3D"_blank"><img alt=3D"" heig=
+ht=3D"20" src=3D"https://app.rule.io/img/social_icons/facebook_white_origin=
+al_32.png" style=3D"border-radius:3px;display:block;" width=3D"20"/></a></t=
+d></tr></tbody></table></td></tr></tbody></table><!--[if mso | IE]></td></t=
+r></table><![endif]--></td></tr></tbody></table></td></tr></tbody></table><=
+/div><!--[if mso | IE]></td></tr></table><![endif]--></td></tr></tbody></ta=
+ble></div><!--[if mso | IE]></td></tr></table><table align=3D"center" borde=
+r=3D"0" cellpadding=3D"0" cellspacing=3D"0" role=3D"presentation" style=3D"=
+width:600px;" width=3D"600" bgcolor=3D"#000000"><tr><td style=3D"line-heigh=
+t:0px;font-size:0px;mso-line-height-rule:exactly;"><![endif]--><div style=
+=3D"background:#000000;background-color:#000000;margin:0px auto;max-width:6=
+00px;"><table align=3D"center" border=3D"0" cellpadding=3D"0" cellspacing=
+=3D"0" role=3D"presentation" style=3D"background:#000000;background-color:#=
+000000;width:100%;border-collapse:separate;"><tbody><tr><td style=3D"direct=
+ion:ltr;font-size:0px;padding:0px 0px 0px 0px;text-align:center;mso-padding=
+-left-alt:0;mso-padding-right-alt:0;"><!--[if mso | IE]><table role=3D"pres=
+entation" border=3D"0" cellpadding=3D"0" cellspacing=3D"0"><tr><td class=3D=
+"rc-column-2156c1f02cf44e93d01e300384daf10c-outlook" style=3D"vertical-alig=
+n:top;width:600px;"><![endif]--><div style=3D"font-size:0px;text-align:left=
+;direction:ltr;display:inline-block;vertical-align:top;width:100%;" class=
+=3D"rc-column-per-100 rc-outlook-group-fix rc-column-2156c1f02cf44e93d01e30=
+0384daf10c"><table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" role=3D=
+"presentation" width=3D"100%" style=3D"border-collapse:separate;"><tbody><t=
+r><td style=3D"vertical-align:top;padding:0 20px;"><table border=3D"0" cell=
+padding=3D"0" cellspacing=3D"0" role=3D"presentation" style=3D"border-colla=
+pse:separate;" width=3D"100%"><tbody><tr><td align=3D"center" class=3D"rc-t=
+ext-24c79578634aef9dd5495c5c6b00fc30" style=3D"font-size:0px;padding:0px 0p=
+x 10px 0px;word-break:break-word;"><div style=3D"font-family:'Inter Regular=
+',                                                                         =
+                          sans-serif;font-size:16px;font-style:normal;font-=
+weight:400;letter-spacing:0em;line-height:120%;text-decoration:none;color:#=
+0F0F1F;"><p style=3D"margin:0;"><a href=3D"https://app.rule.io/browser/eyJp=
+diI6IjFuS2Jrdk12RkN5RWhsaUtEdUVkOHc9PSIsInZhbHVlIjoiSzVmRC8vQmpVeWVtU2pNZHN=
+YWlArQmZDOXQ1eXcvY2xVRzV6blRaU0dpVzRGbWkvSVJGdlhnV2JQMnEzY1JSNVVySVFVRmpUMT=
+RHU1Vhcll5QlJ1Y1N0K1JiM1ZEMGNsYndCNzRmYktrcmdYTVlVTjhXSzB3ZlRmOXZsZHNTZlRtV=
+VY4YzBBM1NCckk5UldsTnE5VXNBPT0iLCJtYWMiOiI1ZGFiOWU2NGIzMGU5MTJiZmNiNmMwN2Mz=
+NDEwOWMyMDU1NGFlNTI4NTAyZWEyMDAxNTQwNzRiNjU0NDE1ZmExIiwidGFnIjoiIn0%3D" tar=
+get=3D"_blank" style=3D"font-size:10px;text-decoration:underline;color:#666=
+666;">Open in browser</a> <span style=3D"font-size:10px;color:#666666;">|</=
+span> <a href=3D"https://app.rule.io/unsubscribe/eyJpdiI6InowcFM3S2VoS2FpTG=
+YycU5yYjZNSGc9PSIsInZhbHVlIjoiQ2JnUDNVbmh1eE1qME9LenZVbjZQVTFSVDZzOHRBdm80S=
+GYvcjNEbCtXMXdXQVJPcDJpZ3lkYXgzY2ZIVGRLU1NQbUdJTGpaMStMa0xDNnJ2ME4ya0E9PSIs=
+Im1hYyI6IjcyZjlkYTk1MzBlOGIyYmFmNTYxMWE4OTBiZGExMWU5MzEyMTAxOTEwYjJlYTEyZGM=
+5YTk1MmY0Y2NhMDc3YWMiLCJ0YWciOiIifQ%3D%3D" target=3D"_blank" style=3D"font-=
+size:10px;text-decoration:underline;color:#666666;">Unsubscribe</a></p></di=
+v></td></tr><tr><td align=3D"center" style=3D"font-size:0px;padding:10px 0p=
+x 0px 0px;word-break:break-word;"><div style=3D"font-family:'Helvetica',   =
+                                                                           =
+                    sans-serif;font-size:10px;font-style:normal;font-weight=
+:400;letter-spacing:0em;line-height:120%;text-decoration:none;color:#666666=
+;"><p style=3D"margin:0;"><br></p></div></td></tr></tbody></table></td></tr=
+></tbody></table></div><!--[if mso | IE]></td></tr></table><![endif]--></td=
+></tr></tbody></table></div><!--[if mso | IE]></td></tr></table><![endif]--=
+><div style=3D"display:none !important;mso-hide:all;"><a href=3D"https://ap=
+p.rule.io/lookup"><i class=3D"btlink"></i></a></div></div>
+            <i=
+mg src=3D"https://app.rule.io/track/image/eyJpdiI6InVVeFhNV3Fkd1R0RmJqYUJsd=
+3hCMmc9PSIsInZhbHVlIjoiNHozM3R1eEh0b2pGbkNGL0F0azFPVWczYVpheDdhSUdaNjU4Wms2=
+VTJTS3RoUHZVdW1LbTZDbDkvaUhLRXhMTytrTFF5V0Zya01PVFJObHRxeXg4YlE9PSIsIm1hYyI=
+6ImJiNjc4MDJiOTIyMmQwMGNkNGI4OWNmNTU4M2IxOTExYzE1YzFiYjk5MmNkNGVhZTU5ZDMxMD=
+VhZGYyZjM2NTgiLCJ0YWciOiIifQ%3D%3D" width=3D"1" height=3D"1" alt=3D""/>
+ =
+   </body>
+</html>
+
+--1pMnpTyx--

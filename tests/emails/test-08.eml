@@ -1,0 +1,95 @@
+From user@example2.com  Thu Aug  6 14:19:47 2026
+Return-Path: <user@example2.com>
+X-Original-To: user2@example.com
+Delivered-To: user2@example.com
+Received-ASN: AS15169 Google LLC (client 209.85.218.45)
+DMARC-Filter: OpenDMARC Filter v1.4.2 mta-in.example.com 167E11842B06
+Authentication-Results: mta-in.example.com; dmarc=pass (p=quarantine dis=none) header.from=example2.com
+DKIM-Filter: OpenDKIM Filter v2.11.0 mta-in.example.com 167E11842B06
+Authentication-Results: mta-in.example.com;
+	dkim=pass (2048-bit key, unprotected) header.d=example2.com header.i=@example2.com header.a=rsa-sha256 header.s=google header.b=LQoIISiO
+Received-SPF: None (mailfrom) identity=mailfrom; client-ip=209.85.218.45; helo=mail-ej1-f45.google.com; envelope-from=user@example2.com; receiver=turkia.eu 
+Received: from mail-ej1-f45.google.com (mail-ej1-f45.google.com [209.85.218.45])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange x25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mta-in.example.com (Postfix) with ESMTPS id 167E11842B06
+	for <user2@example.com>; Thu, 06 Aug 2026 14:19:38 +0300 (EEST)
+Received: by mail-ej1-f45.google.com with SMTP id a640c23a62f3a-c2055573c8cso160648966b.3
+        for <user2@example.com>; Thu, 06 Aug 2026 04:19:38 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1786015178; cv=none;
+        d=google.com; s=arc-20260327;
+        b=WrwxL5XrNQbLZ3hV32VwHTR2Fjsj8SqsPrXLrTfteD6H7uz9/r+z/W4JU68FNQeSe2
+         lVtCbwSbQWfh0OiWztUUFuoIgD4lyWCiImXPvIN31N6vSyZUC0X39x0ksCO2zJGOWnSJ
+         7ymIMnCGL9AVlvl2NJ6bH907MEjeZVPydIrSQ6OMrsQHK1fcYqT1srY6WsVLwXvjNR/v
+         DrI7q8/Ej3T3FFqRFk0p/gw2BIMw4eMzx8q84jsRFclHhwgh8Jhc48CwId06QTcxH4A+
+         WK9AUqfviLYq/iNfluC5NJQApYil8OZl4eJg1+ei/Nnl5F1vfQMRbXXzCKZfIfaAs5hv
+         S0gg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=to:subject:message-id:date:from:mime-version:dkim-signature;
+        bh=xryzAZCSAKCtum8DCG6UwEAd4rqJkqty2ce16V0WiS4=;
+        fh=KQ4Av59Qun5bfNMsXKpEPCRG5LWHARCfbyJ8MuvFje4=;
+        b=n/iVhSUqpbaY42FyNqYCfAz1sQyK1yS+iRBEekil7K+slAJlMQJd6d1FOcvsiTVZGN
+         /L00KOkee3hOU/5O9y2ykw53HoCH/tqSquvwffiiBs6feuPCwUfpKXMbJjdLQsVm2KjZ
+         vRZl6q8z6aJn/hqftohi6BtSEHFbGG94aIBmYLdZn6KwbvWk3bMkar1cV1a3I9+yLF3D
+         BaOJZcPh6Wux0sJ3o2DPv/1WpabMa1I2zJkm2EuQ7xPg5p7H9Abd/RrgUO8BoLBAAVLm
+         SANG/Ta88OM1KHXJjeqd/Srpr/LX/3rdnRhIAJA9PZm98HxI934iNVYjxRZ/qae0IfWd
+         bTIw==;
+        darn=turkia.eu
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=example2.com; s=google; t=1786015178; x=1786619978; darn=turkia.eu;
+        h=content-type:to:subject:message-id:date:from:mime-version:from:to
+         :cc:subject:date:message-id:reply-to:content-type;
+        bh=xryzAZCSAKCtum8DCG6UwEAd4rqJkqty2ce16V0WiS4=;
+        b=LQoIISiOd58trHeaiYSE8fExXbyoKmPsibCoIhScjh25gFQxx8Nb9ROdcitm9/G2IF
+         8ay/jCKcPgy/nf+ZVveEWKgopncehxO2Q7w7Eh609eDqK7qPJd/0eHB0e6zXmuj0TTSO
+         Igpq1s+Ghnl9zmNsG1T455h1V++4IUPQ0NPZKvWP/OYI7toQF1+ukqzH2sDVNlrEEXiM
+         RKzxiOE053rs/a6XuqgftRFE+Cbj5XhOoct2HXx8/PEGjXg4XqJSnM+A7iQL2uhSyDOz
+         fbW0y0NEHBdz7/p86kUjM2SocO1SmAE9liVmq6IJXIoOMalqzZsSiLNTtR3/aRxDewnJ
+         F/BQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1786015178; x=1786619978;
+        h=content-type:to:subject:message-id:date:from:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=xryzAZCSAKCtum8DCG6UwEAd4rqJkqty2ce16V0WiS4=;
+        b=QnXy1Fmq3xoffdcFZyZbXXaLnI+HZerU6oq+CwkffxQa+2SngGISQOBab/40tld4j5
+         mO2SJ0eesv8/geEcHM2aKMhQSYYpCA0iMViKvN0IKbgXlp4Vy4wcaKINiU8TKnot2Hws
+         YbPnsftgCf27IUI9GfuAwzCRkls1WPMzAkvAzPmNwRHh+Umhq/cnJiQ6SRw7fLyBiMDA
+         ebUlHqGNYiK7Q8nuPGIN7WS5/1oyAyO59JQA/YQUc8Ekdte7cgZi5GZPcXcZagVA7eAi
+         lOy5361kUI/2AJ0lDxAACjtI6JpNTbc144fAHYThwIoF1Ywmifp5jVdDZe7cPkwAYA5B
+         /tRg==
+X-Gm-Message-State: AOJu0YwCAb63ifaRhdivQp7AuoM8RG/tTqfU4lIHhT3othn8aQ+a90eS
+	8QT/fbRkEG7TqxoaLzg05/hCQHkWCeLvHPVTKH46Wc24KJ/GKdJrc/xw5A39mfodI0xngRVFAMH
+	gbzIUbbXkOBLDIyjrUZ7dxKPi2HN2O4W38zVUamrp06hy1F0cQ0Y0
+X-Gm-Gg: AR+sD10nwuTK5CevJMkb1SRd5YCtlKDJMleoaunXbM9U9yf9/T6jpXD3cpg/01V8sw+
+	3yrnrCPQ8O65C8QQARm/bw2H1/ikdUr3qFshnCGL+9Yc00SgJOkcJbyBa495pLgtdpn9Lmr426K
+	GSg82/7apwhApu4wnDmESz3utVviRfeUL1hwk9TFFnW/9nRKyZxO5FgIMgYT01D5a/USKdOazHd
+	iRRNB8XSwHIHPqIrPc9izuiPSJVy/wH8RcaDEDWlWlOPpV+45EUvHS+mfeGBYRBIvULxQmS3R3W
+	9/KY+l4tFqlxB3lKxQpe0E+D/0cOrPLFJwKCHSSDJNDe
+X-Received: by 2002:a17:906:f59c:b0:c16:101d:7afe with SMTP id
+ a640c23a62f3a-c2039ca7ec9mr642996366b.23.1786015177354; Thu, 06 Aug 2026
+ 04:19:37 -0700 (PDT)
+MIME-Version: 1.0
+From: Joe User <user@example2.com>
+Date: Thu, 6 Aug 2026 14:19:25 +0300
+X-Gm-Features: AUfX_mz7YYkmo5Q5LRe4gBATZLPtMrZ4PJ2CI4dPHQNJv01bl7_eeXTMJpH2RpM
+Message-ID: <CAAbFtYgCk3T5jd0-6JJAZ=Fkaqfmt7ykTpZ5CSRHs7Tcv_RBpw@mail.gmail.com>
+Subject: Testi 1
+To: Joe User <user2@example.com>
+Content-Type: multipart/alternative; boundary="00000000000035c14006585f107d"
+
+--00000000000035c14006585f107d
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: base64
+
+TWl0w6RzIHTDpMOkbGzDpCBuw6R5dHTDpMOkPw0KDQpBLUoNCg==
+--00000000000035c14006585f107d
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"auto">Mit=C3=A4s t=C3=A4=C3=A4ll=C3=A4 n=C3=A4ytt=C3=A4=C3=A4?<=
+div dir=3D"auto"><br></div><div dir=3D"auto">A-J</div></div>
+
+--00000000000035c14006585f107d--

@@ -1,0 +1,65 @@
+From 1axby1v3gz8p9w6mgsm2z41kg75j0cr58wj5dn-netgear=example.com@bf03.na2.hubspotemail.net  Mon Aug 10 19:03:49 2026
+Return-Path: <1axby1v3gz8p9w6mgsm2z41kg75j0cr58wj5dn-netgear=example.com@bf03.na2.hubspotemail.net>
+X-Original-To: netgear@example.com
+Delivered-To: user@example.com
+Received-ASN: AS16509 Amazon.com, Inc. (client 216.139.64.36)
+DMARC-Filter: OpenDMARC Filter v1.4.2 mta-in.example.com 697901842B06
+Authentication-Results: mta-in.example.com; dmarc=pass (p=reject dis=none) header.from=netgear.com
+DKIM-Filter: OpenDKIM Filter v2.11.0 mta-in.example.com 697901842B06
+Authentication-Results: mta-in.example.com;
+	dkim=pass (2048-bit key, unprotected) header.d=bf03.na2.hubspotemail.net header.i=@bf03.na2.hubspotemail.net header.a=rsa-sha256 header.s=hs1 header.b=OQzngJ34;
+	dkim=pass (2048-bit key, unprotected) header.d=netgear.com header.i=@netgear.com header.a=rsa-sha256 header.s=hs2-242128791 header.b=BtxFHivS
+Received-SPF: Pass (mailfrom) identity=mailfrom; client-ip=216.139.64.36; helo=byc96j6.bf03.na2.hubspotemail.net; envelope-from=1axby1v3gz8p9w6mgsm2z41kg75j0cr58wj5dn-netgear=example.com@bf03.na2.hubspotemail.net; receiver=example.com 
+Received: from byc96j6.bf03.na2.hubspotemail.net (byc96j6.bf03.na2.hubspotemail.net [216.139.64.36])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by mta-in.example.com (Postfix) with ESMTPS id 697901842B06
+	for <netgear@example.com>; Mon, 10 Aug 2026 19:03:47 +0300 (EEST)
+Received: by 172.16.7.22 with SMTP id a089896hoz7454wskqy70diptqecpye0jml8n899b4;
+        Mon, 10 Aug 2026 16:03:45 GMT
+DKIM-Signature: v=1; s=hs1; d=bf03.na2.hubspotemail.net; 
+        i=@bf03.na2.hubspotemail.net; 
+        h=sender:from:from:reply-to:to:to:cc:cc:subject:subject:list-unsubscribe:list-id:form-sub:feedback-id:list-unsubscribe-post; 
+        a=rsa-sha256; c=relaxed/relaxed; 
+        bh=vdqi4FOcIPnAMxqQSbqfIDs4N7znbz3GcALz5m5V+9Q=; 
+        b=OQzngJ34OE9hhXebDSefGTkR0xq4DAY2Lnau/2KT+42NNeWpun3HpCwSwerOVJ
+         XHP1VlIE+r0TovUKEYBMWIVICeFYLMRRvaalAyHqNYq2jS4SV7KXBnVohovaprn
+         jvXfP0JcCi1mEvzNegNCDN2k+swNNxeBgIW6oUsEkaMUZucHO7KCUJXPi0csZaK
+         phFmjXsNlixw325q8QK49jmlzDqHLTcsPPTnPlOBuFkTFTnj6+a3cbKWf46zlqM
+         C4XsNdQg0EJSV4WM7Sx/RtsWvPlu2SJ+DgYKPHe91maeQ6fkA6sG0MOSv/7STY+
+         TGZDa0ojzKWHRznOJ7LuJEx7tuPQ==; q=dns/txt; t=1786377825; 
+        x=1786640625;
+DKIM-Signature: v=1; s=hs2-242128791; d=netgear.com; 
+        i=@netgear.com; 
+        h=sender:from:from:reply-to:to:to:cc:cc:subject:subject:list-unsubscribe:list-id:form-sub:feedback-id:list-unsubscribe-post; 
+        a=rsa-sha256; c=relaxed/relaxed; 
+        bh=vdqi4FOcIPnAMxqQSbqfIDs4N7znbz3GcALz5m5V+9Q=; 
+        b=BtxFHivSxKmTYdwKv/iJ419nE6J1JaLM/FkO00nkIFZhiqNG2E6nGL83pPz89K
+         EGP4KgCwCsgzEUw6JBImWfsFeh2R6iQrvCXjIAZdejy5viNLzYk9QbskJEmckQp
+         k2kOwx1ou7vFEGCocI+Oe66ZNBue6aKPSwjWHxvbKM+AqKJ8up1lvzUpsf03YIc
+         0pdiRmiziNgWt+wDLNpFt3v1D85rWL6TXm2elHSldMZzjNzzu0fLwuuZXQICgWK
+         XUhFZ+USC4SsLbm9Zv7H0a29pKV1yJo1IRh97ReG3t5ZvCeEkHfEv2I3lgsY4hW
+         EMUGMVJn5QcfOQQ+ZXKkuw4Yh9Jw==; q=dns/txt; t=1786377825; 
+        x=1786640625;
+X-HS-Cid: 1axe7cb01manz0rrqnt810p82ynjmlddgd2lob
+List-Unsubscribe: <mailto:1axcy6ycwjyomzdb7wqsmytae66dp1wxz0gmyj-netgear=example.com@bf03.na2.hubspotemail.net?subject=unsubscribe>, <https://get.netgear.com/hs/subscription-preferences/v2/unsubscribe-all?data=aV2rkd-7GlSlRW7Prrmz2r7ShnW62PDKB8QR6tzW7tqhyd8PlT-cW6VlPFb5_H8ZlW6z8Q6d3vTM-3W4k5vc84k1HPcW27Lxy32M38xXW5XSJnL2ZLLmDW63LyFJ5hQJjJW396rJh3_JHbsN6g52W8s1BzQ21y3>
+Date: Mon, 10 Aug 2026 09:03:45 -0700
+From: NETGEAR Enterprise Marketing <enterprisemarketing@netgear.com>
+Reply-To: no-reply@netgear.com
+To: netgear@example.com
+Message-ID: <1786377819825.f7503991-bf64-401a-bf75-a2869078c378@bf03.na2.hubspotemail.net>
+Subject: Help shape the future of NETGEAR Smart Managed switches - win a $50
+ prepaid gift card
+MIME-Version: 1.0
+Content-Type: multipart/alternative; 
+	boundary="----=_Part_13937418_997162237.1786377825153"
+X-Report-Abuse-To: abuse@hubspot.com (see
+ https://policy.hubspot.com/abuse-complaints)
+List-Unsubscribe-Post: List-Unsubscribe=One-Click
+Feedback-ID: aeeafx11:aiu3o8x:airvv:HubSpot
+
+------=_Part_13937418_997162237.1786377825153
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Quick 4-minute survey - enter to win a $50 prepaid gift card

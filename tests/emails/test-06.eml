@@ -1,0 +1,65 @@
+From 1axb0pqcwhs1bte61pz9q4ggw4t0h8l0o1a5bo-dotnetconf=example.com@bf05x.hubspotemail.net  Wed Aug  5 12:05:12 2026
+Return-Path: <1axb0pqcwhs1bte61pz9q4ggw4t0h8l0o1a5bo-dotnetconf=example.com@bf05x.hubspotemail.net>
+X-Original-To: dotnetconf@example.com
+Delivered-To: user@example.com
+Received-ASN: AS14618 Amazon.com, Inc. (client 158.247.24.107)
+DMARC-Filter: OpenDMARC Filter v1.4.2 mta-in.example.com 9715D1842B06
+Authentication-Results: mta-in.example.com; dmarc=pass (p=quarantine dis=none) header.from=growthaccelerationpartners.com
+DKIM-Filter: OpenDKIM Filter v2.11.0 mta-in.example.com 9715D1842B06
+Authentication-Results: mta-in.example.com;
+	dkim=pass (2048-bit key, unprotected) header.d=bf05x.hubspotemail.net header.i=@bf05x.hubspotemail.net header.a=rsa-sha256 header.s=hs1 header.b=KhYjpJ4i;
+	dkim=pass (2048-bit key, unprotected) header.d=growthaccelerationpartners.com header.i=@growthaccelerationpartners.com header.a=rsa-sha256 header.s=hs1-216184 header.b=suYMN5WB
+Received-SPF: Pass (mailfrom) identity=mailfrom; client-ip=158.247.24.107; helo=bid47ul.bf05x.hubspotemail.net; envelope-from=1axb0pqcwhs1bte61pz9q4ggw4t0h8l0o1a5bo-dotnetconf=example.com@bf05x.hubspotemail.net; receiver=example.com 
+Received: from bid47ul.bf05x.hubspotemail.net (bid47ul.bf05x.hubspotemail.net [158.247.24.107])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by mta-in.example.com (Postfix) with ESMTPS id 9715D1842B06
+	for <dotnetconf@example.com>; Wed, 05 Aug 2026 12:05:11 +0300 (EEST)
+Received: by 172.16.92.38 with SMTP id a0cgfhxxtp4xci50o2i295e2psarfeuu4svgg6yuymj;
+        Wed, 5 Aug 2026 09:05:10 GMT
+DKIM-Signature: v=1; s=hs1; d=bf05x.hubspotemail.net; 
+        i=@bf05x.hubspotemail.net; 
+        h=sender:from:from:reply-to:to:to:cc:cc:subject:subject:list-unsubscribe:list-id:form-sub:feedback-id:list-unsubscribe-post; 
+        a=rsa-sha256; c=relaxed/relaxed; 
+        bh=yDdhh6NE3RM5jv/WStlAecuPwxqgglfKeb1VDRxQHG8=; 
+        b=KhYjpJ4iwRRRQJTUrwoZaenV0nbqhAOchz8IePavN+MuuxDLmQd3ihO2/eR4t5
+         HaZPryGLr5dYjDWqPyhlkO08pzGT2NgpZgdFtJ8nDGSK/9x59hNw63eJ4AxxcR8
+         NxxcxbiV4pl8ZdWwCG6ImN9h9PzegKxD+T7IeJSMbtDzOIjN08DjXo5Is3yEic2
+         iV3La9ji04f/zw39V5tKJFd78evO/jIwP4baDbqI3mCQ/0v30B6dAf+yXTYKbNj
+         FLGbgIlgtWEFFoO0sEX+So7zzowL+iVVMk7zyoJGndlVjS9OhpHPmgVE2vQ+3pF
+         LC5Qmf/ZLfuQmcR/+8WGlGXJMJLw==; q=dns/txt; t=1785920710; 
+        x=1786183510;
+DKIM-Signature: v=1; s=hs1-216184; 
+        d=growthaccelerationpartners.com; 
+        i=@growthaccelerationpartners.com; 
+        h=sender:from:from:reply-to:to:to:cc:cc:subject:subject:list-unsubscribe:list-id:form-sub:feedback-id:list-unsubscribe-post; 
+        a=rsa-sha256; c=relaxed/relaxed; 
+        bh=yDdhh6NE3RM5jv/WStlAecuPwxqgglfKeb1VDRxQHG8=; 
+        b=suYMN5WBoliOyxAztXqt0lbT3nApvJFXKK/BYCikcOgqgOjnRyty/mR3Al+TWu
+         NrlaAZHBUOkDk+G4vzC289tL8WwX6QejIM71NNzU43TzezRVGobGZnpko6/LP/T
+         f7I4AvH/MvRhWtZwTlCmEr3KSWYAnLuqCHVNEquOTLavOkKIkdmEUytPdpsVSqk
+         uILNGOPaBJEQlPwtmdTJso5hcf+9QW8wPiN+9sqIuUdyMpYNsnWD8Nwc6wkniyo
+         aGF45GrNAspGzBfaXXAhiny2AlofqA6JFUIR80RXt6NyW31elSak51undEk+s/5
+         tOCrKHTpQKklQ2GPfoqesEjeWCiw==; q=dns/txt; t=1785920710; 
+        x=1786183510;
+X-HS-Cid: 1axe7ovfzbhskk6lic281lx4c53gjvmvuhe2q8
+List-Unsubscribe: <mailto:1axcww2p2xi4bwrtzfo38q8nf4s4hmf5qpvf6s-dotnetconf=example.com@bf05x.hubspotemail.net?subject=unsubscribe>, <https://www.gapvelocity.ai/hs/subscription-preferences/v2/unsubscribe-all?data=aM2L-Qv5VHLrN3DFlFNzNNgdW2fcKh_6_qKFzVnyT2X5wp-1KW1XHGb71l7dtXVvzV-98Kk8BVW1zrxFT34xMNDVpmvtt2BzFqLW5J_1C040NlD0M7gN8hKKxcwW6sL2SG661ghjW5H8ZWl19G4Wz3phQ2>
+Date: Wed, 5 Aug 2026 02:05:10 -0700
+From: Cheyenne Sokkappa <csokkappa@growthaccelerationpartners.com>
+Reply-To: info@growthaccelerationpartners.com
+To: dotnetconf@example.com
+Message-ID: <1785920709924.3837c60b-30ba-4a63-bafe-7259f67cd016@bf05x.hubspotemail.net>
+Subject: Some exciting updates on .NET
+MIME-Version: 1.0
+Content-Type: multipart/alternative; 
+	boundary="----=_Part_5970439_1257060341.1785920710090"
+X-Report-Abuse-To: abuse@hubspot.com (see
+ https://policy.hubspot.com/abuse-complaints)
+List-Unsubscribe-Post: List-Unsubscribe=One-Click
+Feedback-ID: aeew3e:aihe8zrz:aidf:HubSpot
+
+------=_Part_5970439_1257060341.1785920710090
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+VB6 coming next for VELO

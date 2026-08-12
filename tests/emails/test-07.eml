@@ -1,0 +1,92 @@
+From musiikkiopisto@lprmo.fi  Thu Aug  6 12:28:16 2026
+Return-Path: <musiikkiopisto@lprmo.fi>
+X-Original-To: user2@example.com
+Delivered-To: user2@example.com
+Received-ASN: AS15169 Google LLC (client 74.125.224.51)
+DMARC-Filter: OpenDMARC Filter v1.4.2 mta-in.example.com 2DA521842B06
+Authentication-Results: mta-in.example.com; dmarc=none (p=none dis=none) header.from=lprmo.fi
+DKIM-Filter: OpenDKIM Filter v2.11.0 mta-in.example.com 2DA521842B06
+Authentication-Results: mta-in.example.com;
+	dkim=pass (2048-bit key, unprotected) header.d=lprmo-fi.20251104.gappssmtp.com header.i=@lprmo-fi.20251104.gappssmtp.com header.a=rsa-sha256 header.s=20251104 header.b=pxDtj1Tq
+Received-SPF: Pass (mailfrom) identity=mailfrom; client-ip=74.125.224.51; helo=mail-yx1-f51.google.com; envelope-from=musiikkiopisto@lprmo.fi; receiver=turkia.eu 
+Received: from mail-yx1-f51.google.com (mail-yx1-f51.google.com [74.125.224.51])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange x25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mta-in.example.com (Postfix) with ESMTPS id 2DA521842B06
+	for <user2@example.com>; Thu, 06 Aug 2026 12:28:15 +0300 (EEST)
+Received: by mail-yx1-f51.google.com with SMTP id 956f58d0204a3-6689f36ae56so3059790d50.3
+        for <user2@example.com>; Thu, 06 Aug 2026 02:28:15 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1786008494; cv=none;
+        d=google.com; s=arc-20260327;
+        b=X1/9Y54FfyreW8bCVytzzOK3KuX7Cu31/HL/XajqXz2zgp9SmswDAElh5n0hSbr6xS
+         RJRGCykSNjGrikwvgjl3G6DEBaBbJRN+PuhPznx567Wdbu+G9mNAORyY1QzJ411f+Oaa
+         3bCCKLdkHX5W6fiCgJWoa5ZZHERQMBmTeKLlSGMa9mfcliB666FD9RlnFBsgRzOIp8V8
+         8m2AYRgR6bVkT6l4tl20XRF2HyWpf2+9T+kd5SOcXO+r4OAZXDtIAQ8Xm1ZsP3Tg+26p
+         QeQ1F6zLjA3vbVr5ttl/1+4ngygFpIrdu1sXvag/sxzV+RfAkNYq1bzuyq1OeYMWZ95t
+         N0WA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=to:subject:message-id:date:from:mime-version:dkim-signature;
+        bh=guI2EQ5Wc0Px2aHbP2J+8zqp0O8HRcf58UCN0bpa2eA=;
+        fh=QhB1iNA3CY8RMMmojyntgKbpArIHwqon8evPl2CIYOA=;
+        b=ovtU8p5+7403kxwjnYtv/wR3Ubp2HvcUceexdKAF4IRNnIM00eHkE991OnXmiTjQ2N
+         LKF+sqGVy+EKKm4S2pcRHS50yLYezBz/7Gio7tqcJf9zFyYoVIpnSTcnvhsMk3NohMpF
+         HL8qcPbtEbn0ZNJoSYtIfVVpzO0WjJVJOhm48+X3mj3hIlKy2cQXHhR+AN+GsPqGAhZ8
+         /9a9Ea2mkb282ieuXW8BUAY8PKAMm5sFiDKWkYmp6J1qqdZsTy9KKQqFw+8a3Cb0EdC9
+         tHwaJtFs2mQsspkG4Ka7K8/aRZfruFRfFjYZsAlZU5q/SIXBJF0GTSH6/YmJoxABsIxD
+         cFaw==;
+        darn=turkia.eu
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=lprmo-fi.20251104.gappssmtp.com; s=20251104; t=1786008494; x=1786613294; darn=turkia.eu;
+        h=content-type:to:subject:message-id:date:from:mime-version:from:to
+         :cc:subject:date:message-id:reply-to:content-type;
+        bh=guI2EQ5Wc0Px2aHbP2J+8zqp0O8HRcf58UCN0bpa2eA=;
+        b=pxDtj1TqWdqMtrfrYTCtS+/DapsYWKMo9kREbrJj1/ekwmxMxqxFecYeNqlSh0/u/y
+         eV2apOWpjU5RE9a4UX04HMlftQ7HjF0nbv3pfujgsxlN3ZqihMkx10Ap5Nyl2AxTlwlB
+         GPsTuXabHjxp6wZRSbQInipUUap2K1F2qxBP3exBrz+ijEHygacdJ/u9pR3UdiZIdcIe
+         FUJWzYzZCn5qeCZ0dArWHbg2NwhiM03c8ASeuuF6pMUmfJrxfaI5zKvuB+IWiH8IZsx/
+         qkOfZV8f/3+pedKldsacD5TCq+W4edBnsuGUWSyywLs1M3Fm8nCEQ4ma8VjaibJz85D5
+         sr2A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1786008494; x=1786613294;
+        h=content-type:to:subject:message-id:date:from:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=guI2EQ5Wc0Px2aHbP2J+8zqp0O8HRcf58UCN0bpa2eA=;
+        b=NuMY7uXsw9v7FWxby6A4iREmYVsJbIkDh7GMXpNISaVgY3IAz9QaxSBsYsPJYsPxYo
+         3tHtwWV17PjQaCm8jP91e6i71lqv+LGBnYq9n/xgoqfL0TtS7Kx7PZNRSEVDPualMoy7
+         BmM9VjTGt8P230sWA0gJMglhPdK803HQoefsOe85d8oIzbCUwTZu3BlnRNMz0nqwJpDB
+         bZvJhgcKu7E13u+I1t2Btgu1UDbFY/OtUA0a3xA7UtT0rCfkCBpd0MV/lp9BvyE0HHfI
+         9bICFp+0cmyo2kI2GaaiSpRQQe7gpDHCsjx/pJuLXnCEUEoMQ9XTgaQmcC20x7qpdrj+
+         YrsA==
+X-Forwarded-Encrypted: i=1; AHgh+RobJubh8bhJkfxO0v/H8BRBe088KhJtNIfRaLuo+fh8dM40jTARVphfa2T6EYMgvbdlSu7D@turkia.eu
+X-Gm-Message-State: AOJu0YyZpN792cqNxYkV88tY84gWb1c1nas33cxdaXfCNJsU2JlFZALI
+	EBGs81rMLfFlm3uiufMGlrlibt/yCkzRcfGvGq6dKsBPH1XLNGjeUKtMOOwFes+gWZW+u04CANj
+	cNawhnZ9kN0u7pm9Am8Zeq7m0Wcdj9rwoIixMKkwF7g==
+X-Gm-Gg: AR+sD13Iicxqqtej3T5muuJTGF1zm7RlD2OMm5tJLR/jerKmbknEFz/IQKjfhS0YRCZ
+	9nsyWCF5OR6FtuRBEJQvzWE4rj+ze1nMM3db/aYA/+GKxAN2ugJFdxbNTL0jYWP4JqFFq1iu4Qb
+	UvO9bDXBESyR9IPviOpCXJQvJBCgwyFUKxCijQ5mpPhB7TrrsbbWCev8fg7bFzqcuzJBvaG9f2/
+	NLl0u/A7STnRx7NyY5IAO90P/T6rDVPFD7OJmgq/ugbKHOn4aSOSkeMGjyESNMWjbEqOsVFugGd
+	fvxYj03bORN6YbZybTVYlYSaD3+RyLRV9xaSHueQUVFRNXFBltfHy9tqb7Lb3HYRuWM9BjbS1U/
+	MYG1pUfuKU068NAYwjdFZ3hY/DldZ9orsifEOGD/vGVPNL7G0wMOc3bGW652T+fm3AQ==
+X-Received: by 2002:a05:690e:4847:b0:668:10ec:e8fe with SMTP id
+ 956f58d0204a3-6699a623965mr6232941d50.0.1786008493314; Thu, 06 Aug 2026
+ 02:28:13 -0700 (PDT)
+MIME-Version: 1.0
+From: Lappeenrannan musiikkiopisto <musiikkiopisto@lprmo.fi>
+Date: Thu, 6 Aug 2026 12:28:01 +0300
+X-Gm-Features: AUfX_mxiK4pMAWEiKtYRtyuuZ9-hvI6UZgaE5LUKcngEzB5oCTVwEgmtgLsVajk
+Message-ID: <CAOVubj5gSM6YP65ke2sAiyBQiefD32R98Y50w1eu6qNi8TUfMw@mail.gmail.com>
+Subject: Syksyn 2026 aloituskirje jatkavat oppilaat
+To: Minna Tissari <musiikkiopisto@lprmo.fi>
+Content-Type: multipart/mixed; boundary="000000000000cfa1d906585d813d"
+
+--000000000000cfa1d906585d813d
+Content-Type: multipart/alternative; boundary="000000000000cfa1d906585d813b"
+
+--000000000000cfa1d906585d813b
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+Hei, liitteen=C3=A4.

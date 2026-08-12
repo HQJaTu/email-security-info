@@ -1,0 +1,63 @@
+From 1axbnckx84v5bbsuur8xw6967sna82z1irfk7i-censys=example.com@bf07x.hubspotemail.net  Wed Aug  5 09:28:17 2026
+Return-Path: <1axbnckx84v5bbsuur8xw6967sna82z1irfk7i-censys=example.com@bf07x.hubspotemail.net>
+X-Original-To: censys@example.com
+Delivered-To: user@example.com
+Received-ASN: AS14618 Amazon.com, Inc. (client 143.244.88.126)
+DMARC-Filter: OpenDMARC Filter v1.4.2 mta-in.example.com 566581842B06
+Authentication-Results: mta-in.example.com; dmarc=pass (p=quarantine dis=none) header.from=censys.com
+DKIM-Filter: OpenDKIM Filter v2.11.0 mta-in.example.com 566581842B06
+Authentication-Results: mta-in.example.com;
+	dkim=pass (2048-bit key, unprotected) header.d=bf07x.hubspotemail.net header.i=@bf07x.hubspotemail.net header.a=rsa-sha256 header.s=hs2 header.b=SDhNKSEG;
+	dkim=pass (2048-bit key, unprotected) header.d=censys.com header.i=@censys.com header.a=rsa-sha256 header.s=hs2-50081908 header.b=jdZAEF6o
+Received-SPF: Pass (mailfrom) identity=mailfrom; client-ip=143.244.88.126; helo=bd77f18.bf07x.hubspotemail.net; envelope-from=1axbnckx84v5bbsuur8xw6967sna82z1irfk7i-censys=example.com@bf07x.hubspotemail.net; receiver=example.com 
+Received: from bd77f18.bf07x.hubspotemail.net (bd77f18.bf07x.hubspotemail.net [143.244.88.126])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by mta-in.example.com (Postfix) with ESMTPS id 566581842B06
+	for <censys@example.com>; Wed, 05 Aug 2026 09:28:16 +0300 (EEST)
+Received: by 172.16.213.73 with SMTP id a0cgfhxxtp4xci50o2i295e2psarfeuu4svgg6yuymj;
+        Wed, 5 Aug 2026 06:28:15 GMT
+DKIM-Signature: v=1; s=hs2; d=bf07x.hubspotemail.net; 
+        i=@bf07x.hubspotemail.net; 
+        h=sender:from:from:reply-to:to:to:cc:cc:subject:subject:list-unsubscribe:list-id:form-sub:feedback-id:list-unsubscribe-post; 
+        a=rsa-sha256; c=relaxed/relaxed; 
+        bh=oAXImLw5iBtOWi0QrXxSZ15T1JP3e6X7H0RGreOh7A8=; 
+        b=SDhNKSEGkUF2rPcmKqQtW7eK0085N/MTfjP/AbN6akrZ4f/5khHoaqy1OQUZsb
+         CJHuq9hTuSb+oFVYtwnrOeXNMcoK2r7+SPvksC5vHytwhawEOC6sLjoYXojzvnX
+         llvNUDXfErpCpFk4ge3FtkRPQx668aEFPkbfn0BF9tFTReU2Hh2xNGyDhiif06M
+         VqdffYtTRPAdxaFxjDRmyLRJ1UASg5bZhTveFgTQvtff9sg5VRyyMA4S++s5GeH
+         QS10Pu/8niXWWrYJOuAnzUpb3WpcZk7iyfSrGdm86xI6MCqpNHzoOtGwDfrbrE0
+         UnSXmKLjXW+am3VAzRbCVP0coRVw==; q=dns/txt; t=1785911295; 
+        x=1786174095;
+DKIM-Signature: v=1; s=hs2-50081908; d=censys.com; i=@censys.com; 
+        h=sender:from:from:reply-to:to:to:cc:cc:subject:subject:list-unsubscribe:list-id:form-sub:feedback-id:list-unsubscribe-post; 
+        a=rsa-sha256; c=relaxed/relaxed; 
+        bh=oAXImLw5iBtOWi0QrXxSZ15T1JP3e6X7H0RGreOh7A8=; 
+        b=jdZAEF6oo8G89iiDQGKZJvc3Kpzxy4aECuOGdxo+i5/GOZ1logmAzRhzyy3SwC
+         CEBtlRhSzsZ/GUP9Ut62axFniNeVpoyt6kz7I2EsGTYfdWFJHA0SwX7LevRoWln
+         z+uHXP0/f3AoBNKatUngh7g4K0pkI3D/GPBwoX+TBejrFjHXs5W5vwBoQiZlRNg
+         2w3J4lGiqL7Y/w+78OePbJVe/ZmmXg74YeXTTXOWEDI/uu8nGMvFYYYkJJilJzL
+         +8CTpgJX6HC4vdZjTCYmkKb8Ups+n7+sguLLmTyW7UZCxW90KkNFa7AO4whHQLI
+         s/JDpW0qzj3EC+L/0n6NOR/dewxA==; q=dns/txt; t=1785911295; 
+        x=1786174095;
+X-HS-Cid: 1axfgefi1glugrsyj6kh2yjzb419q89izmxrmm
+List-Unsubscribe: <mailto:1axcp6w9hxbnusytpcnnk5mkb1r0ehjwlyr7p6-censys=example.com@bf07x.hubspotemail.net?subject=unsubscribe>, <https://hs-50081908.s.hubspotemail.net/subscription-preferences/v2/unsubscribe-all?data=aM2L-Qv5K_nGW8Kkkb33K7g8_W3FlfYR6lZrm5W24MNMg2NMCwYW3q9pGC18W_BCW5fJrtb52ffGhW4N6_cP2vgbx-W6t0KrF2rJVtYW6WlgJK18PsGCW3klwYQ68SVzmW6Y5GbJ7w10BTW5PLptS2dH5MZ21P3>
+Date: Wed, 5 Aug 2026 02:28:15 -0400
+From: Censys Marketing <marketing@censys.com>
+Reply-To: marketing@censys.com
+To: censys@example.com
+Message-ID: <1785911293743.826561b1-1b63-414f-be11-5b95b6e0028b@bf07x.hubspotemail.net>
+Subject: Last chance to register for the upcoming webinar
+MIME-Version: 1.0
+Content-Type: multipart/alternative; 
+	boundary="----=_Part_32877098_1801902912.1785911295503"
+X-Report-Abuse-To: abuse@hubspot.com (see
+ https://policy.hubspot.com/abuse-complaints)
+List-Unsubscribe-Post: List-Unsubscribe=One-Click
+Feedback-ID: ae33pqe:aihe8g8y:airvv:HubSpot
+
+------=_Part_32877098_1801902912.1785911295503
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Join Us Live on August 6 for Our live session on the Censys Platform

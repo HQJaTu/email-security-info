@@ -1,0 +1,50 @@
+From m-11wtt3y6fmcfc1y7b8y17g6p36rpk7ilkoiu64unzrtwd1xda8ce4nwrcc@bounce.linkedin.com  Mon Aug  3 08:02:45 2026
+Return-Path: <m-11wtt3y6fmcfc1y7b8y17g6p36rpk7ilkoiu64unzrtwd1xda8ce4nwrcc@bounce.linkedin.com>
+X-Original-To: linkedin@example.com
+Delivered-To: user@example.com
+Received-ASN: AS14413 LinkedIn Corporation (client 108.174.0.196)
+DMARC-Filter: OpenDMARC Filter v1.4.2 mta-in.example.com ADAD3183FF40
+Authentication-Results: mta-in.example.com; dmarc=pass (p=reject dis=none) header.from=linkedin.com
+DKIM-Filter: OpenDKIM Filter v2.11.0 mta-in.example.com ADAD3183FF40
+Authentication-Results: mta-in.example.com;
+	dkim=pass (2048-bit key, unprotected) header.d=linkedin.com header.i=@linkedin.com header.a=rsa-sha256 header.s=d2048-202308-00 header.b=FotPqEGA
+Received-SPF: Pass (mailfrom) identity=mailfrom; client-ip=108.174.0.196; helo=maile-gd.linkedin.com; envelope-from=m-11wtt3y6fmcfc1y7b8y17g6p36rpk7ilkoiu64unzrtwd1xda8ce4nwrcc@bounce.linkedin.com; receiver=example.com 
+Received: from maile-gd.linkedin.com (maile-gd.linkedin.com [108.174.0.196])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange x25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mta-in.example.com (Postfix) with ESMTPS id ADAD3183FF40
+	for <linkedin@example.com>; Mon, 03 Aug 2026 08:02:43 +0300 (EEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=linkedin.com; s=d2048-202308-00;
+	h=list-unsubscribe-post:list-unsubscribe:x-linkedin-fbl:x-linkedin-template:
+	 x-linkedin-class:to:content-type:mime-version:subject:message-id:from:date:
+	 from;
+	bh=8J0xkAFXlauKg2lsMyRvU7sDBbhBbUbkvOI6EOxUAWY=;
+	b=FotPqEGAYLwt7Rv61dEAb5ms5GppaEx5CXHa4XvFkwj1uDwdH5dDb36F/lz95BR+EjzbVPu1Yiyba
+	 B7c8RoFl+4IhjbNQL4WCFJOHbwc8MJLRZkxi8GmLz+g62dUSIzMY4qqoV/IaCRV9ybEbBpDZeM9Cj/
+	 3ksIp9/gYTjCAfQ3JMcVXuwPrDfa+ZYkq4HUNEnU2fINiUYGXFmthjevWkLveIgcPSKrIftWPwfSpi
+	 uhXdD0GXlHx/r65NbnWxviptRqz4wZj0DIoXn0J9jgLT7T/jHeznaXknM/SIyRuPYxfchcWQuLFYZD
+	 oct7JgSBPI1MuhzI91UlOXEGVhTNj+A==
+Date: Mon, 3 Aug 2026 05:02:40 +0000 (UTC)
+From: LinkedIn <messages-noreply@linkedin.com>
+Message-ID: <1983206300.28795557.1785733360427@lva2-app64356.prod.linkedin.com>
+Subject: 44 people visited your profile
+MIME-Version: 1.0
+Content-Type: multipart/alternative; 
+	boundary="----=_Part_28795554_904031361.1785733360426"
+To: Joe User <linkedin@example.com>
+X-LinkedIn-Class: PID
+X-LinkedIn-Template: b2_professional_identity_digest_02
+X-LinkedIn-fbl: m2-aszzwntnm1e0h57yiamm678msaj6h4jzo7blx2ig5ydv1uajrnncstzeoy4hv41ngh3lvhlbn0zvc4fpai78tr00srv502e88s80ob
+X-LinkedIn-Id: 1lwd-mscrj972-9l
+List-Unsubscribe: <https://www.linkedin.com/mysettings-api/settingsApiEmailSubscriptionPost?lipi=urn%3Ali%3Apage%3Aemail_b2_professional_identity_digest_02%3Bs80L0v1XTxGFjCCEUzNcpQ%3D%3D&midToken=AQEEa1bVFlIyag&midSig=2EdMhmbRGK8Io1&trk=eml-b2_professional_identity_digest_02-oneClickUnsub-0-oneClickUnsub&trkEmail=eml-b2_professional_identity_digest_02-oneClickUnsub-0-oneClickUnsub-null-1lwd~mscrj972~9l-null-null&eid=1lwd-mscrj972-9l&loid=AQFfCduhT6m3ugAAAZ_GAKkvkyZKStLVY8I4bu9w_hZRibMq7EpyL-vxgdQtPwaD5lNat0meJqH1S6Xg_CsxI7Njtyv8Ex6jynmRhhI2u-SI>
+List-Unsubscribe-Post: List-Unsubscribe=One-Click
+Require-Recipient-Valid-Since: linkedin@example.com; Wed, 13 Sep 2017 14:34:20 +0000
+
+------=_Part_28795554_904031361.1785733360426
+Content-Type: text/plain;charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Content-ID: text-body
+
+44 profile viewers

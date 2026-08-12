@@ -1,0 +1,65 @@
+From sm.5138770744.3f5ada29ba85a3ae55-newsletter=email3.gog.com@emsgrid.com  Thu Jul 23 17:56:14 2026
+Return-Path: <sm.5138770744.3f5ada29ba85a3ae55-newsletter=email3.gog.com@emsgrid.com>
+X-Original-To: gog@example.com
+Delivered-To: user@example.com
+Received-ASN: AS31242 Play (client 185.54.187.77)
+DMARC-Filter: OpenDMARC Filter v1.4.2 mta-in.example.com 2B22B183FF40
+Authentication-Results: mta-in.example.com; dmarc=pass (p=quarantine dis=none) header.from=email3.gog.com
+DKIM-Filter: OpenDKIM Filter v2.11.0 mta-in.example.com 2B22B183FF40
+Authentication-Results: mta-in.example.com;
+	dkim=pass (2048-bit key, unprotected) header.d=smgrid.eu header.i=@smgrid.eu header.a=rsa-sha256 header.s=sm-trackid header.b=ERxWkgg4;
+	dkim=pass (2048-bit key, unprotected) header.d=email3.gog.com header.i=@email3.gog.com header.a=rsa-sha256 header.s=salesmanago header.b=FX+3OOb8
+Received-SPF: Pass (mailfrom) identity=mailfrom; client-ip=185.54.187.77; helo=ianus.emlgrid.com; envelope-from=sm.5138770744.3f5ada29ba85a3ae55-newsletter=email3.gog.com@emsgrid.com; receiver=example.com 
+Received: from ianus.emlgrid.com (ianus.emlgrid.com [185.54.187.77])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange x25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mta-in.example.com (Postfix) with ESMTPS id 2B22B183FF40
+	for <gog@example.com>; Thu, 23 Jul 2026 17:56:13 +0300 (EEST)
+Received: from s04 (_local_)
+	by smgrid.pl (mta01) with ESMTP id 4h5Z245pxLzRkPtB
+	for <gog@example.com>; Thu, 23 Jul 2026 14:56:12 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=smgrid.eu;
+	s=sm-trackid; t=1784818572; x=1784863572;
+	bh=z4vzTwLWpOIjmSGBufiboSd5nEavjGUFrWoLkm0+vYE=;
+	h=Date:From:To:Subject:List-Unsubscribe:List-Unsubscribe-Post:Date:
+	 From:To:Subject:List-Id:List-Unsubscribe:List-Unsubscribe-Post:CC;
+	b=ERxWkgg4VASVSKjlYgeekjysZxMeX7FECIAhQmX/gxfQckW9lJi8tGHKMUmdMbGKy
+	 WCZZY2wDzAOwse/+kdfzTA/pkEruX+xxg2UsWQjqRfNrCjEsIzZGh403QrmuXLKhRS
+	 09P2S/5D4SrfkzxKLBpBN0ZwBj6f0EQNQ1sHori+OXe2vsaVFCa7eWXtKwuF+mVlOd
+	 Dz+53OO72DW41h4gUvFxfmnvw2Fn5gjVlUAfXd8ojCdNQyXdZ4Zc5EbycC9L+960Ma
+	 o+j+x4V2vmPPXTGkl+kZQHTcrZuH8I3fRK3tNJKDbrfLFZFWlybzhwYoLdrVWv6UpC
+	 MhCERsCB/HZFQ==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=email3.gog.com;
+	s=salesmanago; t=1784818572; x=1784863572;
+	bh=z4vzTwLWpOIjmSGBufiboSd5nEavjGUFrWoLkm0+vYE=;
+	h=Date:From:To:Subject:List-Unsubscribe:List-Unsubscribe-Post:Date:
+	 From:To:Subject:List-Id:List-Unsubscribe:List-Unsubscribe-Post:CC;
+	b=FX+3OOb88z9NvS4rbWrGLXMQdQR02ESbIzUd+9HBBNcJaY3+j5OacxginwPhMhTgZ
+	 wXX86F0FxULE0tQ8iQGIbgFgC4UZgKyLUrA6l7W4PlWZyBZ0l4TUtqH2pDih/V33gC
+	 a2LhCyDbpikAK6yrzKINHjcQNtJCHfBZSHnq3iKbOhtqhAoImg6+AcYpFLBkqKADlx
+	 CdN6/9xCMxEt+r5Zsm0y+L3REebNZvR3myMnsIOETORVxIABOj4PZMHBm1cWB3YCi2
+	 43SUhh3VJdHUf6Gun3FEzW642mikB7wBlsCuGDJhMxesnRD6mEbFmcjggPHaTcVXFl
+	 XbJOrO0AYRzhw==
+Date: Thu, 23 Jul 2026 16:56:12 +0200 (CEST)
+From: "GOG.COM" <newsletter@email3.gog.com>
+To: Juser <gog@example.com>
+Message-Id: <5138770744.18572708@emsgrid.com5138770744>
+Subject: Your exclusive discount: 4SG5AAAHF3EYX3FURW
+X-Abuse: Please report abuse here: abuse@salesmanago.pl
+X-Campaign: db5181d3-8bbe-40ca-8057-f30c296dd6e3
+Feedback-ID: db5181d3-8bbe-40ca-8057-f30c296dd6e3:3f5ada29ba85a3ae:3f5ada29ba85a3ae:SALESmanago
+List-Unsubscribe: <mailto:unsubscribe+SuKAqKh9U0tItsCLdKvCLwSNtRgdOLvgygV_MMKW3W4w85@emsgrid.com?subject=SuKAqKh9U0tItsCLdKvCLwSNtRgdOLvgygV_MMKW3W4w85>,	
+  <https://gog.salesmanago.com/optOut.htm?uid=e280a8a8-7d53-44b4-a8b6-c08b74abc22f&sec=c1caa83f434701e922a322523fe664e66aab36f0bd8e0b6f37a0c6251479128d&conversation=db5181d3-8bbe-40ca-8057-f30c296dd6e3&optOutLanguage=en>
+List-Unsubscribe-Post: List-Unsubscribe=One-Click
+Precedence: bulk
+X-Entity-Ref-ID: none
+MIME-Version: 1.0
+Content-Type: multipart/alternative; 
+	boundary="----=_Part_22332800_59127166.1784818572708"
+
+------=_Part_22332800_59127166.1784818572708
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+Plain text version not available
