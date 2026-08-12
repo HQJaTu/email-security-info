@@ -51,7 +51,7 @@ def headers(text: str) -> 'msi.MessageHeaders':
 
 def info(**config) -> 'msi.MessageSecurityInfo':
     """A MessageSecurityInfo with the given config overrides."""
-    return msi.MessageSecurityInfo(msi.Config(**config))
+    return msi.MessageSecurityInfo(msi.SecurityInfoConfig(**config))
 
 
 # -- sample messages -------------------------------------------------------
@@ -161,11 +161,11 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(msi._strip_formatting('Ünicode ok'), 'Ünicode ok')
 
     def test_gettext_substitutes_variables(self):
-        self.assertEqual(msi.gettext('notaligned', {'from': 'example.com'}),
+        self.assertEqual(msi.i18n_gettext('notaligned', {'from': 'example.com'}),
                          'does not match From (example.com)')
 
     def test_gettext_falls_back_to_the_key(self):
-        self.assertEqual(msi.gettext('nosuchlabel'), 'nosuchlabel')
+        self.assertEqual(msi.i18n_gettext('nosuchlabel'), 'nosuchlabel')
 
 
 # -- Authentication-Results parsing ----------------------------------------
@@ -364,22 +364,22 @@ class TestAligned(unittest.TestCase):
     """Relaxed From-alignment."""
 
     def test_equal_domains_are_aligned(self):
-        self.assertTrue(msi.MessageSecurityInfo.aligned('example.com', 'EXAMPLE.com'))
+        self.assertTrue(msi.MessageSecurityInfo._aligned('example.com', 'EXAMPLE.com'))
 
     def test_subdomain_either_way_is_aligned(self):
-        self.assertTrue(msi.MessageSecurityInfo.aligned('example.com', 'mail.example.com'))
-        self.assertTrue(msi.MessageSecurityInfo.aligned('mail.example.com', 'example.com'))
+        self.assertTrue(msi.MessageSecurityInfo._aligned('example.com', 'mail.example.com'))
+        self.assertTrue(msi.MessageSecurityInfo._aligned('mail.example.com', 'example.com'))
 
     def test_unrelated_domains_are_not_aligned(self):
-        self.assertFalse(msi.MessageSecurityInfo.aligned('mailer.net', 'bank.example'))
+        self.assertFalse(msi.MessageSecurityInfo._aligned('mailer.net', 'bank.example'))
 
     def test_a_shared_suffix_is_not_enough(self):
-        self.assertFalse(msi.MessageSecurityInfo.aligned('notexample.com', 'example.com'))
+        self.assertFalse(msi.MessageSecurityInfo._aligned('notexample.com', 'example.com'))
 
     def test_missing_side_is_not_aligned(self):
-        self.assertFalse(msi.MessageSecurityInfo.aligned(None, 'example.com'))
-        self.assertFalse(msi.MessageSecurityInfo.aligned('example.com', None))
-        self.assertFalse(msi.MessageSecurityInfo.aligned('', ''))
+        self.assertFalse(msi.MessageSecurityInfo._aligned(None, 'example.com'))
+        self.assertFalse(msi.MessageSecurityInfo._aligned('example.com', None))
+        self.assertFalse(msi.MessageSecurityInfo._aligned('', ''))
 
 
 class TestSignatureDomain(unittest.TestCase):
@@ -387,23 +387,23 @@ class TestSignatureDomain(unittest.TestCase):
 
     def test_reads_the_signing_domain(self):
         self.assertEqual(
-            msi.MessageSecurityInfo.signature_domain('v=1; a=rsa-sha256; d=Example.COM; s=k1'),
+            msi.MessageSecurityInfo._signature_domain('v=1; a=rsa-sha256; d=Example.COM; s=k1'),
             'example.com')
 
     def test_tolerates_whitespace_around_the_tag(self):
-        self.assertEqual(msi.MessageSecurityInfo.signature_domain('v=1;  d = example.com ; s=k1'),
+        self.assertEqual(msi.MessageSecurityInfo._signature_domain('v=1;  d = example.com ; s=k1'),
                          'example.com')
 
     def test_accepts_the_tag_first(self):
-        self.assertEqual(msi.MessageSecurityInfo.signature_domain('d=example.com; v=1'),
+        self.assertEqual(msi.MessageSecurityInfo._signature_domain('d=example.com; v=1'),
                          'example.com')
 
     def test_is_not_confused_by_other_tags_ending_in_d(self):
-        self.assertEqual(msi.MessageSecurityInfo.signature_domain('v=1; bh=abcd=; d=a.test'),
+        self.assertEqual(msi.MessageSecurityInfo._signature_domain('v=1; bh=abcd=; d=a.test'),
                          'a.test')
 
     def test_missing_tag_is_none(self):
-        self.assertIsNone(msi.MessageSecurityInfo.signature_domain('v=1; a=rsa-sha256; s=k1'))
+        self.assertIsNone(msi.MessageSecurityInfo._signature_domain('v=1; a=rsa-sha256; s=k1'))
 
 
 # -- the From header -------------------------------------------------------
@@ -527,7 +527,7 @@ class TestEvaluate(unittest.TestCase):
         verdict = self.evaluate('Authentication-Results: mx; dmarc=pass header.from=a.test\n'
                                 'From: a@a.test\n\nbody\n')
         self.assertEqual(verdict['status'], 'pass')
-        self.assertEqual(verdict['summary'], msi.gettext('summarypass'))
+        self.assertEqual(verdict['summary'], msi.i18n_gettext('summarypass'))
 
     def test_dmarc_fail_is_authoritative(self):
         verdict = self.evaluate('Authentication-Results: mx; dkim=pass header.d=a.test; '
@@ -557,7 +557,7 @@ class TestEvaluate(unittest.TestCase):
     def test_unverified_signature_is_unknown(self):
         verdict = self.evaluate(UNVERIFIED_EML)
         self.assertEqual(verdict['status'], 'unknown')
-        self.assertEqual(verdict['summary'], msi.gettext('summaryunknown'))
+        self.assertEqual(verdict['summary'], msi.i18n_gettext('summaryunknown'))
 
     def test_no_authentication_data_at_all_warns(self):
         self.assertEqual(self.evaluate('From: a@a.test\n\nbody\n')['status'], 'warn')
@@ -642,7 +642,7 @@ class TestFormatting(unittest.TestCase):
         self.assertEqual(info().format_method({'result': 'neutral', 'domain': None}), 'NEUTRAL')
 
     def test_format_method_without_a_result(self):
-        self.assertEqual(info().format_method(None), msi.gettext('notpresent'))
+        self.assertEqual(info().format_method(None), msi.i18n_gettext('notpresent'))
 
     def test_format_dkim_aligned_pass_has_no_note(self):
         self.assertEqual(
@@ -669,22 +669,22 @@ class TestFormatting(unittest.TestCase):
 
     def test_format_dkim_reports_an_unverified_signature(self):
         self.assertEqual(info().format_dkim(None, 'news.example.com', 'news.example.com'),
-                         msi.gettext('unverified') + ' — news.example.com')
-        self.assertEqual(info().format_dkim(None, None, 'a.test'), msi.gettext('notpresent'))
+                         msi.i18n_gettext('unverified') + ' — news.example.com')
+        self.assertEqual(info().format_dkim(None, None, 'a.test'), msi.i18n_gettext('notpresent'))
 
     def test_no_alignment_note_without_both_domains(self):
         self.assertEqual(info().dkim_alignment_note('fail', 'a.test', None), '')
         self.assertEqual(info().dkim_alignment_note('fail', None, 'a.test'), '')
 
     def test_format_tls(self):
-        self.assertEqual(msi.MessageSecurityInfo.format_tls(None), msi.gettext('tlsunknown'))
+        self.assertEqual(msi.MessageSecurityInfo.format_tls(None), msi.i18n_gettext('tlsunknown'))
         self.assertEqual(msi.MessageSecurityInfo.format_tls({'encrypted': False, 'detail': None}),
-                         msi.gettext('tlsplain'))
+                         msi.i18n_gettext('tlsplain'))
         self.assertEqual(msi.MessageSecurityInfo.format_tls({'encrypted': True, 'detail': None}),
-                         msi.gettext('tlsencrypted'))
+                         msi.i18n_gettext('tlsencrypted'))
         self.assertEqual(msi.MessageSecurityInfo.format_tls({'encrypted': True,
                                                              'detail': 'TLSv1.3'}),
-                         msi.gettext('tlsencrypted') + ' — TLSv1.3')
+                         msi.i18n_gettext('tlsencrypted') + ' — TLSv1.3')
 
 
 # -- assembled result ------------------------------------------------------
@@ -717,7 +717,7 @@ class TestSummaryRows(unittest.TestCase):
 
     def test_the_from_row_falls_back_to_not_present(self):
         self.assertEqual(self.rows('Subject: x\n\nbody\n')['From']['value'],
-                         msi.gettext('notpresent'))
+                         msi.i18n_gettext('notpresent'))
 
     def test_spf_row_uses_the_received_spf_fallback(self):
         rows = self.rows('Received-SPF: Pass (mailfrom) envelope-from=a@a.test;\n'
@@ -750,21 +750,21 @@ class TestRawHeaders(unittest.TestCase):
 
 
 class TestConfig(unittest.TestCase):
-    """Config validation."""
+    """SecurityInfoConfig validation."""
 
     def test_method_enabled_defaults_to_true(self):
-        config = msi.Config()
+        config = msi.SecurityInfoConfig()
         for method in ('spf', 'dkim', 'dmarc', 'tls'):
             self.assertTrue(config.method_enabled(method))
-        self.assertFalse(msi.Config(check_tls=False).method_enabled('tls'))
+        self.assertFalse(msi.SecurityInfoConfig(check_tls=False).method_enabled('tls'))
 
     def test_invalid_header_names_are_rejected(self):
-        config = msi.Config(extra_headers=['X-Ok', 'bad header!', 'also:bad', '', '   '])
+        config = msi.SecurityInfoConfig(extra_headers=['X-Ok', 'bad header!', 'also:bad', '', '   '])
         with self.assertLogs(msi.log, level='WARNING'):
             self.assertEqual(config.valid_extra_headers(), ['X-Ok'])
 
     def test_duplicates_are_removed_case_insensitively(self):
-        config = msi.Config(extra_headers=['X-Spam', ' x-spam ', 'Message-ID'])
+        config = msi.SecurityInfoConfig(extra_headers=['X-Spam', ' x-spam ', 'Message-ID'])
         self.assertEqual(config.valid_extra_headers(), ['X-Spam', 'Message-ID'])
 
 
@@ -796,7 +796,9 @@ class TestEvaluateHeaders(unittest.TestCase):
 # -- text report -----------------------------------------------------------
 
 class TestFormatReport(unittest.TestCase):
-    """Rendering the result as plain text."""
+    """
+    Rendering the result as plain text.
+    """
 
     def report(self, message, color=False, **config):
         return msi.format_report(info(**config).evaluate_headers(headers(message)), color)
@@ -812,8 +814,8 @@ class TestFormatReport(unittest.TestCase):
         self.assertTrue(any(line.strip().startswith('X-Spam-Status') for line in lines))
 
     def test_the_from_marker_sentence_is_included(self):
-        self.assertIn(msi.gettext('frommarkerpass'), self.report(PASS_EML))
-        self.assertIn(msi.gettext('frommarkernone'), self.report(UNVERIFIED_EML))
+        self.assertIn(msi.i18n_gettext('frommarkerpass'), self.report(PASS_EML))
+        self.assertIn(msi.i18n_gettext('frommarkernone'), self.report(UNVERIFIED_EML))
 
     def test_multiline_values_are_aligned_under_the_value_column(self):
         lines = self.report(UNALIGNED_EML).splitlines()
@@ -843,24 +845,26 @@ class TestFormatReport(unittest.TestCase):
 
 
 class TestUseColor(unittest.TestCase):
-    """The --color decision."""
+    """
+    The --color decision.
+    """
 
     def test_explicit_choices(self):
-        self.assertTrue(msi._use_color('always'))
-        self.assertFalse(msi._use_color('never'))
+        self.assertTrue(msi._report_use_color('always'))
+        self.assertFalse(msi._report_use_color('never'))
 
     def test_auto_follows_the_tty(self):
         with mock.patch.object(sys, 'stdout', io.StringIO()):
-            self.assertFalse(msi._use_color('auto'))
+            self.assertFalse(msi._report_use_color('auto'))
 
     def test_auto_honours_no_color(self):
         stdout = mock.Mock(isatty=lambda: True)
         with mock.patch.object(sys, 'stdout', stdout), \
                 mock.patch.dict(os.environ, {'NO_COLOR': '1'}):
-            self.assertFalse(msi._use_color('auto'))
+            self.assertFalse(msi._report_use_color('auto'))
         with mock.patch.object(sys, 'stdout', stdout), \
                 mock.patch.dict(os.environ, {}, clear=True):
-            self.assertTrue(msi._use_color('auto'))
+            self.assertTrue(msi._report_use_color('auto'))
 
 
 # -- command line ----------------------------------------------------------
@@ -996,7 +1000,7 @@ class TestEvaluateMessageSecurityInfo(unittest.TestCase):
         self.addCleanup(os.unlink, handle.name)
 
         result = msi.evaluate_message_security_info(
-            handle.name, msi.Config(check_spf=False, check_dmarc=False, check_tls=False))
+            handle.name, msi.SecurityInfoConfig(check_spf=False, check_dmarc=False, check_tls=False))
         self.assertEqual([r['label'] for r in result['rows']], ['From', 'DKIM'])
 
 
@@ -1021,11 +1025,11 @@ class TestRealMessages(unittest.TestCase):
         for path in self.paths:
             with self.subTest(message=path.name):
                 result = msi.evaluate_message_security_info(
-                    str(path), msi.Config(extra_headers=['Message-ID', 'Return-Path']))
+                    str(path), msi.SecurityInfoConfig(extra_headers=['Message-ID', 'Return-Path']))
 
                 self.assertIn(result['status'], ('pass', 'warn', 'fail', 'unknown'))
                 self.assertIn(result['dkim_from'], ('pass', 'fail', 'none'))
-                self.assertEqual(result['summary'], msi.gettext('summary' + result['status']))
+                self.assertEqual(result['summary'], msi.i18n_gettext('summary' + result['status']))
                 # From, SPF, DKIM, DMARC and TLS rows, all with a value.
                 self.assertEqual(len(result['rows']), 5)
                 self.assertTrue(all(r['value'] for r in result['rows']))
@@ -1044,8 +1048,8 @@ class TestRealMessages(unittest.TestCase):
                 result = msi.evaluate_message_security_info(str(path))
                 report = msi.format_report(result, color=True)
 
-                self.assertIn(msi.gettext('linktitle'), report)
-                self.assertIn(msi.gettext('frommarker' + result['dkim_from']), report)
+                self.assertIn(msi.i18n_gettext('linktitle'), report)
+                self.assertIn(msi.i18n_gettext('frommarker' + result['dkim_from']), report)
                 # Printable on any stdout encoding, i.e. no stray surrogates.
                 report.encode('utf-8')
 
@@ -1060,12 +1064,12 @@ class TestRealMessages(unittest.TestCase):
         for path in self.paths:
             with self.subTest(message=path.name):
                 filtered = msi.evaluate_message_security_info(
-                    str(path), msi.Config(trusted_authserv=['nobody.invalid']))
+                    str(path), msi.SecurityInfoConfig(trusted_authserv=['nobody.invalid']))
                 rows = {r['label']: r['value'] for r in filtered['rows']}
 
                 self.assertEqual(filtered['dkim_from'], 'none')
                 self.assertNotIn('PASS', rows['DKIM'])
-                self.assertEqual(rows['DMARC'], msi.gettext('notpresent'))
+                self.assertEqual(rows['DMARC'], msi.i18n_gettext('notpresent'))
 
                 # A Received-SPF header carries no authserv-id, so it cannot be
                 # trust-filtered and may still produce a pass on its own; without

@@ -48,15 +48,18 @@ import logging
 import os
 import re
 import sys
-import unicodedata
 from dataclasses import dataclass, field
 
 import configargparse
+import unicodedata
 
 log = logging.getLogger(__name__)
 
+#: Exit code per verdict for --exit-status (2 stays argparse's usage error).
+EXIT_STATUS = {'pass': 0, 'warn': 3, 'fail': 4, 'unknown': 5}
+
 #: User-visible strings, ported from the plugin's localization/en_US.inc.
-LABELS = {
+I18N_LABELS = {
     'linktitle': 'Message Security',
 
     # Authentication-results report
@@ -89,10 +92,36 @@ LABELS = {
     'summaryunknown': 'Sender authentication could not be verified.',
 }
 
+#: Glyph + ANSI colour per overall status, and per DKIM/From marker state.
+REPORT_STATUS_STYLE = {
+    'pass': ('✓', '32'),  # green
+    'warn': ('!', '33'),  # amber
+    'fail': ('✗', '31'),  # red
+    'unknown': ('?', '90'),  # grey
+}
+REPORT_MARKER_STYLE = {
+    'pass': ('✓', '32'),
+    'fail': ('✗', '31'),
+    'none': ('?', '33'),
+}
 
-def gettext(name: str, variables: dict[str, str] | None = None) -> str:
-    """One localized label, with the plugin's ``$var`` placeholders filled in."""
-    text = LABELS.get(name, name)
+
+def _setup_logger(options: configargparse.Namespace) -> None:
+    log_level: int = logging.getLevelName(options.log_level)
+    if not log_level:
+        raise ValueError("Unkown logging level '{}'!".format(options.log_level))
+
+    logging.basicConfig(
+        format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  [%(name)s] %(message)s",
+        level=log_level
+    )
+
+
+def i18n_gettext(name: str, variables: dict[str, str] | None = None) -> str:
+    """
+    One localized label, with the plugin's ``$var`` placeholders filled in.
+    """
+    text = I18N_LABELS.get(name, name)
 
     for key, value in (variables or {}).items():
         text = text.replace('$' + key, value)
@@ -101,7 +130,7 @@ def gettext(name: str, variables: dict[str, str] | None = None) -> str:
 
 
 @dataclass
-class Config:
+class SecurityInfoConfig:
     """The tool's settings; the counterpart of the plugin's config.inc.php."""
 
     #: Only trust `Authentication-Results` headers stamped by these authserv-ids
@@ -171,7 +200,8 @@ class RawCompat32(email.policy.Compat32):
 
 
 def _decode_bytes(value: str) -> str:
-    """Repair a header string the parser decoded as latin-1/surrogateescape.
+    """
+    Repair a header string the parser decoded as latin-1/surrogateescape.
 
     Raw headers are supposed to be ASCII, but real-world mail puts raw UTF-8
     (or worse) in them. Recover the original bytes and decode them as UTF-8,
@@ -186,12 +216,15 @@ def _decode_bytes(value: str) -> str:
 
 
 def _unfold(value: str) -> str:
-    """Join a folded header value into a single line (RFC 5322 unfolding)."""
+    """
+    Join a folded header value into a single line (RFC 5322 unfolding).
+    """
     return re.sub(r'[ \t]*\r?\n[ \t]+', ' ', value).strip()
 
 
 def _strip_formatting(text: str) -> str:
-    """Drop control/formatting characters (bidi overrides, zero-width, ...).
+    """
+    Drop control/formatting characters (bidi overrides, zero-width, ...).
 
     They can be used to spoof what a display name looks like; the visible —
     possibly confusable — glyphs are kept as-is.
@@ -200,13 +233,16 @@ def _strip_formatting(text: str) -> str:
 
 
 class MessageHeaders:
-    """The header set of one message, in the shape the ported logic expects."""
+    """
+    The header set of one message, in the shape the ported logic expects.
+    """
 
     def __init__(self, message: email.message.Message):
         self.message = message
 
     def get(self, name: str) -> list[str]:
-        """Every value of a header, unfolded; missing/empty ones are dropped.
+        """
+        Every value of a header, unfolded; missing/empty ones are dropped.
 
         The counterpart of Roundcube's ``$headers->get($name, false)`` plus the
         plugin's ``normalize()``.
@@ -221,19 +257,25 @@ class MessageHeaders:
         return values
 
     def first(self, name: str) -> str | None:
-        """The first value of a header, or None when it is not present."""
+        """
+        The first value of a header, or None when it is not present.
+        """
         values = self.get(name)
 
         return values[0] if values else None
 
     @property
     def from_(self) -> str | None:
-        """The raw (still RFC 2047 encoded) From header value."""
+        """
+        The raw (still RFC 2047 encoded) From header value.
+        """
         return self.first('From')
 
 
 class MessageSecurityInfo:
-    """Evaluates the sender authentication of a message's headers."""
+    """
+    Evaluates the sender authentication of a message's headers.
+    """
 
     #: Where to look for each method's domain inside an Authentication-Results
     #: entry.
@@ -243,10 +285,8 @@ class MessageSecurityInfo:
         'dmarc': (r'header\.from',),
     }
 
-    def __init__(self, config: Config | None = None):
-        self.config = config or Config()
-
-    # -- public API --------------------------------------------------------
+    def __init__(self, config: SecurityInfoConfig | None = None):
+        self.config = config or SecurityInfoConfig()
 
     def evaluate_headers(self, headers: MessageHeaders) -> dict | None:
         """The verdict and the details for one message.
@@ -281,8 +321,6 @@ class MessageSecurityInfo:
 
         return result
 
-    # -- verdict -----------------------------------------------------------
-
     def evaluate(self, headers: MessageHeaders, auth: dict) -> dict:
         """Overall sender-authentication verdict driving the status/summary.
 
@@ -297,9 +335,9 @@ class MessageSecurityInfo:
         if config.method_enabled('dmarc'):
             dmarc = auth['dmarc'][0]['result'] if auth['dmarc'] else None
             if dmarc == 'pass':
-                return {'status': 'pass', 'summary': gettext('summarypass')}
+                return {'status': 'pass', 'summary': i18n_gettext('summarypass')}
             if dmarc == 'fail':
-                return {'status': 'fail', 'summary': gettext('summaryfail')}
+                return {'status': 'fail', 'summary': i18n_gettext('summaryfail')}
 
         # No usable DMARC: combine the SPF and DKIM results that are present.
         from_domain = self.from_domain(headers)
@@ -319,7 +357,7 @@ class MessageSecurityInfo:
 
         status = self.combine_statuses(statuses)
 
-        return {'status': status, 'summary': gettext('summary' + status)}
+        return {'status': status, 'summary': i18n_gettext('summary' + status)}
 
     def method_status(self, method: str, entry: dict, from_domain: str | None) -> str:
         """Map one SPF/DKIM result to pass / warn / fail / unknown / none.
@@ -329,7 +367,7 @@ class MessageSecurityInfo:
         result = entry['result']
 
         if result == 'pass':
-            if method == 'dkim' and not self.aligned(entry.get('domain'), from_domain):
+            if method == 'dkim' and not self._aligned(entry.get('domain'), from_domain):
                 return 'warn'
             return 'pass'
         if result == 'fail':
@@ -357,8 +395,6 @@ class MessageSecurityInfo:
                 return level
 
         return 'unknown'
-
-    # -- Authentication-Results parsing ------------------------------------
 
     def parse_authresults(self, headers: MessageHeaders) -> dict:
         """Parse all DKIM/SPF/DMARC results from the Authentication-Results header(s)."""
@@ -451,30 +487,28 @@ class MessageSecurityInfo:
         # A version clause without a recognised transmission type still implies TLS.
         return {'encrypted': True, 'detail': detail} if detail is not None else None
 
-    # -- details -----------------------------------------------------------
-
     def summary_rows(self, headers: MessageHeaders, auth: dict) -> list[dict]:
         """The parsed SPF/DKIM/DMARC (and From/TLS) rows of the report."""
         config = self.config
         from_domain = self.from_domain(headers)
         signature = headers.first('DKIM-Signature')
-        sig_domain = self.signature_domain(signature) if signature else None
+        sig_domain = self._signature_domain(signature) if signature else None
 
         # SPF is often only in a Received-SPF header, not Authentication-Results.
         spf = (auth['spf'][0] if auth['spf'] else None) or self.spf_from_received(headers)
 
         # The sender address the SPF/DKIM/DMARC results are judged against.
         rows = [{
-            'label': gettext('from'),
-            'value': self.from_address(headers) or gettext('notpresent'),
+            'label': i18n_gettext('from'),
+            'value': self.from_address(headers) or i18n_gettext('notpresent'),
         }]
 
         if config.method_enabled('spf'):
-            rows.append({'label': gettext('spf'), 'value': self.format_method(spf)})
+            rows.append({'label': i18n_gettext('spf'), 'value': self.format_method(spf)})
 
         if config.method_enabled('dkim'):
             rows.append({
-                'label': gettext('dkim'),
+                'label': i18n_gettext('dkim'),
                 'value': self.format_dkim(auth['dkim'][0] if auth['dkim'] else None,
                                           sig_domain, from_domain),
                 # Same verdict as the From-header marker, so the two can be
@@ -484,12 +518,12 @@ class MessageSecurityInfo:
 
         if config.method_enabled('dmarc'):
             rows.append({
-                'label': gettext('dmarc'),
+                'label': i18n_gettext('dmarc'),
                 'value': self.format_method(auth['dmarc'][0] if auth['dmarc'] else None),
             })
 
         if config.method_enabled('tls'):
-            rows.append({'label': gettext('tls'), 'value': self.format_tls(self.tls_info(headers))})
+            rows.append({'label': i18n_gettext('tls'), 'value': self.format_tls(self.tls_info(headers))})
 
         return rows
 
@@ -511,7 +545,7 @@ class MessageSecurityInfo:
     def format_method(entry: dict | None) -> str:
         """Format an SPF/DMARC result line, e.g. "PASS — example.com"."""
         if not entry:
-            return gettext('notpresent')
+            return i18n_gettext('notpresent')
 
         value = entry['result'].upper()
 
@@ -521,8 +555,8 @@ class MessageSecurityInfo:
                     from_domain: str | None) -> str:
         """Format the DKIM result line, including From-alignment."""
         if not entry:
-            return (gettext('unverified') + ' — ' + sig_domain if sig_domain
-                    else gettext('notpresent'))
+            return (i18n_gettext('unverified') + ' — ' + sig_domain if sig_domain
+                    else i18n_gettext('notpresent'))
 
         domain = entry.get('domain') or sig_domain
         value = entry['result'].upper()
@@ -543,8 +577,8 @@ class MessageSecurityInfo:
         if not from_domain or not domain:
             return ''
 
-        aligned = self.aligned(domain, from_domain)
-        mismatch = gettext('notaligned', {'from': from_domain})
+        aligned = self._aligned(domain, from_domain)
+        mismatch = i18n_gettext('notaligned', {'from': from_domain})
 
         if result.lower() == 'pass':
             # Positive result: a clean, aligned PASS shows nothing further; a
@@ -553,20 +587,18 @@ class MessageSecurityInfo:
             return '' if aligned else '\n' + mismatch
 
         # Non-pass: parenthesised alignment note.
-        return ' (' + (gettext('aligned') if aligned else mismatch) + ')'
+        return ' (' + (i18n_gettext('aligned') if aligned else mismatch) + ')'
 
     @staticmethod
     def format_tls(tls: dict | None) -> str:
         """Format the transport (TLS) result line."""
         if tls is None:
-            return gettext('tlsunknown')
+            return i18n_gettext('tlsunknown')
         if not tls.get('encrypted'):
-            return gettext('tlsplain')
+            return i18n_gettext('tlsplain')
 
-        return (gettext('tlsencrypted') + ' — ' + tls['detail'] if tls.get('detail')
-                else gettext('tlsencrypted'))
-
-    # -- From header -------------------------------------------------------
+        return (i18n_gettext('tlsencrypted') + ' — ' + tls['detail'] if tls.get('detail')
+                else i18n_gettext('tlsencrypted'))
 
     def from_domain(self, headers: MessageHeaders) -> str | None:
         """The domain of the visible From address."""
@@ -578,7 +610,8 @@ class MessageSecurityInfo:
 
     @staticmethod
     def from_parts(headers: MessageHeaders) -> dict | None:
-        """The decoded From display name and address as {name, addr}.
+        """
+        The decoded From display name and address as {name, addr}.
 
         None when there is no From header. The name has control/formatting
         characters (bidi overrides, zero-width, ...) stripped so it can't spoof
@@ -615,7 +648,8 @@ class MessageSecurityInfo:
         return {'name': name, 'addr': addr}
 
     def from_address(self, headers: MessageHeaders) -> str | None:
-        """The visible From value for display, as ``Name <local@domain>``.
+        """
+        The visible From value for display, as ``Name <local@domain>``.
 
         Showing both makes a deceptive/obfuscated display name — a common
         phishing trick — obvious next to the real address the DKIM/SPF/DMARC
@@ -631,7 +665,8 @@ class MessageSecurityInfo:
         return parts['name'] + ' <' + parts['addr'] + '>' if parts['name'] else parts['addr']
 
     def dkim_from_marker(self, headers: MessageHeaders, auth: dict) -> str:
-        """From-header marker verdict, DKIM-specific and independent of the overall status.
+        """
+        From-header marker verdict, DKIM-specific and independent of the overall status.
 
         'pass' (a DKIM PASS aligned with the From domain), 'fail' (a PASS that
         isn't aligned, or any non-pass DKIM result) or 'none' (no verified DKIM
@@ -650,22 +685,23 @@ class MessageSecurityInfo:
         if not domain:
             signature = headers.first('DKIM-Signature')
             if signature:
-                domain = self.signature_domain(signature)
+                domain = self._signature_domain(signature)
 
-        return 'pass' if self.aligned(domain, from_domain) else 'fail'
-
-    # -- helpers -----------------------------------------------------------
+        return 'pass' if self._aligned(domain, from_domain) else 'fail'
 
     @staticmethod
-    def signature_domain(signature: str) -> str | None:
-        """The d= signing domain of a raw DKIM-Signature header value."""
+    def _signature_domain(signature: str) -> str | None:
+        """
+        The d= signing domain of a raw DKIM-Signature header value.
+        """
         match = re.search(r'(?:^|;)\s*d\s*=\s*([^;\s]+)', signature, re.I)
 
         return match.group(1).strip().lower() if match else None
 
     @staticmethod
-    def aligned(domain: str | None, from_domain: str | None) -> bool:
-        """Relaxed alignment: equal, or one a subdomain of the other.
+    def _aligned(domain: str | None, from_domain: str | None) -> bool:
+        """
+        Relaxed alignment: equal, or one a subdomain of the other.
 
         Note: this is a pragmatic check, not a Public-Suffix-List organizational
         domain comparison, so e.g. two unrelated `*.co.uk` domains are not
@@ -683,17 +719,23 @@ class MessageSecurityInfo:
 
 
 def _header_parser() -> email.parser.BytesParser:
-    """A parser that reads headers only, keeping their bytes intact."""
+    """
+    A parser that reads headers only, keeping their bytes intact.
+    """
     return email.parser.BytesParser(policy=RawCompat32())
 
 
 def load_headers_from_bytes(data: bytes) -> MessageHeaders:
-    """The headers of a raw RFC 822 message; its body is not parsed."""
+    """
+    The headers of a raw RFC 822 message; its body is not parsed.
+    """
     return MessageHeaders(_header_parser().parsebytes(data, headersonly=True))
 
 
 def load_headers(eml_path: str) -> MessageHeaders:
-    """Read a message's headers from an .eml file, or from stdin for '-'."""
+    """
+    Read a message's headers from an .eml file, or from stdin for '-'.
+    """
     if eml_path == '-':
         log.debug('Reading message from stdin')
         return MessageHeaders(_header_parser().parse(sys.stdin.buffer, headersonly=True))
@@ -703,31 +745,16 @@ def load_headers(eml_path: str) -> MessageHeaders:
         return MessageHeaders(_header_parser().parse(handle, headersonly=True))
 
 
-def evaluate_message_security_info(eml_path: str, config: Config | None = None) -> dict | None:
-    """Evaluate one message file: {status, summary, rows, headers, dkim_from}.
+def evaluate_message_security_info(eml_path: str, config: SecurityInfoConfig | None = None) -> dict | None:
+    """
+    Evaluate one message file: {status, summary, rows, headers, dkim_from}.
 
     None when every authentication mechanism is disabled.
     """
     return MessageSecurityInfo(config).evaluate_headers(load_headers(eml_path))
 
 
-# -- reporting -------------------------------------------------------------
-
-#: Glyph + ANSI colour per overall status, and per DKIM/From marker state.
-STATUS_STYLE = {
-    'pass': ('✓', '32'),   # green
-    'warn': ('!', '33'),   # amber
-    'fail': ('✗', '31'),   # red
-    'unknown': ('?', '90'),  # grey
-}
-MARKER_STYLE = {
-    'pass': ('✓', '32'),
-    'fail': ('✗', '31'),
-    'none': ('?', '33'),
-}
-
-
-def _use_color(when: str) -> bool:
+def _report_use_color(when: str) -> bool:
     """Whether to colourize, honouring --color and the NO_COLOR convention."""
     if when == 'never':
         return False
@@ -739,18 +766,19 @@ def _use_color(when: str) -> bool:
 
 def format_report(result: dict, color: bool = False) -> str:
     """Render the verdict, the parsed rows and the raw headers as plain text."""
+
     def paint(text: str, ansi: str) -> str:
         return '\033[' + ansi + 'm' + text + '\033[0m' if color else text
 
     status = result['status']
-    glyph, ansi = STATUS_STYLE.get(status, STATUS_STYLE['unknown'])
+    glyph, ansi = REPORT_STATUS_STYLE.get(status, REPORT_STATUS_STYLE['unknown'])
 
     lines = [
-        '{}: {} {}'.format(gettext('linktitle'),
+        '{}: {} {}'.format(i18n_gettext('linktitle'),
                            paint(glyph + ' ' + status.upper(), ansi),
                            result['summary']),
         '',
-        gettext('authresults') + ':',
+        i18n_gettext('authresults') + ':',
     ]
 
     rows = result.get('rows', [])
@@ -768,7 +796,7 @@ def format_report(result: dict, color: bool = False) -> str:
 
         if marker:
             # Padded uncoloured, so the ANSI escapes don't count towards width.
-            head += ' ' + paint(*MARKER_STYLE.get(marker, MARKER_STYLE['none']))
+            head += ' ' + paint(*REPORT_MARKER_STYLE.get(marker, REPORT_MARKER_STYLE['none']))
         elif marked:
             head += '  '
 
@@ -779,7 +807,7 @@ def format_report(result: dict, color: bool = False) -> str:
         add(row['label'], row['value'], row.get('marker'))
 
     if 'dkim_from' in result:
-        lines += ['', '  ' + gettext('frommarker' + result['dkim_from'])]
+        lines += ['', '  ' + i18n_gettext('frommarker' + result['dkim_from'])]
 
     if raw:
         lines.append('')
@@ -789,20 +817,13 @@ def format_report(result: dict, color: bool = False) -> str:
     return '\n'.join(lines)
 
 
-# -- command line ----------------------------------------------------------
-
-def _setup_logger(options: configargparse.Namespace) -> None:
-    log_level: int = logging.getLevelName(options.log_level)
-    if not log_level:
-        raise ValueError("Unkown logging level '{}'!".format(options.log_level))
-
-    logging.basicConfig(
-        format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  [%(name)s] %(message)s",
-        level=log_level
-    )
-
-
 def _parse_args(argv: list[str] | None = None) -> configargparse.Namespace:
+    """
+    Argument parser setup and incoming argument parsing.
+    Note: This is a separate function for testability.
+    :param argv: arguments
+    :return: result of argument parsing
+    """
     parser = configargparse.ArgParser(
         description='Email Message Security Info',
         epilog='Config file keys are the long option names without the leading '
@@ -829,7 +850,7 @@ def _parse_args(argv: list[str] | None = None) -> configargparse.Namespace:
                             default=True,
                             help='Evaluate and report {}. A disabled mechanism is dropped from '
                                  'both the verdict and the details. Default: enabled'
-                                 .format(method.upper()))
+                            .format(method.upper()))
     parser.add_argument('--check-tls',
                         action=argparse.BooleanOptionalAction,
                         default=True,
@@ -867,15 +888,16 @@ def _parse_args(argv: list[str] | None = None) -> configargparse.Namespace:
     return parser.parse_args(argv)
 
 
-#: Exit code per verdict for --exit-status (2 stays argparse's usage error).
-EXIT_STATUS = {'pass': 0, 'warn': 3, 'fail': 4, 'unknown': 5}
-
-
 def main(argv: list[str] | None = None) -> int:
+    """
+    The main stuff
+    :param argv: arguments
+    :return: exit code
+    """
     args = _parse_args(argv)
     _setup_logger(args)
 
-    config = Config(
+    config = SecurityInfoConfig(
         trusted_authserv=args.trusted_authserv,
         check_spf=args.check_spf,
         check_dkim=args.check_dkim,
@@ -896,7 +918,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.json:
         print(json.dumps(result, indent=2, ensure_ascii=False))
     else:
-        print(format_report(result, _use_color(args.color)))
+        print(format_report(result, _report_use_color(args.color)))
 
     return EXIT_STATUS.get(result['status'], 0) if args.exit_status else 0
 
