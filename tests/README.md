@@ -1,9 +1,9 @@
 Tests for message-security-info
 ===============================
 
-Everything test-related lives in this directory: the test suite itself and the
-sample messages it runs against. The program under test is the single file one
-level up, `../message-security-info.py`.
+Everything test-related lives in this directory: the test files, the shared
+helpers they use, and the sample messages they run against. The program under
+test is the single file one level up, `../message-security-info.py`.
 
 
 Requirements
@@ -26,63 +26,91 @@ From the project root:
     python -m unittest discover -s tests          # quiet
     python -m unittest discover -s tests -v       # one line per test
 
-Or straight from a file, which works from any directory:
+Or one area at a time, straight from a file, which works from any directory:
 
-    python tests/test_message_security_info.py    # verbose by default
+    python tests/test_verdict.py                  # verbose by default
+    python tests/test_verdict.py TestEvaluate
+    python tests/test_verdict.py TestEvaluate.test_full_pass
 
 With pytest, if you'd rather have its output and `-k` filtering:
 
     python -m pytest tests
+    python -m pytest tests/test_verdict.py
     python -m pytest tests -k tls
-
-Run one class or one test while working on it:
-
-    python -m unittest tests.test_message_security_info.TestTlsInfo
-    python -m unittest tests.test_message_security_info.TestTlsInfo.test_esmtpsa_is_encrypted
 
 Expect ~150 tests in well under a second. There is no network access, no DNS and
 no temporary state outside `tempfile` directories that clean themselves up.
+
+Note that the dotted form (`python -m unittest tests.test_verdict`) does *not*
+work: there is deliberately no `tests/__init__.py`, so this is not a package.
+Use file paths or `-k` instead.
 
 
 Layout
 ------
 
+The program is one file because that is how it is distributed; the tests are
+not, and split along the seams of what they cover:
+
     tests/
-      README.md                        this file
-      test_message_security_info.py    the whole suite
-      emails/*.eml                     real-world sample messages (optional)
+      README.md                 this file
+      support.py                shared helpers — not a test file
+      test_headers.py           reading raw headers: unfolding, repeats, bytes
+      test_authresults.py       Authentication-Results, Received-SPF, trust filtering
+      test_transport.py         TLS detection from the last Received hop
+      test_alignment.py         relaxed From-alignment, DKIM signing domain
+      test_sender.py            the From header: decoding, sanitizing, display
+      test_verdict.py           per-method statuses, how they combine, DKIM marker
+      test_formatting.py        one result → its displayed line
+      test_result.py            the assembled result: rows, raw headers, shape
+      test_report.py            the text report and the colour decision
+      test_config.py            settings, the command line and the config file
+      test_cli.py               the command line end to end: input, output, exit codes
+      test_real_messages.py     smoke test over emails/
+      emails/*.eml              real-world sample messages (optional)
 
-The suite is one file because the program is one file. Its classes are grouped
-in the same order as the code they cover — header handling, Authentication-Results
-parsing, trust filtering, TLS detection, alignment, the From header, verdicts,
-formatting, the assembled result, the text report, and the command line.
+Files roughly follow the order of the code they cover, from raw input to
+rendered output. When you add a test, put it with the behaviour it exercises
+rather than with the function it happens to call.
 
-`test_message_security_info.py` loads `../message-security-info.py` **by path**,
-using `importlib`, rather than importing it. That is deliberate: the program
-keeps its hyphenated, executable-style filename, which is not a valid Python
-identifier, so `import message-security-info` is a syntax error. If the program
-is ever renamed to `message_security_info.py`, the `_load_module()` helper at the
-top of the suite can collapse into a plain `import`.
+`support.py` holds everything shared: the module loader, the `headers()` and
+`info()` constructors, the sample header blocks (`PASS_EML`, `FAIL_EML`,
+`UNALIGNED_EML`, `UNVERIFIED_EML`) and `EMAIL_DIR`. Each test file imports it
+plainly:
+
+    import unittest
+
+    from support import PASS_EML, headers, info
+
+That plain `import support` works because unittest discovery, pytest and direct
+execution all put this directory on `sys.path`.
+
+`support.py` loads `../message-security-info.py` **by path**, using `importlib`,
+rather than importing it, and exposes it as `support.msi`. That is deliberate:
+the program keeps its hyphenated, executable-style filename, which is not a
+valid Python identifier, so `import message-security-info` is a syntax error. If
+the program is ever renamed to `message_security_info.py`, `_load_module()` can
+collapse into a plain `import`.
 
 
 The sample messages in emails/
 ------------------------------
 
-`TestRealMessages` runs the whole evaluation over every `emails/*.eml` file.
-Real headers are far messier than hand-written ones — a dozen `Received` hops,
-several DKIM signatures, encoded words, odd folding — so these samples catch
-things the unit tests cannot anticipate.
+`test_real_messages.py` runs the whole evaluation over every `emails/*.eml`
+file. Real headers are far messier than hand-written ones — a dozen `Received`
+hops, several DKIM signatures, encoded words, odd folding — so these samples
+catch things the unit tests cannot anticipate.
 
-The class asserts **only invariants that must hold for any message**, never
-anything about the content of these particular ones: the status is one of the
-four known values, the summary matches it, all five rows have a value, no raw
-header value is left folded, the result survives a JSON round-trip, the report
-renders without stray surrogates, and evaluation is deterministic.
+It asserts **only invariants that must hold for any message**, never anything
+about the content of these particular ones: the status is one of the four known
+values, the summary matches it, all five rows have a value, no raw header value
+is left folded, the result survives a JSON round-trip, the report renders
+without stray surrogates, and evaluation is deterministic.
 
 That means you can add, replace, redact or obfuscate the samples freely without
-touching the suite. Nothing depends on their bodies either — the program only
-ever reads headers and never verifies signatures cryptographically, so
-mangled MIME parts or rewritten bodies do not affect the results.
+touching the tests. Nothing depends on their bodies either — the program only
+ever reads headers and never verifies signatures cryptographically, so mangled
+MIME parts or rewritten bodies do not affect the results.
 
 To add a message: drop the raw source in as `emails/<name>.eml` (in Roundcube:
 *More → Download → As source*; in most other clients: *Save as* / *Show
@@ -92,8 +120,8 @@ mutually consistent, because rewriting a domain in `From` but not in
 `Authentication-Results` (or vice versa) will change the alignment verdicts and
 make the sample misleading rather than merely anonymous.
 
-If this directory is missing or empty, `TestRealMessages` skips itself and the
-rest of the suite still runs.
+If this directory is missing or empty, `test_real_messages.py` skips itself and
+the rest of the suite still runs.
 
 
 Two tests that document known limitations
@@ -103,11 +131,12 @@ These pin down behaviour inherited from the Roundcube PHP plugin that is
 faithful but arguably wrong. They are written to fail loudly if someone changes
 the behaviour, so that fixing it is a deliberate act, not an accident:
 
-- `TestDkimFromMarker.test_only_the_first_signature_is_judged` — when a message
-  carries several DKIM signatures (an ESP's plus the sender's own, which is
-  common), only the first one is judged, so an aligned pass further down the
-  header does not count. Most samples in `emails/` hit this.
-- `TestRealMessages.test_a_trust_list_drops_all_untrusted_evidence` — a
+- `test_verdict.py`, `TestDkimFromMarker.test_only_the_first_signature_is_judged`
+  — when a message carries several DKIM signatures (an ESP's plus the sender's
+  own, which is common), only the first one is judged, so an aligned pass
+  further down the header does not count. Most samples in `emails/` hit this.
+- `test_real_messages.py`,
+  `TestRealMessages.test_a_trust_list_drops_all_untrusted_evidence` — a
   `Received-SPF` header carries no authserv-id, so `--trusted-authserv` cannot
   filter it and an SPF pass from it survives even when every
   `Authentication-Results` header is distrusted.
