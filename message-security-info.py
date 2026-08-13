@@ -754,6 +754,20 @@ def evaluate_message_security_info(eml_path: str, config: SecurityInfoConfig | N
     return MessageSecurityInfo(config).evaluate_headers(load_headers(eml_path))
 
 
+def _message_source(email: str | None) -> str | None:
+    """
+    Resolve where to read the message from: the given path, or stdin when the
+    argument was omitted, which is how mail clients invoke a pipe command.
+
+    None when nothing was given and stdin is a terminal — silently waiting for
+    a message nobody is going to type by hand only looks like a hang.
+    """
+    if email:
+        return email
+
+    return None if sys.stdin.isatty() else '-'
+
+
 def _report_use_color(when: str) -> bool:
     """Whether to colourize, honouring --color and the NO_COLOR convention."""
     if when == 'never':
@@ -834,8 +848,10 @@ def _parse_args(argv: list[str] | None = None) -> configargparse.Namespace:
         ),
     )
     parser.add_argument('email',
+                        nargs='?',
                         metavar='EMAIL-TO-EVALUATE',
-                        help=".eml file path, or '-' for stdin")
+                        help=".eml file path, or '-' for stdin. Default: stdin, so a message "
+                             'can simply be piped in (mail clients pipe the raw message)')
     parser.add_argument('--trusted-authserv',
                         action='append',
                         default=[],
@@ -897,6 +913,11 @@ def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
     _setup_logger(args)
 
+    source = _message_source(args.email)
+    if source is None:
+        log.error('No message given: pass an .eml file path, or pipe a message in')
+        return 2
+
     config = SecurityInfoConfig(
         trusted_authserv=args.trusted_authserv,
         check_spf=args.check_spf,
@@ -907,7 +928,7 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     try:
-        result = evaluate_message_security_info(args.email, config)
+        result = evaluate_message_security_info(source, config)
     except OSError as error:
         log.error('Cannot read the message: %s', error)
         return 1

@@ -60,6 +60,29 @@ class TestCommandLine(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertEqual(json.loads(out)['status'], 'pass')
 
+    def test_stdin_is_the_default_when_no_message_is_given(self):
+        # How a mail client invokes a pipe command: raw message in, no arguments.
+        stdin = mock.Mock(buffer=io.BytesIO(PASS_EML), isatty=lambda: False)
+        with mock.patch.object(sys, 'stdin', stdin):
+            code, out = self.run_main('--json')
+        self.assertEqual(code, 0)
+        self.assertEqual(json.loads(out)['status'], 'pass')
+
+    def test_an_explicit_dash_reads_stdin_even_on_a_terminal(self):
+        stdin = mock.Mock(buffer=io.BytesIO(PASS_EML), isatty=lambda: True)
+        with mock.patch.object(sys, 'stdin', stdin):
+            code, out = self.run_main('--json', '-')
+        self.assertEqual(code, 0)
+        self.assertEqual(json.loads(out)['status'], 'pass')
+
+    def test_no_message_and_an_interactive_stdin_is_refused(self):
+        stdin = mock.Mock(isatty=lambda: True)
+        with mock.patch.object(sys, 'stdin', stdin), self.assertLogs(msi.log, 'ERROR') as logs:
+            code, out = self.run_main()
+        self.assertEqual(code, 2)
+        self.assertEqual(out, '')
+        self.assertIn('No message given', logs.output[0])
+
     def test_exit_status_is_off_by_default(self):
         code, _ = self.run_main('--color', 'never', self.write('fail.eml', FAIL_EML))
         self.assertEqual(code, 0)
@@ -97,6 +120,28 @@ class TestCommandLine(unittest.TestCase):
 
         _, out = self.run_main('--json', '--trusted-authserv', 'mx.example.org', path)
         self.assertEqual(json.loads(out)['status'], 'warn')
+
+
+class TestMessageSource(unittest.TestCase):
+    """Where the message is read from when the argument is omitted."""
+
+    def source(self, email, tty: bool) -> str | None:
+        with mock.patch.object(sys, 'stdin', mock.Mock(isatty=lambda: tty)):
+            return msi._message_source(email)
+
+    def test_a_given_path_is_used_as_is(self):
+        self.assertEqual(self.source('x.eml', True), 'x.eml')
+        self.assertEqual(self.source('x.eml', False), 'x.eml')
+
+    def test_an_explicit_dash_is_kept(self):
+        self.assertEqual(self.source('-', True), '-')
+        self.assertEqual(self.source('-', False), '-')
+
+    def test_nothing_given_means_stdin_when_it_is_a_pipe(self):
+        self.assertEqual(self.source(None, False), '-')
+
+    def test_nothing_given_on_a_terminal_is_refused(self):
+        self.assertIsNone(self.source(None, True))
 
 
 class TestEvaluateMessageSecurityInfo(unittest.TestCase):

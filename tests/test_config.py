@@ -75,9 +75,13 @@ class TestArguments(unittest.TestCase):
         args = msi._parse_args(['-c', str(config), '--check-tls', 'x.eml'])
         self.assertTrue(args.check_tls)
 
-    def test_a_missing_message_argument_is_a_usage_error(self):
+    def test_the_message_argument_is_optional(self):
+        self.assertIsNone(msi._parse_args([]).email)
+        self.assertEqual(msi._parse_args(['x.eml']).email, 'x.eml')
+
+    def test_an_unknown_option_is_a_usage_error(self):
         with self.assertRaises(SystemExit), contextlib.redirect_stderr(io.StringIO()):
-            msi._parse_args([])
+            msi._parse_args(['--nonsense', 'x.eml'])
 
 
 if __name__ == '__main__':
