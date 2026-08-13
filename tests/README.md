@@ -61,8 +61,8 @@ not, and split along the seams of what they cover:
       test_alignment.py         relaxed From-alignment, DKIM signing domain
       test_sender.py            the From header: decoding, sanitizing, display
       test_verdict.py           per-method statuses, how they combine, DKIM marker
-      test_formatting.py        one result → its displayed line
-      test_result.py            the assembled result: rows, raw headers, shape
+      test_formatting.py        one security finding → its displayed line
+      test_result.py            the assembled result: info, security, raw headers
       test_report.py            the text report and the colour decision
       test_config.py            settings, the command line and the config file
       test_cli.py               the command line end to end: input, output, exit codes
@@ -103,8 +103,10 @@ catch things the unit tests cannot anticipate.
 
 It asserts **only invariants that must hold for any message**, never anything
 about the content of these particular ones: the status is one of the four known
-values, the summary matches it, all five rows have a value, no raw header value
-is left folded, the result survives a JSON round-trip, the report renders
+values, the summary matches it, every `info` field carries a string, every
+mechanism in `security` has the same fixed set of keys with values drawn from
+the known vocabularies, no raw header value is left folded, the result survives
+a JSON round-trip, the report renders
 without stray surrogates, and evaluation is deterministic.
 
 That means you can add, replace, redact or obfuscate the samples freely without

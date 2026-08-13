@@ -277,6 +277,9 @@ class MessageSecurityInfo:
     Evaluates the sender authentication of a message's headers.
     """
 
+    #: The security mechanisms reported, in report order.
+    METHODS = ('spf', 'dkim', 'dmarc')
+
     #: Where to look for each method's domain inside an Authentication-Results
     #: entry.
     DOMAIN_KEYS = {
@@ -291,11 +294,11 @@ class MessageSecurityInfo:
     def evaluate_headers(self, headers: MessageHeaders) -> dict | None:
         """The verdict and the details for one message.
 
-        Returns the same structure the plugin hands to its client: ``status``
-        (pass/warn/fail/unknown), a one-line ``summary``, the parsed ``rows``,
-        the ``headers`` to show raw and the DKIM/From marker ``dkim_from``.
-        None when every authentication mechanism is disabled — there is then
-        nothing to evaluate.
+        Returns ``status`` (pass/warn/fail/unknown), a one-line ``summary``, the
+        descriptive ``info`` fields, the ``security`` findings per mechanism, the
+        ``headers`` to show raw and the DKIM/From marker ``dkim_from``. None when
+        every authentication mechanism is disabled — there is then nothing to
+        evaluate.
         """
         config = self.config
 
@@ -310,7 +313,8 @@ class MessageSecurityInfo:
         result = {
             'status': verdict['status'],
             'summary': verdict['summary'],
-            'rows': self.summary_rows(headers, auth),
+            'info': self.info_fields(headers),
+            'security': self.security_fields(headers, auth),
             'headers': self.raw_headers(headers),
         }
 
@@ -487,45 +491,106 @@ class MessageSecurityInfo:
         # A version clause without a recognised transmission type still implies TLS.
         return {'encrypted': True, 'detail': detail} if detail is not None else None
 
-    def summary_rows(self, headers: MessageHeaders, auth: dict) -> list[dict]:
-        """The parsed SPF/DKIM/DMARC (and From/TLS) rows of the report."""
+    def info_fields(self, headers: MessageHeaders) -> dict:
+        """Descriptive facts about the message, as ready-to-display strings.
+
+        Not verdicts — just what the message says about itself. 'header-from' is
+        the sender address the SPF/DKIM/DMARC results are judged against;
+        'transport' is present only while the TLS check is enabled.
+        """
+        info = {'header-from': self.from_address(headers) or i18n_gettext('notpresent')}
+
+        if self.config.method_enabled('tls'):
+            info['transport'] = self.format_tls(self.tls_info(headers))
+
+        return info
+
+    def security_fields(self, headers: MessageHeaders, auth: dict) -> dict:
+        """The SPF/DKIM/DMARC findings: one fixed-shape entry per enabled mechanism.
+
+        A disabled mechanism is absent entirely — nothing was evaluated, so
+        there is nothing to report. Every entry present has the same keys, so a
+        caller can read them without special-casing:
+
+        present     the mechanism is in effect for this message. False when
+                    nothing was reported at all, and equally when the reported
+                    result was 'none' (no SPF/DKIM/DMARC on the sending side).
+        verified    your receiving server checked this, rather than the message
+                    merely carrying an unverified claim (an unchecked
+                    DKIM-Signature is present but not verified).
+        status      the raw protocol result, upper case (PASS, FAIL, SOFTFAIL,
+                    NONE, TEMPERROR, ...), or None when there is no result.
+        domain      the domain the result is about — DKIM's signing domain, or
+                    the envelope/From domain SPF and DMARC judged.
+        aligned     whether `domain` matches the From domain (DKIM only, since
+                    that is the only mechanism this compares); None where the
+                    question does not apply or cannot be answered.
+        verdict     the normalised severity: pass, warn, fail, unknown, or none
+                    (none = contributes nothing to the overall status).
+        marker      the DKIM/From marker (pass/fail/none) mirroring the
+                    top-level `dkim_from`; None for SPF and DMARC, which do not
+                    mark the From header.
+        description a human-readable note: the alignment note, or why there is
+                    no result. None when there is nothing to add.
+        """
         config = self.config
         from_domain = self.from_domain(headers)
         signature = headers.first('DKIM-Signature')
         sig_domain = self._signature_domain(signature) if signature else None
+        marker = self.dkim_from_marker(headers, auth) if config.method_enabled('dkim') else None
 
         # SPF is often only in a Received-SPF header, not Authentication-Results.
-        spf = (auth['spf'][0] if auth['spf'] else None) or self.spf_from_received(headers)
+        results = {
+            'spf': (auth['spf'][0] if auth['spf'] else None) or self.spf_from_received(headers),
+            'dkim': auth['dkim'][0] if auth['dkim'] else None,
+            'dmarc': auth['dmarc'][0] if auth['dmarc'] else None,
+        }
 
-        # The sender address the SPF/DKIM/DMARC results are judged against.
-        rows = [{
-            'label': i18n_gettext('from'),
-            'value': self.from_address(headers) or i18n_gettext('notpresent'),
-        }]
+        return {method: self._security_entry(method, results[method], from_domain,
+                                             sig_domain, marker)
+                for method in self.METHODS if config.method_enabled(method)}
 
-        if config.method_enabled('spf'):
-            rows.append({'label': i18n_gettext('spf'), 'value': self.format_method(spf)})
+    def _security_entry(self, method: str, entry: dict | None, from_domain: str | None,
+                        sig_domain: str | None, marker: str | None) -> dict:
+        """One mechanism's finding in the fixed shape security_fields documents."""
+        if entry is None:
+            # No verified result. A DKIM-Signature with nothing to confirm it is
+            # still worth reporting: the message is signed, your server did not
+            # check it. Alignment is deliberately left unanswered — an unverified
+            # signature can claim any domain, so matching means nothing here.
+            signed = method == 'dkim' and sig_domain is not None
 
-        if config.method_enabled('dkim'):
-            rows.append({
-                'label': i18n_gettext('dkim'),
-                'value': self.format_dkim(auth['dkim'][0] if auth['dkim'] else None,
-                                          sig_domain, from_domain),
-                # Same verdict as the From-header marker, so the two can be
-                # tied together visually.
-                'marker': self.dkim_from_marker(headers, auth),
-            })
+            return {
+                'present': signed,
+                'verified': False,
+                'status': None,
+                'domain': sig_domain if signed else None,
+                'aligned': None,
+                'verdict': 'unknown' if signed else 'none',
+                'marker': marker if method == 'dkim' else None,
+                'description': i18n_gettext('unverified' if signed else 'notpresent'),
+            }
 
-        if config.method_enabled('dmarc'):
-            rows.append({
-                'label': i18n_gettext('dmarc'),
-                'value': self.format_method(auth['dmarc'][0] if auth['dmarc'] else None),
-            })
+        result = entry['result'].lower()
+        domain = entry.get('domain') or (sig_domain if method == 'dkim' else None)
+        aligned = None
+        description = None
 
-        if config.method_enabled('tls'):
-            rows.append({'label': i18n_gettext('tls'), 'value': self.format_tls(self.tls_info(headers))})
+        if method == 'dkim' and domain and from_domain:
+            aligned = self._aligned(domain, from_domain)
+            description = (i18n_gettext('aligned') if aligned
+                           else i18n_gettext('notaligned', {'from': from_domain}))
 
-        return rows
+        return {
+            'present': result != 'none',
+            'verified': True,
+            'status': result.upper(),
+            'domain': domain,
+            'aligned': aligned,
+            'verdict': self.method_status(method, entry, from_domain),
+            'marker': marker if method == 'dkim' else None,
+            'description': description,
+        }
 
     def raw_headers(self, headers: MessageHeaders) -> list[dict]:
         """Raw header lines to show below the summary.
@@ -540,54 +605,6 @@ class MessageSecurityInfo:
                 out.append({'name': name, 'value': value})
 
         return out
-
-    @staticmethod
-    def format_method(entry: dict | None) -> str:
-        """Format an SPF/DMARC result line, e.g. "PASS — example.com"."""
-        if not entry:
-            return i18n_gettext('notpresent')
-
-        value = entry['result'].upper()
-
-        return value + ' — ' + entry['domain'] if entry.get('domain') else value
-
-    def format_dkim(self, entry: dict | None, sig_domain: str | None,
-                    from_domain: str | None) -> str:
-        """Format the DKIM result line, including From-alignment."""
-        if not entry:
-            return (i18n_gettext('unverified') + ' — ' + sig_domain if sig_domain
-                    else i18n_gettext('notpresent'))
-
-        domain = entry.get('domain') or sig_domain
-        value = entry['result'].upper()
-
-        if domain:
-            value += ' — ' + domain
-
-        return value + self.dkim_alignment_note(entry['result'], domain, from_domain)
-
-    def dkim_alignment_note(self, result: str, domain: str | None,
-                            from_domain: str | None) -> str:
-        """The From-alignment suffix appended to a DKIM result line.
-
-        Empty for a clean aligned PASS, a newline-prefixed mismatch note for an
-        unaligned PASS, or a parenthesised aligned/mismatch note for any
-        non-pass result.
-        """
-        if not from_domain or not domain:
-            return ''
-
-        aligned = self._aligned(domain, from_domain)
-        mismatch = i18n_gettext('notaligned', {'from': from_domain})
-
-        if result.lower() == 'pass':
-            # Positive result: a clean, aligned PASS shows nothing further; a
-            # PASS whose signing domain isn't aligned adds the mismatch note on
-            # its own line (no surrounding parentheses).
-            return '' if aligned else '\n' + mismatch
-
-        # Non-pass: parenthesised alignment note.
-        return ' (' + (i18n_gettext('aligned') if aligned else mismatch) + ')'
 
     @staticmethod
     def format_tls(tls: dict | None) -> str:
@@ -778,8 +795,52 @@ def _report_use_color(when: str) -> bool:
     return sys.stdout.isatty() and not os.environ.get('NO_COLOR')
 
 
+def security_line(entry: dict) -> str:
+    """One security finding as a display line, e.g. "PASS — example.com".
+
+    An unaligned PASS carries its mismatch note on a second line; any other
+    noteworthy result carries it parenthesised.
+    """
+    if entry['status'] is None:
+        # Nothing was verified: either no result at all, or a signature your
+        # server did not check. Either way the description says which.
+        return (entry['description'] + ' — ' + entry['domain'] if entry['domain']
+                else entry['description'])
+
+    value = entry['status']
+
+    if entry['domain']:
+        value += ' — ' + entry['domain']
+
+    if not entry['description']:
+        return value
+
+    if entry['status'] == 'PASS':
+        # A clean, aligned PASS needs no further comment.
+        return value if entry['aligned'] else value + '\n' + entry['description']
+
+    return value + ' (' + entry['description'] + ')'
+
+
+def report_rows(result: dict) -> list[tuple[str, str, str | None]]:
+    """The result as (label, value, marker) display rows, in report order."""
+    info = result.get('info', {})
+    rows = []
+
+    if 'header-from' in info:
+        rows.append((i18n_gettext('from'), info['header-from'], None))
+
+    for method, entry in result.get('security', {}).items():
+        rows.append((i18n_gettext(method), security_line(entry), entry['marker']))
+
+    if 'transport' in info:
+        rows.append((i18n_gettext('tls'), info['transport'], None))
+
+    return rows
+
+
 def format_report(result: dict, color: bool = False) -> str:
-    """Render the verdict, the parsed rows and the raw headers as plain text."""
+    """Render the verdict, the findings and the raw headers as plain text."""
 
     def paint(text: str, ansi: str) -> str:
         return '\033[' + ansi + 'm' + text + '\033[0m' if color else text
@@ -795,13 +856,13 @@ def format_report(result: dict, color: bool = False) -> str:
         i18n_gettext('authresults') + ':',
     ]
 
-    rows = result.get('rows', [])
+    rows = report_rows(result)
     raw = result.get('headers', [])
-    # One label column wide enough for the parsed rows and the raw header names.
-    width = max([len(r['label']) for r in rows] + [len(h['name']) for h in raw] + [0])
+    # One label column wide enough for the findings and the raw header names.
+    width = max([len(label) for label, _, _ in rows] + [len(h['name']) for h in raw] + [0])
 
     # Label column, plus room for the DKIM marker glyph when any row has one.
-    marked = any(r.get('marker') for r in rows)
+    marked = any(marker for _, _, marker in rows)
     label_width = width + (2 if marked else 0)
 
     def add(label: str, value: str, marker: str | None = None) -> None:
@@ -817,8 +878,8 @@ def format_report(result: dict, color: bool = False) -> str:
         for i, part in enumerate(str(value).split('\n')):
             lines.append('  {}  {}'.format(head if i == 0 else ' ' * label_width, part))
 
-    for row in rows:
-        add(row['label'], row['value'], row.get('marker'))
+    for label, value, marker in rows:
+        add(label, value, marker)
 
     if 'dkim_from' in result:
         lines += ['', '  ' + i18n_gettext('frommarker' + result['dkim_from'])]

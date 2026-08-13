@@ -2,7 +2,7 @@
 
 # vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=python
 
-"""The assembled result: which rows and raw headers it contains, and its shape.
+"""The assembled result: the info fields, the security findings, the raw headers.
 
 See README.md in this directory for how to run these.
 """
@@ -10,43 +10,104 @@ See README.md in this directory for how to run these.
 import json
 import unittest
 
-from support import FAIL_EML, PASS_EML, UNVERIFIED_EML, headers, info, msi
+from support import FAIL_EML, PASS_EML, UNALIGNED_EML, UNVERIFIED_EML, headers, info, msi
 
 
-class TestSummaryRows(unittest.TestCase):
-    """Which rows the details contain, and what they say."""
+class TestInfoFields(unittest.TestCase):
+    """The descriptive, non-verdict fields."""
 
-    def rows(self, message, **config):
+    def fields(self, message, **config):
+        return info(**config).info_fields(headers(message))
+
+    def test_both_fields_by_default(self):
+        self.assertEqual(self.fields(PASS_EML),
+                         {'header-from': 'Alice Example <alice@example.com>',
+                          'transport': 'Encrypted — TLSv1.3'})
+
+    def test_transport_is_dropped_when_the_tls_check_is_off(self):
+        self.assertEqual(list(self.fields(PASS_EML, check_tls=False)), ['header-from'])
+
+    def test_the_sender_falls_back_to_not_present(self):
+        self.assertEqual(self.fields('Subject: x\n\nbody\n')['header-from'],
+                         msi.i18n_gettext('notpresent'))
+
+
+class TestSecurityFields(unittest.TestCase):
+    """The per-mechanism findings: which appear, and what each one says."""
+
+    def fields(self, message, **config):
         engine = info(**config)
         h = headers(message)
 
-        return {r['label']: r for r in engine.summary_rows(h, engine.parse_authresults(h))}
+        return engine.security_fields(h, engine.parse_authresults(h))
 
-    def test_all_rows_by_default(self):
-        rows = self.rows(PASS_EML)
-        self.assertEqual(list(rows), ['From', 'SPF', 'DKIM', 'DMARC', 'Transport (TLS)'])
-        self.assertEqual(rows['From']['value'], 'Alice Example <alice@example.com>')
-        self.assertEqual(rows['SPF']['value'], 'PASS — example.com')
-        self.assertEqual(rows['DKIM']['value'], 'PASS — example.com')
-        self.assertEqual(rows['DMARC']['value'], 'PASS — example.com')
-        self.assertEqual(rows['Transport (TLS)']['value'], 'Encrypted — TLSv1.3')
+    def test_every_enabled_mechanism_appears_in_order(self):
+        self.assertEqual(list(self.fields(PASS_EML)), ['spf', 'dkim', 'dmarc'])
 
-    def test_disabled_methods_are_dropped(self):
-        rows = self.rows(PASS_EML, check_spf=False, check_dmarc=False, check_tls=False)
-        self.assertEqual(list(rows), ['From', 'DKIM'])
+    def test_disabled_mechanisms_are_absent(self):
+        self.assertEqual(list(self.fields(PASS_EML, check_spf=False, check_dmarc=False)),
+                         ['dkim'])
 
-    def test_the_dkim_row_carries_the_from_marker(self):
-        self.assertEqual(self.rows(PASS_EML)['DKIM']['marker'], 'pass')
-        self.assertEqual(self.rows(FAIL_EML)['DKIM']['marker'], 'fail')
+    def test_every_entry_has_the_same_keys(self):
+        keys = {'present', 'verified', 'status', 'domain', 'aligned', 'verdict',
+                'marker', 'description'}
+        for message in (PASS_EML, FAIL_EML, UNALIGNED_EML, UNVERIFIED_EML):
+            for method, entry in self.fields(message).items():
+                with self.subTest(message=message[:20], method=method):
+                    self.assertEqual(set(entry), keys)
 
-    def test_the_from_row_falls_back_to_not_present(self):
-        self.assertEqual(self.rows('Subject: x\n\nbody\n')['From']['value'],
-                         msi.i18n_gettext('notpresent'))
+    def test_a_clean_pass(self):
+        self.assertEqual(self.fields(PASS_EML)['spf'],
+                         {'present': True, 'verified': True, 'status': 'PASS',
+                          'domain': 'example.com', 'aligned': None, 'verdict': 'pass',
+                          'marker': None, 'description': None})
 
-    def test_spf_row_uses_the_received_spf_fallback(self):
-        rows = self.rows('Received-SPF: Pass (mailfrom) envelope-from=a@a.test;\n'
-                         'From: a@a.test\n\nbody\n')
-        self.assertEqual(rows['SPF']['value'], 'PASS — a.test')
+    def test_an_aligned_dkim_pass(self):
+        self.assertEqual(self.fields(PASS_EML)['dkim'],
+                         {'present': True, 'verified': True, 'status': 'PASS',
+                          'domain': 'example.com', 'aligned': True, 'verdict': 'pass',
+                          'marker': 'pass', 'description': msi.i18n_gettext('aligned')})
+
+    def test_an_unaligned_dkim_pass(self):
+        entry = self.fields(UNALIGNED_EML)['dkim']
+        self.assertEqual(entry['status'], 'PASS')
+        self.assertEqual(entry['domain'], 'mailer.net')
+        self.assertFalse(entry['aligned'])
+        self.assertEqual(entry['verdict'], 'warn')
+        self.assertEqual(entry['marker'], 'fail')
+        self.assertEqual(entry['description'],
+                         msi.i18n_gettext('notaligned', {'from': 'bank.example'}))
+
+    def test_a_signature_nobody_verified(self):
+        # Signed, but the receiving server left no result: present, unverified,
+        # and alignment deliberately unanswered.
+        self.assertEqual(self.fields(UNVERIFIED_EML)['dkim'],
+                         {'present': True, 'verified': False, 'status': None,
+                          'domain': 'news.example.com', 'aligned': None,
+                          'verdict': 'unknown', 'marker': 'none',
+                          'description': msi.i18n_gettext('unverified')})
+
+    def test_a_mechanism_with_no_evidence_at_all(self):
+        self.assertEqual(self.fields(UNVERIFIED_EML)['dmarc'],
+                         {'present': False, 'verified': False, 'status': None,
+                          'domain': None, 'aligned': None, 'verdict': 'none',
+                          'marker': None, 'description': msi.i18n_gettext('notpresent')})
+
+    def test_a_none_result_is_reported_but_not_present(self):
+        # dmarc=none means the sending domain has no DMARC: a real, verified
+        # result saying the mechanism is not in effect.
+        entry = self.fields('Authentication-Results: mx; dmarc=none header.from=a.test\n'
+                            'From: a@a.test\n\nbody\n')['dmarc']
+        self.assertFalse(entry['present'])
+        self.assertTrue(entry['verified'])
+        self.assertEqual(entry['status'], 'NONE')
+        self.assertEqual(entry['verdict'], 'none')
+
+    def test_spf_uses_the_received_spf_fallback(self):
+        entry = self.fields('Received-SPF: Pass (mailfrom) envelope-from=a@a.test;\n'
+                            'From: a@a.test\n\nbody\n')['spf']
+        self.assertEqual((entry['status'], entry['domain'], entry['verified']),
+                         ('PASS', 'a.test', True))
 
 
 class TestRawHeaders(unittest.TestCase):
@@ -78,10 +139,12 @@ class TestEvaluateHeaders(unittest.TestCase):
 
     def test_result_shape(self):
         result = info(extra_headers=['X-Spam-Status']).evaluate_headers(headers(PASS_EML))
-        self.assertEqual(set(result), {'status', 'summary', 'rows', 'headers', 'dkim_from'})
+        self.assertEqual(set(result),
+                         {'status', 'summary', 'info', 'security', 'headers', 'dkim_from'})
         self.assertEqual(result['status'], 'pass')
         self.assertEqual(result['dkim_from'], 'pass')
-        self.assertTrue(all({'label', 'value'} <= set(r) for r in result['rows']))
+        self.assertEqual(set(result['info']), {'header-from', 'transport'})
+        self.assertEqual(list(result['security']), ['spf', 'dkim', 'dmarc'])
         self.assertTrue(all(set(h) == {'name', 'value'} for h in result['headers']))
 
     def test_no_dkim_marker_when_dkim_is_disabled(self):

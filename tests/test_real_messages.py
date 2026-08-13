@@ -23,6 +23,10 @@ class TestRealMessages(unittest.TestCase):
     which lets the samples be replaced or obfuscated freely.
     """
 
+    #: The fixed shape every security finding must have.
+    ENTRY_KEYS = {'present', 'verified', 'status', 'domain', 'aligned', 'verdict',
+                  'marker', 'description'}
+
     @classmethod
     def setUpClass(cls):
         cls.paths = sorted(EMAIL_DIR.glob('*.eml'))
@@ -36,9 +40,20 @@ class TestRealMessages(unittest.TestCase):
                 self.assertIn(result['status'], ('pass', 'warn', 'fail', 'unknown'))
                 self.assertIn(result['dkim_from'], ('pass', 'fail', 'none'))
                 self.assertEqual(result['summary'], msi.i18n_gettext('summary' + result['status']))
-                # From, SPF, DKIM, DMARC and TLS rows, all with a value.
-                self.assertEqual(len(result['rows']), 5)
-                self.assertTrue(all(r['value'] for r in result['rows']))
+                # The sender and the transport, both with something to show.
+                self.assertEqual(set(result['info']), {'header-from', 'transport'})
+                self.assertTrue(all(result['info'].values()))
+                # Every mechanism reported, each in the documented fixed shape.
+                self.assertEqual(list(result['security']), ['spf', 'dkim', 'dmarc'])
+                for method, entry in result['security'].items():
+                    self.assertEqual(set(entry), self.ENTRY_KEYS, method)
+                    self.assertIn(entry['verdict'], ('pass', 'warn', 'fail', 'unknown', 'none'))
+                    self.assertIsInstance(entry['present'], bool)
+                    self.assertIsInstance(entry['verified'], bool)
+                    # A status is a bare protocol token, never a rendered line.
+                    if entry['status'] is not None:
+                        self.assertRegex(entry['status'], r'^[A-Z]+$')
+
                 self.assertEqual(json.loads(json.dumps(result)), result)
 
     def test_no_raw_header_value_is_folded(self):
@@ -71,11 +86,13 @@ class TestRealMessages(unittest.TestCase):
             with self.subTest(message=path.name):
                 filtered = msi.evaluate_message_security_info(
                     str(path), msi.SecurityInfoConfig(trusted_authserv=['nobody.invalid']))
-                rows = {r['label']: r['value'] for r in filtered['rows']}
+                security = filtered['security']
 
                 self.assertEqual(filtered['dkim_from'], 'none')
-                self.assertNotIn('PASS', rows['DKIM'])
-                self.assertEqual(rows['DMARC'], msi.i18n_gettext('notpresent'))
+                self.assertFalse(security['dkim']['verified'])
+                self.assertIsNone(security['dkim']['status'])
+                self.assertEqual(security['dmarc']['status'], None)
+                self.assertFalse(security['dmarc']['present'])
 
                 # A Received-SPF header carries no authserv-id, so it cannot be
                 # trust-filtered and may still produce a pass on its own; without

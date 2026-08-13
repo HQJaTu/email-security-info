@@ -66,6 +66,35 @@ class TestFormatReport(unittest.TestCase):
         self.assertNotIn('✓', without.split('\n', 1)[1])
 
 
+class TestReportRows(unittest.TestCase):
+    """The display rows the report is built from, and their order."""
+
+    def rows(self, message, **config):
+        return msi.report_rows(info(**config).evaluate_headers(headers(message)))
+
+    def test_the_sender_leads_and_the_transport_trails(self):
+        self.assertEqual([label for label, _, _ in self.rows(PASS_EML)],
+                         ['From', 'SPF', 'DKIM', 'DMARC', 'Transport (TLS)'])
+
+    def test_disabled_checks_drop_their_rows(self):
+        self.assertEqual([label for label, _, _ in
+                          self.rows(PASS_EML, check_spf=False, check_dmarc=False,
+                                    check_tls=False)],
+                         ['From', 'DKIM'])
+
+    def test_only_the_dkim_row_carries_a_marker(self):
+        self.assertEqual([(label, marker) for label, _, marker in self.rows(FAIL_EML)
+                          if marker],
+                         [('DKIM', 'fail')])
+
+    def test_values_are_the_displayed_strings(self):
+        rows = {label: value for label, value, _ in self.rows(PASS_EML)}
+        self.assertEqual(rows['From'], 'Alice Example <alice@example.com>')
+        self.assertEqual(rows['SPF'], 'PASS — example.com')
+        self.assertEqual(rows['DKIM'], 'PASS — example.com')
+        self.assertEqual(rows['Transport (TLS)'], 'Encrypted — TLSv1.3')
+
+
 class TestUseColor(unittest.TestCase):
     """
     The --color decision.

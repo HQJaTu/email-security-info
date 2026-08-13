@@ -2,58 +2,71 @@
 
 # vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=python
 
-"""Formatting one SPF / DKIM / DMARC / TLS result into its displayed line.
+"""Turning one security finding — or the TLS info — into its displayed line.
 
 See README.md in this directory for how to run these.
 """
 
 import unittest
 
-from support import info, msi
+from support import msi
 
 
-class TestFormatting(unittest.TestCase):
-    """The result lines shown for each method."""
+def entry(**fields) -> dict:
+    """A security finding carrying the given fields, the rest left neutral."""
+    return {'present': True, 'verified': True, 'status': None, 'domain': None,
+            'aligned': None, 'verdict': 'unknown', 'marker': None,
+            'description': None, **fields}
 
-    def test_format_method_with_and_without_a_domain(self):
-        self.assertEqual(info().format_method({'result': 'pass', 'domain': 'a.test'}),
+
+class TestSecurityLine(unittest.TestCase):
+    """The line shown for one SPF / DKIM / DMARC finding."""
+
+    def test_a_result_with_and_without_a_domain(self):
+        self.assertEqual(msi.security_line(entry(status='PASS', domain='a.test')),
                          'PASS — a.test')
-        self.assertEqual(info().format_method({'result': 'neutral', 'domain': None}), 'NEUTRAL')
+        self.assertEqual(msi.security_line(entry(status='NEUTRAL')), 'NEUTRAL')
 
-    def test_format_method_without_a_result(self):
-        self.assertEqual(info().format_method(None), msi.i18n_gettext('notpresent'))
-
-    def test_format_dkim_aligned_pass_has_no_note(self):
+    def test_no_result_at_all(self):
         self.assertEqual(
-            info().format_dkim({'result': 'pass', 'domain': 'example.com'}, None, 'example.com'),
+            msi.security_line(entry(status=None, description=msi.i18n_gettext('notpresent'))),
+            msi.i18n_gettext('notpresent'))
+
+    def test_an_unverified_signature_keeps_its_domain(self):
+        self.assertEqual(
+            msi.security_line(entry(status=None, verified=False, domain='news.example.com',
+                                    description=msi.i18n_gettext('unverified'))),
+            msi.i18n_gettext('unverified') + ' — news.example.com')
+
+    def test_an_aligned_pass_shows_no_note(self):
+        self.assertEqual(
+            msi.security_line(entry(status='PASS', domain='example.com', aligned=True,
+                                    description=msi.i18n_gettext('aligned'))),
             'PASS — example.com')
 
-    def test_format_dkim_unaligned_pass_notes_the_mismatch_on_its_own_line(self):
+    def test_an_unaligned_pass_notes_the_mismatch_on_its_own_line(self):
         self.assertEqual(
-            info().format_dkim({'result': 'pass', 'domain': 'mailer.net'}, None, 'bank.example'),
+            msi.security_line(entry(status='PASS', domain='mailer.net', aligned=False,
+                                    description='does not match From (bank.example)')),
             'PASS — mailer.net\ndoes not match From (bank.example)')
 
-    def test_format_dkim_non_pass_notes_alignment_in_parentheses(self):
+    def test_a_non_pass_notes_alignment_in_parentheses(self):
         self.assertEqual(
-            info().format_dkim({'result': 'fail', 'domain': 'a.test'}, None, 'a.test'),
+            msi.security_line(entry(status='FAIL', domain='a.test', aligned=True,
+                                    description=msi.i18n_gettext('aligned'))),
             'FAIL — a.test (aligned with From)')
         self.assertEqual(
-            info().format_dkim({'result': 'fail', 'domain': 'a.test'}, None, 'b.test'),
+            msi.security_line(entry(status='FAIL', domain='a.test', aligned=False,
+                                    description='does not match From (b.test)')),
             'FAIL — a.test (does not match From (b.test))')
 
-    def test_format_dkim_falls_back_to_the_signature_domain(self):
-        self.assertEqual(info().format_dkim({'result': 'pass', 'domain': None},
-                                            'example.com', 'example.com'),
-                         'PASS — example.com')
+    def test_a_result_without_a_description_stands_alone(self):
+        self.assertEqual(msi.security_line(entry(status='SOFTFAIL', domain='a.test')),
+                         'SOFTFAIL — a.test')
 
-    def test_format_dkim_reports_an_unverified_signature(self):
-        self.assertEqual(info().format_dkim(None, 'news.example.com', 'news.example.com'),
-                         msi.i18n_gettext('unverified') + ' — news.example.com')
-        self.assertEqual(info().format_dkim(None, None, 'a.test'), msi.i18n_gettext('notpresent'))
 
-    def test_no_alignment_note_without_both_domains(self):
-        self.assertEqual(info().dkim_alignment_note('fail', 'a.test', None), '')
-        self.assertEqual(info().dkim_alignment_note('fail', None, 'a.test'), '')
+class TestFormatTls(unittest.TestCase):
+    """The transport-encryption line."""
 
     def test_format_tls(self):
         self.assertEqual(msi.MessageSecurityInfo.format_tls(None), msi.i18n_gettext('tlsunknown'))

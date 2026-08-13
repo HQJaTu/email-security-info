@@ -162,7 +162,8 @@ class TestEvaluateMessageSecurityInfo(unittest.TestCase):
 
         result = msi.evaluate_message_security_info(
             handle.name, msi.SecurityInfoConfig(check_spf=False, check_dmarc=False, check_tls=False))
-        self.assertEqual([r['label'] for r in result['rows']], ['From', 'DKIM'])
+        self.assertEqual(set(result['info']), {'header-from'})
+        self.assertEqual(list(result['security']), ['dkim'])
 
 
 if __name__ == '__main__':
