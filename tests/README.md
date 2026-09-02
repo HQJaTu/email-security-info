@@ -106,8 +106,8 @@ about the content of these particular ones: the status is one of the four known
 values, the summary matches it, every `info` field carries a string, every
 mechanism in `security` has the same fixed set of keys with values drawn from
 the known vocabularies, no raw header value is left folded, the result survives
-a JSON round-trip, the report renders
-without stray surrogates, and evaluation is deterministic.
+a JSON round-trip, the report renders without stray surrogates, and evaluation
+is deterministic.
 
 That means you can add, replace, redact or obfuscate the samples freely without
 touching the tests. Nothing depends on their bodies either — the program only

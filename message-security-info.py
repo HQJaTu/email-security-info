@@ -764,7 +764,8 @@ def load_headers(eml_path: str) -> MessageHeaders:
 
 def evaluate_message_security_info(eml_path: str, config: SecurityInfoConfig | None = None) -> dict | None:
     """
-    Evaluate one message file: {status, summary, rows, headers, dkim_from}.
+    Evaluate one message file: {status, summary, info, security, headers,
+    dkim_from}.
 
     None when every authentication mechanism is disabled.
     """
