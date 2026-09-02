@@ -14,12 +14,19 @@ directory on ``sys.path``. See README.md.
 """
 
 import importlib.util
+import json
 import pathlib
 import sys
 
 MODULE_PATH = pathlib.Path(__file__).resolve().parent.parent / 'message-security-info.py'
 
 EMAIL_DIR = pathlib.Path(__file__).resolve().with_name('emails')
+
+#: One recorded result per sample message, ``<name>.eml`` -> ``<name>.json``.
+EXPECTED_DIR = pathlib.Path(__file__).resolve().with_name('expected')
+
+#: How to re-record them, quoted in test failures.
+REGENERATE = 'python tests/update_expected.py'
 
 
 def _load_module():
@@ -48,7 +55,51 @@ def info(**config) -> 'msi.MessageSecurityInfo':
     return msi.MessageSecurityInfo(msi.SecurityInfoConfig(**config))
 
 
-# -- sample messages -------------------------------------------------------
+# -- the sample messages in emails/ and their recorded results -------------
+
+
+def sample_messages() -> list[pathlib.Path]:
+    """Every ``emails/*.eml``, in a stable order. Empty when there are none."""
+    return sorted(EMAIL_DIR.glob('*.eml')) if EMAIL_DIR.is_dir() else []
+
+
+def expected_config() -> 'msi.SecurityInfoConfig':
+    """The settings every recorded result in ``expected/`` was produced under.
+
+    Plain defaults: all four checks on, no authserv-id trusted in particular, no
+    extra headers. One fixed configuration, so a recorded result means exactly
+    one thing and a difference is always the program's doing rather than the
+    caller's. Behaviour under other settings is covered by the tests that build
+    their own config.
+    """
+    return msi.SecurityInfoConfig()
+
+
+def expected_path(message: pathlib.Path) -> pathlib.Path:
+    """Where ``emails/<name>.eml`` records its result."""
+    return EXPECTED_DIR / (message.stem + '.json')
+
+
+def evaluate_sample(message: pathlib.Path) -> dict:
+    """Evaluate one sample message exactly as its recorded result was produced."""
+    return msi.evaluate_message_security_info(str(message), expected_config())
+
+
+def format_expected(result: dict) -> str:
+    """Serialize a result the way ``expected/*.json`` stores it.
+
+    The same rendering the program's own ``--json`` uses, so a recorded file and
+    a piece of real output can be diffed against each other directly.
+    """
+    return json.dumps(result, indent=2, ensure_ascii=False) + '\n'
+
+
+def load_expected(message: pathlib.Path) -> dict:
+    """The recorded result for one sample message."""
+    return json.loads(expected_path(message).read_text('utf-8'))
+
+
+# -- hand-written sample messages ------------------------------------------
 
 PASS_EML = b"""Received: from mail.example.com (mail.example.com [198.51.100.7])
 \tby mx.example.org (Postfix) with ESMTPS id 4B2Cd1

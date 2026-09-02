@@ -1,0 +1,55 @@
+{
+  "status": "fail",
+  "summary": "Sender authentication failed — the sender may be forged.",
+  "info": {
+    "header-from": "Nathalie - CDandLP <somenews@cdandlp.com>",
+    "transport": "Encrypted — TLSv1.3"
+  },
+  "security": {
+    "spf": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "ip19.rp05.net",
+      "aligned": null,
+      "verdict": "pass",
+      "marker": null,
+      "description": null
+    },
+    "dkim": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "ip19.rp05.net",
+      "aligned": false,
+      "verdict": "warn",
+      "marker": "fail",
+      "description": "does not match From (cdandlp.com)"
+    },
+    "dmarc": {
+      "present": true,
+      "verified": true,
+      "status": "FAIL",
+      "domain": "cdandlp.com",
+      "aligned": null,
+      "verdict": "fail",
+      "marker": null,
+      "description": null
+    }
+  },
+  "headers": [
+    {
+      "name": "Authentication-Results",
+      "value": "mta-in.example.com; dmarc=fail (p=none dis=none) header.from=cdandlp.com"
+    },
+    {
+      "name": "Authentication-Results",
+      "value": "mta-in.example.com; dkim=pass (2048-bit key, unprotected) header.d=ip19.rp05.net header.i=@ip19.rp05.net header.a=rsa-sha256 header.s=mta0ip header.b=GYYokT2g; dkim=pass (1024-bit key, unprotected) header.d=ip19.rp05.net header.i=@ip19.rp05.net header.a=rsa-sha256 header.s=mta0 header.b=w9O0HKDL"
+    },
+    {
+      "name": "Received-SPF",
+      "value": "Pass (mailfrom) identity=mailfrom; client-ip=109.197.245.119; helo=ip19.rp05.net; envelope-from=somenews@ip19.rp05.net; receiver=example.com"
+    }
+  ],
+  "dkim_from": "fail"
+}

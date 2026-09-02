@@ -1,0 +1,55 @@
+{
+  "status": "pass",
+  "summary": "Sender authentication passed.",
+  "info": {
+    "header-from": "GOG.COM <newsletter@email3.gog.com>",
+    "transport": "Encrypted — TLSv1.3"
+  },
+  "security": {
+    "spf": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "emsgrid.com",
+      "aligned": null,
+      "verdict": "pass",
+      "marker": null,
+      "description": null
+    },
+    "dkim": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "smgrid.eu",
+      "aligned": false,
+      "verdict": "warn",
+      "marker": "fail",
+      "description": "does not match From (email3.gog.com)"
+    },
+    "dmarc": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "email3.gog.com",
+      "aligned": null,
+      "verdict": "pass",
+      "marker": null,
+      "description": null
+    }
+  },
+  "headers": [
+    {
+      "name": "Authentication-Results",
+      "value": "mta-in.example.com; dmarc=pass (p=quarantine dis=none) header.from=email3.gog.com"
+    },
+    {
+      "name": "Authentication-Results",
+      "value": "mta-in.example.com; dkim=pass (2048-bit key, unprotected) header.d=smgrid.eu header.i=@smgrid.eu header.a=rsa-sha256 header.s=sm-trackid header.b=ERxWkgg4; dkim=pass (2048-bit key, unprotected) header.d=email3.gog.com header.i=@email3.gog.com header.a=rsa-sha256 header.s=salesmanago header.b=FX+3OOb8"
+    },
+    {
+      "name": "Received-SPF",
+      "value": "Pass (mailfrom) identity=mailfrom; client-ip=185.54.187.77; helo=ianus.emlgrid.com; envelope-from=sm.5138770744.3f5ada29ba85a3ae55-newsletter=email3.gog.com@emsgrid.com; receiver=example.com"
+    }
+  ],
+  "dkim_from": "fail"
+}

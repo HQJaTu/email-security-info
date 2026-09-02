@@ -1,0 +1,55 @@
+{
+  "status": "pass",
+  "summary": "Sender authentication passed.",
+  "info": {
+    "header-from": "Joe User <user@example2.com>",
+    "transport": "Encrypted — TLSv1.3"
+  },
+  "security": {
+    "spf": {
+      "present": false,
+      "verified": true,
+      "status": "NONE",
+      "domain": "example2.com",
+      "aligned": null,
+      "verdict": "none",
+      "marker": null,
+      "description": null
+    },
+    "dkim": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "example2.com",
+      "aligned": true,
+      "verdict": "pass",
+      "marker": "pass",
+      "description": "aligned with From"
+    },
+    "dmarc": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "example2.com",
+      "aligned": null,
+      "verdict": "pass",
+      "marker": null,
+      "description": null
+    }
+  },
+  "headers": [
+    {
+      "name": "Authentication-Results",
+      "value": "mta-in.example.com; dmarc=pass (p=quarantine dis=none) header.from=example2.com"
+    },
+    {
+      "name": "Authentication-Results",
+      "value": "mta-in.example.com; dkim=pass (2048-bit key, unprotected) header.d=example2.com header.i=@example2.com header.a=rsa-sha256 header.s=google header.b=LQoIISiO"
+    },
+    {
+      "name": "Received-SPF",
+      "value": "None (mailfrom) identity=mailfrom; client-ip=209.85.218.45; helo=mail-ej1-f45.google.com; envelope-from=user@example2.com; receiver=turkia.eu"
+    }
+  ],
+  "dkim_from": "pass"
+}

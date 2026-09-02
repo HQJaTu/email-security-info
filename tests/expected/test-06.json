@@ -1,0 +1,55 @@
+{
+  "status": "pass",
+  "summary": "Sender authentication passed.",
+  "info": {
+    "header-from": "Cheyenne Sokkappa <csokkappa@growthaccelerationpartners.com>",
+    "transport": "Encrypted — TLSv1.2"
+  },
+  "security": {
+    "spf": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "bf05x.hubspotemail.net",
+      "aligned": null,
+      "verdict": "pass",
+      "marker": null,
+      "description": null
+    },
+    "dkim": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "bf05x.hubspotemail.net",
+      "aligned": false,
+      "verdict": "warn",
+      "marker": "fail",
+      "description": "does not match From (growthaccelerationpartners.com)"
+    },
+    "dmarc": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "growthaccelerationpartners.com",
+      "aligned": null,
+      "verdict": "pass",
+      "marker": null,
+      "description": null
+    }
+  },
+  "headers": [
+    {
+      "name": "Authentication-Results",
+      "value": "mta-in.example.com; dmarc=pass (p=quarantine dis=none) header.from=growthaccelerationpartners.com"
+    },
+    {
+      "name": "Authentication-Results",
+      "value": "mta-in.example.com; dkim=pass (2048-bit key, unprotected) header.d=bf05x.hubspotemail.net header.i=@bf05x.hubspotemail.net header.a=rsa-sha256 header.s=hs1 header.b=KhYjpJ4i; dkim=pass (2048-bit key, unprotected) header.d=growthaccelerationpartners.com header.i=@growthaccelerationpartners.com header.a=rsa-sha256 header.s=hs1-216184 header.b=suYMN5WB"
+    },
+    {
+      "name": "Received-SPF",
+      "value": "Pass (mailfrom) identity=mailfrom; client-ip=158.247.24.107; helo=bid47ul.bf05x.hubspotemail.net; envelope-from=1axb0pqcwhs1bte61pz9q4ggw4t0h8l0o1a5bo-dotnetconf=example.com@bf05x.hubspotemail.net; receiver=example.com"
+    }
+  ],
+  "dkim_from": "fail"
+}

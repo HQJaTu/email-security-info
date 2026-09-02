@@ -1,0 +1,55 @@
+{
+  "status": "pass",
+  "summary": "Sender authentication passed.",
+  "info": {
+    "header-from": "Mailat24 <info@mailat24.fi>",
+    "transport": "Encrypted — TLSv1.3"
+  },
+  "security": {
+    "spf": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "rm.mailat24.fi",
+      "aligned": null,
+      "verdict": "pass",
+      "marker": null,
+      "description": null
+    },
+    "dkim": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "rulemailer.se",
+      "aligned": false,
+      "verdict": "warn",
+      "marker": "fail",
+      "description": "does not match From (mailat24.fi)"
+    },
+    "dmarc": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "mailat24.fi",
+      "aligned": null,
+      "verdict": "pass",
+      "marker": null,
+      "description": null
+    }
+  },
+  "headers": [
+    {
+      "name": "Authentication-Results",
+      "value": "mta-in.example.com; dmarc=pass (p=none dis=none) header.from=mailat24.fi"
+    },
+    {
+      "name": "Authentication-Results",
+      "value": "mta-in.example.com; dkim=pass (2048-bit key, unprotected) header.d=rulemailer.se header.i=@rulemailer.se header.a=rsa-sha256 header.s=keyse header.b=WnnNRpHE; dkim=pass (2048-bit key, unprotected) header.d=mailat24.fi header.i=@mailat24.fi header.a=rsa-sha256 header.s=keyse header.b=eOeq+1jE"
+    },
+    {
+      "name": "Received-SPF",
+      "value": "Pass (mailfrom) identity=mailfrom; client-ip=192.176.241.8; helo=8241.rulemailer.se; envelope-from=v-6-bounce-12008-1-961856-388283711-2884214@rm.mailat24.fi; receiver=example.com"
+    }
+  ],
+  "dkim_from": "fail"
+}

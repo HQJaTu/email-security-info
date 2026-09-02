@@ -38,7 +38,7 @@ With pytest, if you'd rather have its output and `-k` filtering:
     python -m pytest tests/test_verdict.py
     python -m pytest tests -k tls
 
-Expect ~150 tests in well under a second. There is no network access, no DNS and
+Expect ~175 tests in well under a second. There is no network access, no DNS and
 no temporary state outside `tempfile` directories that clean themselves up.
 
 Note that the dotted form (`python -m unittest tests.test_verdict`) does *not*
@@ -66,8 +66,10 @@ not, and split along the seams of what they cover:
       test_report.py            the text report and the colour decision
       test_config.py            settings, the command line and the config file
       test_cli.py               the command line end to end: input, output, exit codes
-      test_real_messages.py     smoke test over emails/
+      test_real_messages.py     emails/ against expected/, plus what must always hold
+      update_expected.py        re-records expected/ — a tool, not a test
       emails/*.eml              real-world sample messages (optional)
+      expected/*.json           the result recorded for each of them
 
 Files roughly follow the order of the code they cover, from raw input to
 rendered output. When you add a test, put it with the behaviour it exercises
@@ -101,29 +103,84 @@ file. Real headers are far messier than hand-written ones — a dozen `Received`
 hops, several DKIM signatures, encoded words, odd folding — so these samples
 catch things the unit tests cannot anticipate.
 
-It asserts **only invariants that must hold for any message**, never anything
-about the content of these particular ones: the status is one of the four known
-values, the summary matches it, every `info` field carries a string, every
-mechanism in `security` has the same fixed set of keys with values drawn from
-the known vocabularies, no raw header value is left folded, the result survives
-a JSON round-trip, the report renders without stray surrogates, and evaluation
-is deterministic.
+It checks them in two ways, because the two catch different mistakes.
 
-That means you can add, replace, redact or obfuscate the samples freely without
-touching the tests. Nothing depends on their bodies either — the program only
-ever reads headers and never verifies signatures cryptographically, so mangled
-MIME parts or rewritten bodies do not affect the results.
+### Recorded results: expected/
 
-To add a message: drop the raw source in as `emails/<name>.eml` (in Roundcube:
-*More → Download → As source*; in most other clients: *Save as* / *Show
-original*). Redact what you like, but keep `Authentication-Results`,
-`Received-SPF`, `DKIM-Signature`, `Received` and `From` intact — and keep them
-mutually consistent, because rewriting a domain in `From` but not in
+`expected/<name>.json` holds the **complete result** the program produces for
+`emails/<name>.eml` — status, summary, `info`, `security`, `dkim_from` and the
+raw headers — evaluated under plain default settings: all four checks on, no
+authserv-id trusted in particular, no extra headers. Every run re-evaluates each
+sample and compares it against its recorded file, so any change in what the
+program *says* about a real message fails, with a unified diff of exactly what
+moved:
+
+    AssertionError: test-01.eml no longer evaluates as recorded. If the new
+    answer is the correct one, re-record it with `python tests/update_expected.py`.
+
+    --- expected/test-01.eml
+    +++ actual
+    @@ -22,5 +22,5 @@
+           "domain": "21124867m.ngrok.com",
+    -      "aligned": false,
+    +      "aligned": true,
+
+**A failure here is not automatically a bug.** It means the reported answer
+moved. Read the diff, decide whether the new answer is the better one, and if it
+is, re-record it and commit the re-recorded file *together with* the change that
+caused it — that diff is the review, and it is the only place a reviewer can see
+what a refactor did to real-world output.
+
+    python tests/update_expected.py            # write what changed
+    python tests/update_expected.py --check    # report only, exit 1 if anything differs
+    python tests/update_expected.py --prune    # also delete files whose .eml is gone
+
+Never hand-edit a file in `expected/`: `test_the_recorded_results_are_current_format`
+compares each one against its own re-serialization and fails if it is not in the
+form the tool writes. The point of these files is that a human never types them.
+
+### Invariants: whatever the samples happen to be
+
+The rest of `test_real_messages.py` asserts **only what must hold for any
+message**, never anything about the content of these particular ones: the status
+is one of the four known values, the summary matches it, every `info` field
+carries a string, every mechanism in `security` has the same fixed set of keys
+with values drawn from the known vocabularies, no raw header value is left
+folded, the result survives a JSON round-trip, the report renders without stray
+surrogates, and evaluation is deterministic.
+
+These keep holding when the samples are replaced wholesale, and they are what
+catches a *malformed* result — which a recorded file, being a recording, would
+happily preserve.
+
+### Adding, replacing or redacting a message
+
+Drop the raw source in as `emails/<name>.eml` (in Roundcube: *More → Download →
+As source*; in most other clients: *Save as* / *Show original*), then record its
+result:
+
+    python tests/update_expected.py
+
+Redact what you like, but keep `Authentication-Results`, `Received-SPF`,
+`DKIM-Signature`, `Received` and `From` intact — and keep them mutually
+consistent, because rewriting a domain in `From` but not in
 `Authentication-Results` (or vice versa) will change the alignment verdicts and
-make the sample misleading rather than merely anonymous.
+make the sample misleading rather than merely anonymous. Editing a sample means
+re-recording it, and the resulting diff is worth a glance: it tells you whether
+your redaction changed the verdict.
 
-If this directory is missing or empty, `test_real_messages.py` skips itself and
-the rest of the suite still runs.
+Nothing depends on the message bodies — the program only ever reads headers and
+never verifies signatures cryptographically, so mangled MIME parts or rewritten
+bodies do not affect the results.
+
+Note that a recorded result contains the sender address, the authentication
+domains and the raw header lines of its sample, in clear. That is the same
+content as the `.eml` beside it, so it discloses nothing new — but it does mean
+redacting a sample is only finished once its recorded result has been rewritten
+too.
+
+If `emails/` is missing or empty, `test_real_messages.py` skips itself and the
+rest of the suite still runs.
 
 
 Two tests that document known limitations

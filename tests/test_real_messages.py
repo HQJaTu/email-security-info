@@ -2,15 +2,87 @@
 
 # vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=python
 
-"""Smoke test over the sample messages in emails/.
+"""The sample messages in emails/: their recorded results, and what must always hold.
+
+Two layers. `TestExpectedResults` compares each sample against the result
+recorded for it in expected/, which catches a changed answer. `TestRealMessages`
+asserts only what must hold for any message at all, which catches a malformed
+one — and keeps holding when the samples are replaced.
 
 See README.md in this directory for how to run these.
 """
 
+import difflib
 import json
 import unittest
 
-from support import EMAIL_DIR, msi
+from support import (EMAIL_DIR, EXPECTED_DIR, REGENERATE, evaluate_sample, expected_path,
+                     format_expected, load_expected, msi, sample_messages)
+
+
+def result_diff(expected: dict, actual: dict, name: str) -> str:
+    """A readable unified diff between a recorded result and a fresh one."""
+    lines = difflib.unified_diff(format_expected(expected).splitlines(),
+                                 format_expected(actual).splitlines(),
+                                 fromfile='expected/' + name, tofile='actual', lineterm='',
+                                 n=2)
+
+    return '\n'.join(lines)
+
+
+@unittest.skipUnless(EMAIL_DIR.is_dir(), 'no emails/ sample messages')
+class TestExpectedResults(unittest.TestCase):
+    """Every sample message still evaluates to the result recorded for it.
+
+    The invariant tests below cannot tell a right answer from a wrong one, only
+    a well-formed one from a malformed one. These can: expected/<name>.json
+    holds the complete result for emails/<name>.eml under default settings, so
+    any change in what the program says about a real message — a verdict, a
+    domain, a rendered note, a raw header — fails here with a diff.
+
+    A failure is not automatically a bug. It means the reported answer moved:
+    read the diff, decide whether the new answer is the better one, and if it
+    is, re-record it with `python tests/update_expected.py` and commit the diff
+    along with the change that caused it.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.paths = sample_messages()
+
+    def test_every_sample_has_a_recorded_result(self):
+        missing = [path.name for path in self.paths if not expected_path(path).is_file()]
+        self.assertEqual(missing, [], 'no result recorded yet — run ' + REGENERATE)
+
+    def test_no_recorded_result_outlives_its_message(self):
+        stale = sorted(path.name for path in EXPECTED_DIR.glob('*.json')
+                       if not (EMAIL_DIR / (path.stem + '.eml')).is_file())
+        self.assertEqual(stale, [], 'sample message gone — run ' + REGENERATE + ' --prune')
+
+    def test_each_sample_matches_its_recorded_result(self):
+        for path in self.paths:
+            if not expected_path(path).is_file():
+                continue  # Already reported, once, by the test above.
+
+            with self.subTest(message=path.name):
+                expected = load_expected(path)
+                actual = evaluate_sample(path)
+                if actual != expected:
+                    self.fail('{} no longer evaluates as recorded. If the new answer is '
+                              'the correct one, re-record it with `{}`.\n\n{}'.format(
+                                  path.name, REGENERATE, result_diff(expected, actual, path.name)))
+
+    def test_the_recorded_results_are_current_format(self):
+        # A file hand-edited into a shape the program would never produce would
+        # otherwise sit there asserting nothing until its sample changed.
+        for path in self.paths:
+            if not expected_path(path).is_file():
+                continue
+
+            with self.subTest(message=path.name):
+                self.assertEqual(expected_path(path).read_text('utf-8'),
+                                 format_expected(load_expected(path)),
+                                 'not in recorded form — run ' + REGENERATE)
 
 
 @unittest.skipUnless(EMAIL_DIR.is_dir(), 'no emails/ sample messages')
@@ -29,7 +101,7 @@ class TestRealMessages(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.paths = sorted(EMAIL_DIR.glob('*.eml'))
+        cls.paths = sample_messages()
 
     def test_every_sample_evaluates(self):
         for path in self.paths:

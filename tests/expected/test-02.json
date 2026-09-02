@@ -1,0 +1,55 @@
+{
+  "status": "pass",
+  "summary": "Sender authentication passed.",
+  "info": {
+    "header-from": "Facebook <notification@facebookmail.com>",
+    "transport": "Encrypted — TLSv1.3"
+  },
+  "security": {
+    "spf": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "facebookmail.com",
+      "aligned": null,
+      "verdict": "pass",
+      "marker": null,
+      "description": null
+    },
+    "dkim": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "facebookmail.com",
+      "aligned": true,
+      "verdict": "pass",
+      "marker": "pass",
+      "description": "aligned with From"
+    },
+    "dmarc": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "facebookmail.com",
+      "aligned": null,
+      "verdict": "pass",
+      "marker": null,
+      "description": null
+    }
+  },
+  "headers": [
+    {
+      "name": "Authentication-Results",
+      "value": "mta-in.example.com; dmarc=pass (p=reject dis=none) header.from=facebookmail.com"
+    },
+    {
+      "name": "Authentication-Results",
+      "value": "mta-in.example.com; dkim=pass (1024-bit key, unprotected) header.d=facebookmail.com header.i=@facebookmail.com header.a=rsa-sha256 header.s=s1024-2013-q3 header.b=HtUtIgqP"
+    },
+    {
+      "name": "Received-SPF",
+      "value": "Pass (mailfrom) identity=mailfrom; client-ip=69.171.232.146; helo=69-171-232-146.mail-mail.facebook.com; envelope-from=notification@facebookmail.com; receiver=example.com"
+    }
+  ],
+  "dkim_from": "pass"
+}

@@ -246,6 +246,8 @@ Development
     requirements.txt            ConfigArgParse — the only runtime dependency
     requirements-dev.txt        pytest, optional (the suite is stdlib unittest)
     tests/                      the test suite, its helpers and sample messages
+    tests/emails/               real-world sample messages
+    tests/expected/             the result recorded for each of them
 
 The program is one file on purpose: it is distributed by copying it, and a
 single file is the whole story — no package, no entry point, no install step.
@@ -280,16 +282,33 @@ With pytest, if you want its output and `-k` filtering:
     python -m pytest tests
     python -m pytest tests -k tls
 
-Expect ~170 tests in well under a second. The suite needs no network, no DNS and
+Expect ~175 tests in well under a second. The suite needs no network, no DNS and
 no fixtures beyond the sample messages in `tests/emails/`.
 
 The dotted form (`python -m unittest tests.test_verdict`) deliberately does not
 work: there is no `tests/__init__.py`, so `tests` is not a package. Use file
 paths or `-k`.
 
-See `tests/README.md` for what each file covers, how the shared `support.py`
-helpers work, how to add your own sample messages, and the two tests that pin
-down known limitations inherited from the PHP plugin.
+### Recorded results for the sample messages
+
+`tests/expected/<name>.json` holds the complete result the program produces for
+`tests/emails/<name>.eml` under default settings, and every test run compares
+the two. So a change in what the program *says* about a real message — a
+verdict, a domain, a rendered note, a raw header — fails a test with a diff of
+exactly what moved, instead of passing quietly.
+
+    python tests/update_expected.py            # re-record what changed
+    python tests/update_expected.py --check    # report only, exit 1 if anything differs
+
+Run it after adding a sample message, or after deliberately changing what the
+program reports — and in that second case read the diff before committing it,
+because that diff is the only place a reviewer sees what the change did to
+real-world output. Do not hand-edit the recorded files; a test checks they are
+still in the form the tool writes.
+
+See `tests/README.md` for what each test file covers, how the shared
+`support.py` helpers work, how to add and redact your own sample messages, and
+the two tests that pin down known limitations inherited from the PHP plugin.
 
 ### Style
 
