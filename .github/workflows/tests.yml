@@ -1,0 +1,57 @@
+name: Unit tests
+
+# Every push, so a branch is known-good before anyone opens a pull request from
+# it, and every pull request against master, so what is tested is the merge
+# result rather than the branch tip on its own.
+#
+# A branch pushed inside this repository and then opened as a pull request runs
+# both — the same commit tested twice. That is the price of testing branches
+# before they become pull requests; narrow `push` to `branches: [master]` if the
+# duplicate runs ever become the bigger annoyance.
+on:
+  push:
+  pull_request:
+    branches:
+      - master
+
+# A second push to the same branch makes the first run's answer irrelevant.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      # One version failing must not hide what the others would have said —
+      # "3.11 broke" and "everything broke" need different fixes.
+      fail-fast: false
+      matrix:
+        # 3.11 is the floor README.md promises; 3.14 is what it is developed on.
+        python-version: ['3.11', '3.12', '3.13', '3.14']
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      # The suite is stdlib unittest, so the program's own single dependency is
+      # everything it needs. pytest is supported but optional, and left out here
+      # deliberately: a test run should not be able to fail over a test runner
+      # the tests do not require.
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check -r requirements.txt
+
+      # From the project root, as tests/README.md documents. No network, no DNS,
+      # no state outside self-cleaning temporary directories.
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -v
