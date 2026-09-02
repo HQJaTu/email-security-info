@@ -15,7 +15,7 @@ from support import msi
 def entry(**fields) -> dict:
     """A security finding carrying the given fields, the rest left neutral."""
     return {'present': True, 'verified': True, 'status': None, 'domain': None,
-            'aligned': None, 'verdict': 'unknown', 'marker': None,
+            'aligned': None, 'verdict': 'unknown',
             'description': None, **fields}
 
 

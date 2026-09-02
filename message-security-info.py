@@ -26,12 +26,30 @@ Because `Authentication-Results` headers added by hops you don't control can be
 forged, pass ``--trusted-authserv`` with your own mail server's authserv-id(s)
 for a trustworthy result.
 
+The overall status is the *worst* of the per-mechanism verdicts: SPF, DKIM and
+DMARC are independent assertions about the same message, so the weakest one
+governs, and a DMARC pass does not excuse a weaker result beside it. Within DKIM
+the rule is reversed — several signatures are alternatives, so the best of them
+is the one reported. `evaluate` and `best_dkim` carry the reasoning.
+
 Differences from the Roundcube plugin
 ------------------------------------
 The IMAP/webmail-specific parts have no counterpart here: there is no
 `fetch_headers` step (a local message has all of its headers), no Sent/Drafts
 folder skipping and no per-user preference storage — the equivalent of the
 plugin's admin config is the command line / config file.
+
+The verdict is stricter. The plugin let a DMARC result decide on its own and
+judged only the first DKIM signature; this combines every mechanism worst-first
+and picks the best signature, so an ESP-signed message with an aligned second
+signature now passes, and a message whose mechanisms disagree now warns instead
+of being waved through on DMARC alone.
+
+The From-header marker is gone as a separate answer. The plugin computed a
+pass/fail marker beside the DKIM verdict, which meant an unaligned PASS could
+read `warn` in one place and `fail` in another; here `dkim_from` is the DKIM
+verdict itself, so the row glyph, the sentence below the table and the JSON all
+say the same thing.
 
 @license GNU GPLv3+
 @author Claude
@@ -73,9 +91,11 @@ I18N_LABELS = {
     'notaligned': 'does not match From ($from)',
     'unverified': 'present, not verified by your server',
 
-    # DKIM marker on the message's From header
+    # The DKIM verdict spelled out, one sentence per value it can take.
     'frommarkerpass': 'DKIM: signed and matches the sender address.',
-    'frommarkerfail': 'DKIM: signature does not match the sender, or verification failed.',
+    'frommarkerwarn': 'DKIM: signed, but the signature does not match the sender address.',
+    'frommarkerfail': 'DKIM: signature verification failed.',
+    'frommarkerunknown': 'DKIM: signed, but your server did not verify the signature.',
     'frommarkernone': 'DKIM: this message is not signed.',
 
     # Transport encryption (informational; does not affect the verdict)
@@ -92,17 +112,17 @@ I18N_LABELS = {
     'summaryunknown': 'Sender authentication could not be verified.',
 }
 
-#: Glyph + ANSI colour per overall status, and per DKIM/From marker state.
-REPORT_STATUS_STYLE = {
+#: Glyph + ANSI colour per verdict — the same five for the headline and the rows.
+#:
+#: One table on purpose: a reader who sees ✓ beside SPF and ! beside DKIM should
+#: be able to read the ! on the headline as "the DKIM one won", which only works
+#: while the same verdict always draws the same glyph.
+REPORT_GLYPH_STYLE = {
     'pass': ('✓', '32'),  # green
     'warn': ('!', '33'),  # amber
     'fail': ('✗', '31'),  # red
     'unknown': ('?', '90'),  # grey
-}
-REPORT_MARKER_STYLE = {
-    'pass': ('✓', '32'),
-    'fail': ('✗', '31'),
-    'none': ('?', '33'),
+    'none': ('·', '90'),  # grey — nothing was reported, which is not a failing
 }
 
 
@@ -280,6 +300,9 @@ class MessageSecurityInfo:
     #: The security mechanisms reported, in report order.
     METHODS = ('spf', 'dkim', 'dmarc')
 
+    #: DKIM verdicts from best to worst, for picking between signatures.
+    DKIM_PREFERENCE = ('pass', 'warn', 'unknown', 'fail')
+
     #: Where to look for each method's domain inside an Authentication-Results
     #: entry.
     DOMAIN_KEYS = {
@@ -296,7 +319,7 @@ class MessageSecurityInfo:
 
         Returns ``status`` (pass/warn/fail/unknown), a one-line ``summary``, the
         descriptive ``info`` fields, the ``security`` findings per mechanism, the
-        ``headers`` to show raw and the DKIM/From marker ``dkim_from``. None when
+        ``headers`` to show raw and the DKIM verdict ``dkim_from``. None when
         every authentication mechanism is disabled — there is then nothing to
         evaluate.
         """
@@ -308,60 +331,75 @@ class MessageSecurityInfo:
             return None
 
         auth = self.parse_authresults(headers)
-        verdict = self.evaluate(headers, auth)
+        security = self.security_fields(headers, auth)
+        verdict = self.evaluate(security)
 
         result = {
             'status': verdict['status'],
             'summary': verdict['summary'],
             'info': self.info_fields(headers),
-            'security': self.security_fields(headers, auth),
+            'security': security,
             'headers': self.raw_headers(headers),
         }
 
-        # A DKIM/From marker for the message's From header ('pass' = signed &
-        # aligned, 'fail' = signed-but-unaligned or failed, 'none' = unsigned).
-        if config.method_enabled('dkim'):
-            result['dkim_from'] = self.dkim_from_marker(headers, auth)
+        # The DKIM verdict, lifted out for callers that only want the one
+        # question "did the sender sign this themselves?" — and it is lifted,
+        # not recomputed, so it can never disagree with the finding it names.
+        if 'dkim' in security:
+            result['dkim_from'] = security['dkim']['verdict']
 
         return result
 
-    def evaluate(self, headers: MessageHeaders, auth: dict) -> dict:
+    def evaluate(self, security: dict) -> dict:
         """Overall sender-authentication verdict driving the status/summary.
 
-        DMARC, when it actually evaluated, is authoritative — it already implies
-        an aligned SPF or DKIM pass. Otherwise the present SPF and DKIM results
-        are combined, omitting whichever is missing. Disabled mechanisms are
-        excluded entirely.
+        The worst of the per-mechanism verdicts, and nothing else: the status is
+        exactly ``combine_statuses`` over the ``verdict`` fields the caller can
+        already see in `security`, so nothing decides the outcome off to one
+        side where a reader of the output cannot follow it.
+
+        Deliberately, a DMARC pass does not excuse a weaker result beside it.
+        DMARC passing means the domain owner's policy was met; it does not mean
+        every mechanism agreed, and the disagreement is the interesting part.
+
+        Known consequence, left in on purpose: forwarders and mailing lists
+        break SPF while the aligned DKIM signature survives, so such a message
+        arrives as spf=fail + dkim=pass + dmarc=pass and is reported FAIL, on
+        the strength of the SPF result alone. That is a false alarm for the
+        common case of legitimately relayed mail. If it proves noisy, the fix is
+        to demote an SPF fail to 'warn' while the DMARC verdict is 'pass' —
+        DMARC has then already weighed the SPF failure and accepted the message
+        on the signature. Nothing else about this method should need to change.
         """
-        config = self.config
-
-        # DMARC is the overall verdict when enabled and it yielded a real result.
-        if config.method_enabled('dmarc'):
-            dmarc = auth['dmarc'][0]['result'] if auth['dmarc'] else None
-            if dmarc == 'pass':
-                return {'status': 'pass', 'summary': i18n_gettext('summarypass')}
-            if dmarc == 'fail':
-                return {'status': 'fail', 'summary': i18n_gettext('summaryfail')}
-
-        # No usable DMARC: combine the SPF and DKIM results that are present.
-        from_domain = self.from_domain(headers)
-        statuses = []
-
-        if config.method_enabled('spf'):
-            spf = (auth['spf'][0] if auth['spf'] else None) or self.spf_from_received(headers)
-            if spf:
-                statuses.append(self.method_status('spf', spf, from_domain))
-
-        if config.method_enabled('dkim'):
-            if auth['dkim']:
-                statuses.append(self.method_status('dkim', auth['dkim'][0], from_domain))
-            elif headers.get('DKIM-Signature'):
-                # Signature present but not verified by the receiving server.
-                statuses.append('unknown')
-
-        status = self.combine_statuses(statuses)
+        status = self.combine_statuses([entry['verdict'] for entry in security.values()])
 
         return {'status': status, 'summary': i18n_gettext('summary' + status)}
+
+    def best_dkim(self, entries: list[dict], from_domain: str | None,
+                  sig_domain: str | None = None) -> dict | None:
+        """The DKIM result that counts, out of every signature the server checked.
+
+        A message is commonly signed twice — by the sending platform and by the
+        sender's own domain — and the two are alternatives rather than
+        independent claims: one signature that verifies and is aligned with the
+        From domain authenticates the message, whatever the other one says. So
+        the best result wins here, which is the exact opposite of how the
+        mechanisms combine in `combine_statuses`, where the worst wins.
+
+        Ties keep the earliest signature. None when the server verified none.
+        """
+        if not entries:
+            return None
+
+        def rank(entry: dict) -> int:
+            # Judge on the same domain the caller will display, falling back to
+            # the raw DKIM-Signature when the result named no domain of its own.
+            if sig_domain and not entry.get('domain'):
+                entry = {**entry, 'domain': sig_domain}
+
+            return self.DKIM_PREFERENCE.index(self.method_status('dkim', entry, from_domain))
+
+        return min(entries, key=rank)
 
     def method_status(self, method: str, entry: dict, from_domain: str | None) -> str:
         """Map one SPF/DKIM result to pass / warn / fail / unknown / none.
@@ -385,10 +423,15 @@ class MessageSecurityInfo:
 
     @staticmethod
     def combine_statuses(statuses: list[str]) -> str:
-        """Reduce per-method statuses to one.
+        """Reduce the per-mechanism statuses to one.
 
-        Worst wins (fail > warn > pass); "none" entries are dropped; only-unknown
-        stays unknown; nothing to check at all is a (visible) warning.
+        Worst wins (fail > warn > pass): the mechanisms are independent
+        assertions about the same message, so the weakest of them governs. (Not
+        to be confused with `best_dkim`, which picks between several signatures
+        *within* DKIM, where the best wins.)
+
+        "none" entries are dropped; only-unknown stays unknown; nothing to check
+        at all is a (visible) warning.
         """
         statuses = [s for s in statuses if s != 'none']
 
@@ -526,10 +569,9 @@ class MessageSecurityInfo:
                     that is the only mechanism this compares); None where the
                     question does not apply or cannot be answered.
         verdict     the normalised severity: pass, warn, fail, unknown, or none
-                    (none = contributes nothing to the overall status).
-        marker      the DKIM/From marker (pass/fail/none) mirroring the
-                    top-level `dkim_from`; None for SPF and DMARC, which do not
-                    mark the From header.
+                    (none = contributes nothing to the overall status). This is
+                    also what the report draws its glyph from, so a finding can
+                    never show a glyph that disagrees with its own verdict.
         description a human-readable note: the alignment note, or why there is
                     no result. None when there is nothing to add.
         """
@@ -537,21 +579,19 @@ class MessageSecurityInfo:
         from_domain = self.from_domain(headers)
         signature = headers.first('DKIM-Signature')
         sig_domain = self._signature_domain(signature) if signature else None
-        marker = self.dkim_from_marker(headers, auth) if config.method_enabled('dkim') else None
 
         # SPF is often only in a Received-SPF header, not Authentication-Results.
         results = {
             'spf': (auth['spf'][0] if auth['spf'] else None) or self.spf_from_received(headers),
-            'dkim': auth['dkim'][0] if auth['dkim'] else None,
+            'dkim': self.best_dkim(auth['dkim'], from_domain, sig_domain),
             'dmarc': auth['dmarc'][0] if auth['dmarc'] else None,
         }
 
-        return {method: self._security_entry(method, results[method], from_domain,
-                                             sig_domain, marker)
+        return {method: self._security_entry(method, results[method], from_domain, sig_domain)
                 for method in self.METHODS if config.method_enabled(method)}
 
     def _security_entry(self, method: str, entry: dict | None, from_domain: str | None,
-                        sig_domain: str | None, marker: str | None) -> dict:
+                        sig_domain: str | None) -> dict:
         """One mechanism's finding in the fixed shape security_fields documents."""
         if entry is None:
             # No verified result. A DKIM-Signature with nothing to confirm it is
@@ -567,7 +607,6 @@ class MessageSecurityInfo:
                 'domain': sig_domain if signed else None,
                 'aligned': None,
                 'verdict': 'unknown' if signed else 'none',
-                'marker': marker if method == 'dkim' else None,
                 'description': i18n_gettext('unverified' if signed else 'notpresent'),
             }
 
@@ -587,8 +626,11 @@ class MessageSecurityInfo:
             'status': result.upper(),
             'domain': domain,
             'aligned': aligned,
-            'verdict': self.method_status(method, entry, from_domain),
-            'marker': marker if method == 'dkim' else None,
+            # Judged on the domain the row displays, not on the raw result: a
+            # result that named no domain of its own falls back to the
+            # DKIM-Signature above, and the verdict has to follow it there or it
+            # would contradict the line it is printed beside.
+            'verdict': self.method_status(method, {**entry, 'domain': domain}, from_domain),
             'description': description,
         }
 
@@ -680,31 +722,6 @@ class MessageSecurityInfo:
             return parts['name'] or None
 
         return parts['name'] + ' <' + parts['addr'] + '>' if parts['name'] else parts['addr']
-
-    def dkim_from_marker(self, headers: MessageHeaders, auth: dict) -> str:
-        """
-        From-header marker verdict, DKIM-specific and independent of the overall status.
-
-        'pass' (a DKIM PASS aligned with the From domain), 'fail' (a PASS that
-        isn't aligned, or any non-pass DKIM result) or 'none' (no verified DKIM
-        result to judge).
-        """
-        entry = auth['dkim'][0] if auth['dkim'] else None
-        if not entry:
-            return 'none'
-
-        if entry['result'].lower() != 'pass':
-            return 'fail'
-
-        from_domain = self.from_domain(headers)
-        domain = entry.get('domain')
-
-        if not domain:
-            signature = headers.first('DKIM-Signature')
-            if signature:
-                domain = self._signature_domain(signature)
-
-        return 'pass' if self._aligned(domain, from_domain) else 'fail'
 
     @staticmethod
     def _signature_domain(signature: str) -> str | None:
@@ -824,7 +841,11 @@ def security_line(entry: dict) -> str:
 
 
 def report_rows(result: dict) -> list[tuple[str, str, str | None]]:
-    """The result as (label, value, marker) display rows, in report order."""
+    """The result as (label, value, verdict) display rows, in report order.
+
+    The verdict is what the row's glyph is drawn from, and None for the rows
+    that carry no verdict at all — the From address and the transport.
+    """
     info = result.get('info', {})
     rows = []
 
@@ -832,7 +853,7 @@ def report_rows(result: dict) -> list[tuple[str, str, str | None]]:
         rows.append((i18n_gettext('from'), info['header-from'], None))
 
     for method, entry in result.get('security', {}).items():
-        rows.append((i18n_gettext(method), security_line(entry), entry['marker']))
+        rows.append((i18n_gettext(method), security_line(entry), entry['verdict']))
 
     if 'transport' in info:
         rows.append((i18n_gettext('tls'), info['transport'], None))
@@ -847,7 +868,7 @@ def format_report(result: dict, color: bool = False) -> str:
         return '\033[' + ansi + 'm' + text + '\033[0m' if color else text
 
     status = result['status']
-    glyph, ansi = REPORT_STATUS_STYLE.get(status, REPORT_STATUS_STYLE['unknown'])
+    glyph, ansi = REPORT_GLYPH_STYLE.get(status, REPORT_GLYPH_STYLE['unknown'])
 
     lines = [
         '{}: {} {}'.format(i18n_gettext('linktitle'),
@@ -862,25 +883,25 @@ def format_report(result: dict, color: bool = False) -> str:
     # One label column wide enough for the findings and the raw header names.
     width = max([len(label) for label, _, _ in rows] + [len(h['name']) for h in raw] + [0])
 
-    # Label column, plus room for the DKIM marker glyph when any row has one.
-    marked = any(marker for _, _, marker in rows)
+    # Label column, plus room for the verdict glyph when any row has one.
+    marked = any(verdict for _, _, verdict in rows)
     label_width = width + (2 if marked else 0)
 
-    def add(label: str, value: str, marker: str | None = None) -> None:
+    def add(label: str, value: str, verdict: str | None = None) -> None:
         """Append one label/value line, aligning any continuation lines."""
         head = label.ljust(width)
 
-        if marker:
+        if verdict:
             # Padded uncoloured, so the ANSI escapes don't count towards width.
-            head += ' ' + paint(*REPORT_MARKER_STYLE.get(marker, REPORT_MARKER_STYLE['none']))
+            head += ' ' + paint(*REPORT_GLYPH_STYLE.get(verdict, REPORT_GLYPH_STYLE['unknown']))
         elif marked:
             head += '  '
 
         for i, part in enumerate(str(value).split('\n')):
             lines.append('  {}  {}'.format(head if i == 0 else ' ' * label_width, part))
 
-    for label, value, marker in rows:
-        add(label, value, marker)
+    for label, value, verdict in rows:
+        add(label, value, verdict)
 
     if 'dkim_from' in result:
         lines += ['', '  ' + i18n_gettext('frommarker' + result['dkim_from'])]

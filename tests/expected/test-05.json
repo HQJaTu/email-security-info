@@ -1,0 +1,52 @@
+{
+  "status": "pass",
+  "summary": "Sender authentication passed.",
+  "info": {
+    "header-from": "Censys Marketing <marketing@censys.com>",
+    "transport": "Encrypted — TLSv1.2"
+  },
+  "security": {
+    "spf": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "bf07x.hubspotemail.net",
+      "aligned": null,
+      "verdict": "pass",
+      "description": null
+    },
+    "dkim": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "censys.com",
+      "aligned": true,
+      "verdict": "pass",
+      "description": "aligned with From"
+    },
+    "dmarc": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "censys.com",
+      "aligned": null,
+      "verdict": "pass",
+      "description": null
+    }
+  },
+  "headers": [
+    {
+      "name": "Authentication-Results",
+      "value": "mta-in.example.com; dmarc=pass (p=quarantine dis=none) header.from=censys.com"
+    },
+    {
+      "name": "Authentication-Results",
+      "value": "mta-in.example.com; dkim=pass (2048-bit key, unprotected) header.d=bf07x.hubspotemail.net header.i=@bf07x.hubspotemail.net header.a=rsa-sha256 header.s=hs2 header.b=SDhNKSEG; dkim=pass (2048-bit key, unprotected) header.d=censys.com header.i=@censys.com header.a=rsa-sha256 header.s=hs2-50081908 header.b=jdZAEF6o"
+    },
+    {
+      "name": "Received-SPF",
+      "value": "Pass (mailfrom) identity=mailfrom; client-ip=143.244.88.126; helo=bd77f18.bf07x.hubspotemail.net; envelope-from=1axbnckx84v5bbsuur8xw6967sna82z1irfk7i-censys=example.com@bf07x.hubspotemail.net; receiver=example.com"
+    }
+  ],
+  "dkim_from": "pass"
+}

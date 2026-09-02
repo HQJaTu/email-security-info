@@ -50,7 +50,7 @@ class TestSecurityFields(unittest.TestCase):
 
     def test_every_entry_has_the_same_keys(self):
         keys = {'present', 'verified', 'status', 'domain', 'aligned', 'verdict',
-                'marker', 'description'}
+                'description'}
         for message in (PASS_EML, FAIL_EML, UNALIGNED_EML, UNVERIFIED_EML):
             for method, entry in self.fields(message).items():
                 with self.subTest(message=message[:20], method=method):
@@ -60,13 +60,13 @@ class TestSecurityFields(unittest.TestCase):
         self.assertEqual(self.fields(PASS_EML)['spf'],
                          {'present': True, 'verified': True, 'status': 'PASS',
                           'domain': 'example.com', 'aligned': None, 'verdict': 'pass',
-                          'marker': None, 'description': None})
+                          'description': None})
 
     def test_an_aligned_dkim_pass(self):
         self.assertEqual(self.fields(PASS_EML)['dkim'],
                          {'present': True, 'verified': True, 'status': 'PASS',
                           'domain': 'example.com', 'aligned': True, 'verdict': 'pass',
-                          'marker': 'pass', 'description': msi.i18n_gettext('aligned')})
+                          'description': msi.i18n_gettext('aligned')})
 
     def test_an_unaligned_dkim_pass(self):
         entry = self.fields(UNALIGNED_EML)['dkim']
@@ -74,7 +74,6 @@ class TestSecurityFields(unittest.TestCase):
         self.assertEqual(entry['domain'], 'mailer.net')
         self.assertFalse(entry['aligned'])
         self.assertEqual(entry['verdict'], 'warn')
-        self.assertEqual(entry['marker'], 'fail')
         self.assertEqual(entry['description'],
                          msi.i18n_gettext('notaligned', {'from': 'bank.example'}))
 
@@ -84,14 +83,14 @@ class TestSecurityFields(unittest.TestCase):
         self.assertEqual(self.fields(UNVERIFIED_EML)['dkim'],
                          {'present': True, 'verified': False, 'status': None,
                           'domain': 'news.example.com', 'aligned': None,
-                          'verdict': 'unknown', 'marker': 'none',
+                          'verdict': 'unknown',
                           'description': msi.i18n_gettext('unverified')})
 
     def test_a_mechanism_with_no_evidence_at_all(self):
         self.assertEqual(self.fields(UNVERIFIED_EML)['dmarc'],
                          {'present': False, 'verified': False, 'status': None,
                           'domain': None, 'aligned': None, 'verdict': 'none',
-                          'marker': None, 'description': msi.i18n_gettext('notpresent')})
+                          'description': msi.i18n_gettext('notpresent')})
 
     def test_a_none_result_is_reported_but_not_present(self):
         # dmarc=none means the sending domain has no DMARC: a real, verified
@@ -147,7 +146,7 @@ class TestEvaluateHeaders(unittest.TestCase):
         self.assertEqual(list(result['security']), ['spf', 'dkim', 'dmarc'])
         self.assertTrue(all(set(h) == {'name', 'value'} for h in result['headers']))
 
-    def test_no_dkim_marker_when_dkim_is_disabled(self):
+    def test_no_dkim_verdict_when_dkim_is_disabled(self):
         result = info(check_dkim=False).evaluate_headers(headers(PASS_EML))
         self.assertNotIn('dkim_from', result)
 

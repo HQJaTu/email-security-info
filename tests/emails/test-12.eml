@@ -1,0 +1,65 @@
+From 386506252000143bd1d02-b26245-b3bad030ac564a1188bc98dc129ff89d@mailer.ebookers.com  Wed Sep  2 12:43:02 2026
+Return-Path: <386506252000143bd1d02-b26245-b3bad030ac564a1188bc98dc129ff89d@mailer.ebookers.com>
+X-Original-To: ebookers@example.com
+Delivered-To: user@example.com
+Received-ASN: AS46475 Limestone Networks, Inc. (client 135.84.217.207)
+DMARC-Filter: OpenDMARC Filter v1.4.2 mta-in.example.com AE007183FF40
+Authentication-Results: mta-in.example.com; dmarc=none (p=none dis=none) header.from=n.ebookers.com
+DKIM-Filter: OpenDKIM Filter v2.11.0 mta-in.example.com AE007183FF40
+Authentication-Results: mta-in.example.com;
+	dkim=pass (1024-bit key, unprotected) header.d=mailer.ebookers.com header.i=@mailer.ebookers.com header.a=rsa-sha256 header.s=gears header.b=bj6DYbO/
+Received-SPF: Pass (mailfrom) identity=mailfrom; client-ip=135.84.217.207; helo=gears217-207.expediamail.com; envelope-from=386506252000143bd1d02-b26245-b3bad030ac564a1188bc98dc129ff89d@mailer.ebookers.com; receiver=example.com 
+Received: from gears217-207.expediamail.com (gears217-207.expediamail.com [135.84.217.207])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange x25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mta-in.example.com (Postfix) with ESMTPS id AE007183FF40
+	for <ebookers@example.com>; Wed, 02 Sep 2026 12:42:55 +0300 (EEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; s=gears; d=mailer.ebookers.com;
+ h=Date:From:Reply-To:To:Message-ID:Subject:MIME-Version:Content-Type:
+ List-Unsubscribe:List-Unsubscribe-Post;
+ bh=cCVUvdsH8cbotZCUD1TX4sViHBD+dnY6e1m9gJSL6DU=;
+ b=bj6DYbO/+7WZYpnx82CqFxodXjvfbcvgSVVs0PK+HRmJPlR4jGBBDWhsE5hQ2jN7llYwrwzIv70W
+   R1tAN7GOqRgibtobq+2KghVeUZlMPjQ7wlfXdInx2uMAUS7GX0LBLrnd+EYiXYSjmeIFJ9OaN6Ge
+   yT14GR9RUPgZUIwXAFg=
+Date: Wed, 2 Sep 2026 05:42:53 -0400 (EDT)
+From: ebookers Travel Information <noreply@n.ebookers.com>
+Reply-To: 
+	r-386506252000143bd1d02-b26245-b3bad030ac564a1188bc98dc129ff89d@mailer.ebookers.com
+To: ebookers@example.com
+Message-ID: <11972799.14312998.1788342173594@mta0204.messagegears.net>
+Subject: =?UTF-8?Q?ebookers_ei_en=C3=A4=C3=A4_hyv=C3=A4ksy_uusia_?=
+ =?UTF-8?Q?varauksia_ja_BONUS+_on_p=C3=A4=C3=A4ttynyt?=
+MIME-Version: 1.0
+Content-Type: multipart/mixed; 
+	boundary="----=_Part_14312995_652650475.1788342173594"
+X-Complaint-ID: 386506252000143bd1d02-b26245-b3bad030ac564a1188bc98dc129ff89d
+X-Original-To: ebookers@example.com
+List-Unsubscribe: <https://link.mailer.ebookers.com/list-unsub/uc/3/eyJhaSI6ODY1MDYyNTIsImUiOiJtZy1lbmM6Q055UUxIa0lDT3ZKeEJTSWhoTzJGRUZCK0R4U3E1UFIiLCJycSI6IjAyLWIyNjI0NS1iM2JhZDAzMGFjNTY0YTExODhiYzk4ZGMxMjlmZjg5ZCIsIm0iOmZhbHNlfQ/nMeHfySa2kPYYkbW6qxY6w>, <mailto:unsub-386506252000143bd1d02-b26245-b3bad030ac564a1188bc98dc129ff89d@mailer.ebookers.com>
+List-Unsubscribe-Post: List-Unsubscribe=One-Click
+
+------=_Part_14312995_652650475.1788342173594
+Content-Type: multipart/related; 
+	boundary="----=_Part_14312996_1796738999.1788342173594"
+
+------=_Part_14312996_1796738999.1788342173594
+Content-Type: text/html;charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.=
+w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns=3D"http://www.w3.org/1999/xhtml">
+
+
+------=_Part_14312996_1796738999.1788342173594--
+
+------=_Part_14312995_652650475.1788342173594--

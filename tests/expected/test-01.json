@@ -1,0 +1,52 @@
+{
+  "status": "pass",
+  "summary": "Sender authentication passed.",
+  "info": {
+    "header-from": "Joel @ ngrok <team@m.ngrok.com>",
+    "transport": "Encrypted — TLSv1.2"
+  },
+  "security": {
+    "spf": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "21124867m.ngrok.com",
+      "aligned": null,
+      "verdict": "pass",
+      "description": null
+    },
+    "dkim": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "m.ngrok.com",
+      "aligned": true,
+      "verdict": "pass",
+      "description": "aligned with From"
+    },
+    "dmarc": {
+      "present": false,
+      "verified": true,
+      "status": "NONE",
+      "domain": "m.ngrok.com",
+      "aligned": null,
+      "verdict": "none",
+      "description": null
+    }
+  },
+  "headers": [
+    {
+      "name": "Authentication-Results",
+      "value": "mta-in.example.com; dmarc=none (p=none dis=none) header.from=m.ngrok.com"
+    },
+    {
+      "name": "Authentication-Results",
+      "value": "mta-in.example.com; dkim=pass (2048-bit key, unprotected) header.d=21124867m.ngrok.com header.i=@21124867m.ngrok.com header.a=rsa-sha256 header.s=hs1 header.b=ISa4FW2K; dkim=pass (2048-bit key, unprotected) header.d=m.ngrok.com header.i=@m.ngrok.com header.a=rsa-sha256 header.s=hs1-21124867 header.b=zyWFdOIV"
+    },
+    {
+      "name": "Received-SPF",
+      "value": "Pass (mailfrom) identity=mailfrom; client-ip=158.247.26.177; helo=bid48ar.21124867m.ngrok.com; envelope-from=1axboes5ld001t4lgsbt8hpxno46gs3vee6cfc-ngrok=example.com@21124867m.ngrok.com; receiver=example.com"
+    }
+  ],
+  "dkim_from": "pass"
+}

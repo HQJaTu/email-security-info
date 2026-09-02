@@ -1,0 +1,55 @@
+From somenews@ip19.rp05.net  Thu Aug 13 17:56:01 2026
+Return-Path: <somenews@ip19.rp05.net>
+X-Original-To: cdandlp@example.com
+Delivered-To: user@example.com
+Received-ASN: AS35625 Eurofiber France SAS (client 109.197.245.119)
+DMARC-Filter: OpenDMARC Filter v1.4.2 mta-in.example.com 91265183FF40
+Authentication-Results: mta-in.example.com; dmarc=fail (p=none dis=none) header.from=cdandlp.com
+DKIM-Filter: OpenDKIM Filter v2.11.0 mta-in.example.com 91265183FF40
+Authentication-Results: mta-in.example.com;
+	dkim=pass (2048-bit key, unprotected) header.d=ip19.rp05.net header.i=@ip19.rp05.net header.a=rsa-sha256 header.s=mta0ip header.b=GYYokT2g;
+	dkim=pass (1024-bit key, unprotected) header.d=ip19.rp05.net header.i=@ip19.rp05.net header.a=rsa-sha256 header.s=mta0 header.b=w9O0HKDL
+Received-SPF: Pass (mailfrom) identity=mailfrom; client-ip=109.197.245.119; helo=ip19.rp05.net; envelope-from=somenews@ip19.rp05.net; receiver=example.com 
+Received: from ip19.rp05.net (ip19.rp05.net [109.197.245.119])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange x25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mta-in.example.com (Postfix) with ESMTPS id 91265183FF40
+	for <cdandlp@example.com>; Thu, 13 Aug 2026 17:55:56 +0300 (EEST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1786632956;
+	s=mta0ip; d=ip19.rp05.net;
+	h=Date:Message-ID:MIME-Version:Content-Type:List-Unsubscribe:
+	 List-Unsubscribe-Post:Reply-To:From:Sender:To:Subject;
+	bh=sgzRoUQ226APvfoFdMuba4zp8VpB+GBG2TQHRwYOtto=;
+	b=GYYokT2gjb+CBxOjn8mY2g7Zxr2p/4euFnQlJlNE89JdDd6HxH4vIemw2H1Bvelrt64EJzc+Y
+	 oFiqs1WAq02UNY81TBEDodIYAzsDBfNwBNmbdKH24ce7GmxbSw0XJXSLPT1Y5X4dtHlTAakxVJb
+	 qCf6MMt3BIaMZTdtb4ElByTBzMqB3BgxVUjnJOu+HfhGm5G8O5RKN/c6uM/2o0cn6ngSjkU0dzo
+	 pHjSnCuF4Vme1dqpexi/HKyT2bkQrf2jhBX7ZissOlkaFMVSrXJb3UNZNfGsj9jBBCrswcp9n1d
+	 rc1rBPOo5HWgyQ6yhIk62h2Z6xQ7km7kOCjYpIiGWCVw==
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1786632956;
+	s=mta0; d=ip19.rp05.net;
+	h=Date:Message-ID:MIME-Version:Content-Type:List-Unsubscribe:
+	 List-Unsubscribe-Post:Reply-To:From:Sender:To:Subject;
+	bh=sgzRoUQ226APvfoFdMuba4zp8VpB+GBG2TQHRwYOtto=;
+	b=w9O0HKDLVa6vXJpIKjJuQ6YTpjXHHHA5HmO2sw0KTSWUjbKk6bCWkyFqRAr4H5PJgegLtUpkL
+	 8paZfSl3B2nIarf1MRpaamb9Xw0kn2hdwdFLdXzilXgo5KzdTmlY3+HlxF4UXpXMmUV8xpLrdBR
+	 kY84dx1GaAdpLq/J3pqxHo0=
+Date: Thu, 13 Aug 2026 16:55:56 +0200 (CEST)
+Message-ID: <32m38hheiftkfa025d1zBA_RCkVS_2JY31-HW_k3g3f7233ab-745b-409b-a0a6-2d928b40dcf5@ip19.rp05.net>
+MIME-Version: 1.0
+Content-Type: multipart/alternative; 
+	boundary="----=_Part_2811766_145855753.1786632654867"
+Feedback-ID: 666718096746045886b3dfa5:vzINm90NS0qEoNbDQZkZHA:none:Sarbacane
+List-Unsubscribe: <https://eye.sbc33.com/ur-p?q=wAbNCcbDtnZ6SU5tOTBOUzBxRW9OYkRRWmtaSEGgxBDQzBA_RCkVS_3QiWN9fh1v5NDeuDY2NjcxODA5Njc0NjA0NTg4NmIzZGZhNaDZJDNmNzIzM2FiLTc0NWItNDA5Yi1hMGE2LTJkOTI4YjQwZGNmNbNjZGFuZGxwQGphdHUub25saW5lkA==>
+List-Unsubscribe-Post: List-Unsubscribe=One-Click
+Reply-To: The Team <contact@cdandlp.com>
+From: Nathalie - CDandLP <somenews@cdandlp.com>
+Sender: somenews@ip19.rp05.net
+To: cdandlp@example.com
+Subject: Summer time
+
+------=_Part_2811766_145855753.1786632654867
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+Fancy a little more summer? =E2=98=80=EF=B8=8F

@@ -1,0 +1,52 @@
+{
+  "status": "warn",
+  "summary": "Sender authentication is incomplete or not aligned.",
+  "info": {
+    "header-from": "Lappeenrannan musiikkiopisto <musiikkiopisto@lprmo.fi>",
+    "transport": "Encrypted — TLSv1.3"
+  },
+  "security": {
+    "spf": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "lprmo.fi",
+      "aligned": null,
+      "verdict": "pass",
+      "description": null
+    },
+    "dkim": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "lprmo-fi.20251104.gappssmtp.com",
+      "aligned": false,
+      "verdict": "warn",
+      "description": "does not match From (lprmo.fi)"
+    },
+    "dmarc": {
+      "present": false,
+      "verified": true,
+      "status": "NONE",
+      "domain": "lprmo.fi",
+      "aligned": null,
+      "verdict": "none",
+      "description": null
+    }
+  },
+  "headers": [
+    {
+      "name": "Authentication-Results",
+      "value": "mta-in.example.com; dmarc=none (p=none dis=none) header.from=lprmo.fi"
+    },
+    {
+      "name": "Authentication-Results",
+      "value": "mta-in.example.com; dkim=pass (2048-bit key, unprotected) header.d=lprmo-fi.20251104.gappssmtp.com header.i=@lprmo-fi.20251104.gappssmtp.com header.a=rsa-sha256 header.s=20251104 header.b=pxDtj1Tq"
+    },
+    {
+      "name": "Received-SPF",
+      "value": "Pass (mailfrom) identity=mailfrom; client-ip=74.125.224.51; helo=mail-yx1-f51.google.com; envelope-from=musiikkiopisto@lprmo.fi; receiver=turkia.eu"
+    }
+  ],
+  "dkim_from": "warn"
+}
