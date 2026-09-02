@@ -13,7 +13,6 @@
       "domain": "ip19.rp05.net",
       "aligned": null,
       "verdict": "pass",
-      "marker": null,
       "description": null
     },
     "dkim": {
@@ -23,7 +22,6 @@
       "domain": "ip19.rp05.net",
       "aligned": false,
       "verdict": "warn",
-      "marker": "fail",
       "description": "does not match From (cdandlp.com)"
     },
     "dmarc": {
@@ -33,7 +31,6 @@
       "domain": "cdandlp.com",
       "aligned": null,
       "verdict": "fail",
-      "marker": null,
       "description": null
     }
   },
@@ -51,5 +48,5 @@
       "value": "Pass (mailfrom) identity=mailfrom; client-ip=109.197.245.119; helo=ip19.rp05.net; envelope-from=somenews@ip19.rp05.net; receiver=example.com"
     }
   ],
-  "dkim_from": "fail"
+  "dkim_from": "warn"
 }

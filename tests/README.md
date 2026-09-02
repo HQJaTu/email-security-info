@@ -38,7 +38,7 @@ With pytest, if you'd rather have its output and `-k` filtering:
     python -m pytest tests/test_verdict.py
     python -m pytest tests -k tls
 
-Expect ~175 tests in well under a second. There is no network access, no DNS and
+Expect ~190 tests in well under a second. There is no network access, no DNS and
 no temporary state outside `tempfile` directories that clean themselves up.
 
 Note that the dotted form (`python -m unittest tests.test_verdict`) does *not*
@@ -60,7 +60,7 @@ not, and split along the seams of what they cover:
       test_transport.py         TLS detection from the last Received hop
       test_alignment.py         relaxed From-alignment, DKIM signing domain
       test_sender.py            the From header: decoding, sanitizing, display
-      test_verdict.py           per-method statuses, how they combine, DKIM marker
+      test_verdict.py           per-method statuses, how they combine, the DKIM verdict
       test_formatting.py        one security finding → its displayed line
       test_result.py            the assembled result: info, security, raw headers
       test_report.py            the text report and the colour decision
@@ -143,9 +143,11 @@ form the tool writes. The point of these files is that a human never types them.
 
 The rest of `test_real_messages.py` asserts **only what must hold for any
 message**, never anything about the content of these particular ones: the status
-is one of the four known values, the summary matches it, every `info` field
-carries a string, every mechanism in `security` has the same fixed set of keys
-with values drawn from the known vocabularies, no raw header value is left
+is one of the four known values, the summary matches it, the status is
+exactly the worst of the per-mechanism verdicts printed beneath it, `dkim_from`
+is exactly the DKIM finding's verdict, every `info`
+field carries a string, every mechanism in `security` has the same fixed set of
+keys with values drawn from the known vocabularies, no raw header value is left
 folded, the result survives a JSON round-trip, the report renders without stray
 surrogates, and evaluation is deterministic.
 
@@ -183,22 +185,30 @@ If `emails/` is missing or empty, `test_real_messages.py` skips itself and the
 rest of the suite still runs.
 
 
-Two tests that document known limitations
+Tests that pin down deliberate behaviour
 ----------------------------------------
 
-These pin down behaviour inherited from the Roundcube PHP plugin that is
-faithful but arguably wrong. They are written to fail loudly if someone changes
-the behaviour, so that fixing it is a deliberate act, not an accident:
+These tests exist to fail loudly if someone changes behaviour that was chosen on
+purpose, so that changing it again is a deliberate act rather than an accident.
 
-- `test_verdict.py`, `TestDkimFromMarker.test_only_the_first_signature_is_judged`
-  — when a message carries several DKIM signatures (an ESP's plus the sender's
-  own, which is common), only the first one is judged, so an aligned pass
-  further down the header does not count. Most samples in `emails/` hit this.
+- `test_verdict.py`, `TestDkimVerdict.test_dkim_from_is_the_same_answer` — there is
+  exactly one DKIM answer. The row glyph, the sentence below the table and the
+  JSON's `dkim_from` are all the DKIM finding's `verdict`, never recomputed
+  alongside it. They used to be computed twice and drifted apart, so an unaligned
+  PASS showed `verdict: warn` beside a `✗`.
+- `test_verdict.py`, `TestEvaluate.test_a_dmarc_pass_does_not_excuse_a_weaker_mechanism`
+  — the verdict is the worst of SPF, DKIM and DMARC, and a DMARC pass does not
+  lift a warning beside it. The Roundcube plugin let DMARC decide on its own;
+  this does not.
+- `test_verdict.py`, `TestEvaluate.test_a_forwarded_message_is_judged_on_its_broken_spf`
+  — the known cost of the rule above. A mailing list breaks SPF while the aligned
+  signature survives, and such a message is reported `fail`. If that proves too
+  noisy in practice, `evaluate()`'s docstring says what to change; change this
+  test with it.
 - `test_real_messages.py`,
   `TestRealMessages.test_a_trust_list_drops_all_untrusted_evidence` — a
   `Received-SPF` header carries no authserv-id, so `--trusted-authserv` cannot
   filter it and an SPF pass from it survives even when every
-  `Authentication-Results` header is distrusted.
-
-If either limitation is fixed, update the corresponding test rather than
-deleting it.
+  `Authentication-Results` header is distrusted. This one is a genuine
+  limitation, not a choice; if it is fixed, update the test rather than deleting
+  it.

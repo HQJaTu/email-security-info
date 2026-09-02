@@ -97,7 +97,7 @@ class TestRealMessages(unittest.TestCase):
 
     #: The fixed shape every security finding must have.
     ENTRY_KEYS = {'present', 'verified', 'status', 'domain', 'aligned', 'verdict',
-                  'marker', 'description'}
+                  'description'}
 
     @classmethod
     def setUpClass(cls):
@@ -110,7 +110,8 @@ class TestRealMessages(unittest.TestCase):
                     str(path), msi.SecurityInfoConfig(extra_headers=['Message-ID', 'Return-Path']))
 
                 self.assertIn(result['status'], ('pass', 'warn', 'fail', 'unknown'))
-                self.assertIn(result['dkim_from'], ('pass', 'fail', 'none'))
+                self.assertIn(result['dkim_from'], ('pass', 'warn', 'fail', 'unknown', 'none'))
+                self.assertEqual(result['dkim_from'], result['security']['dkim']['verdict'])
                 self.assertEqual(result['summary'], msi.i18n_gettext('summary' + result['status']))
                 # The sender and the transport, both with something to show.
                 self.assertEqual(set(result['info']), {'header-from', 'transport'})
@@ -127,6 +128,18 @@ class TestRealMessages(unittest.TestCase):
                         self.assertRegex(entry['status'], r'^[A-Z]+$')
 
                 self.assertEqual(json.loads(json.dumps(result)), result)
+
+    def test_the_status_is_the_worst_of_the_findings_shown(self):
+        # Nothing may decide the verdict off to one side: whatever the report
+        # says about a real message, the headline is exactly the worst of the
+        # per-mechanism verdicts printed beneath it. A reader who disagrees with
+        # the headline can always point at the line that produced it.
+        engine = msi.MessageSecurityInfo(msi.SecurityInfoConfig())
+        for path in self.paths:
+            with self.subTest(message=path.name):
+                result = msi.evaluate_message_security_info(str(path))
+                verdicts = [entry['verdict'] for entry in result['security'].values()]
+                self.assertEqual(result['status'], engine.combine_statuses(verdicts))
 
     def test_no_raw_header_value_is_folded(self):
         for path in self.paths:
@@ -160,7 +173,10 @@ class TestRealMessages(unittest.TestCase):
                     str(path), msi.SecurityInfoConfig(trusted_authserv=['nobody.invalid']))
                 security = filtered['security']
 
-                self.assertEqual(filtered['dkim_from'], 'none')
+                # Signed, but with every stamped result distrusted nothing
+                # confirms it: 'unknown', never a pass, warn or fail.
+                self.assertEqual(filtered['dkim_from'], 'unknown')
+                self.assertFalse(filtered['security']['dkim']['verified'])
                 self.assertFalse(security['dkim']['verified'])
                 self.assertIsNone(security['dkim']['status'])
                 self.assertEqual(security['dmarc']['status'], None)

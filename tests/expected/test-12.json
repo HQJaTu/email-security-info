@@ -13,7 +13,6 @@
       "domain": "mailer.ebookers.com",
       "aligned": null,
       "verdict": "pass",
-      "marker": null,
       "description": null
     },
     "dkim": {
@@ -23,7 +22,6 @@
       "domain": "mailer.ebookers.com",
       "aligned": false,
       "verdict": "warn",
-      "marker": "fail",
       "description": "does not match From (n.ebookers.com)"
     },
     "dmarc": {
@@ -33,23 +31,22 @@
       "domain": "n.ebookers.com",
       "aligned": null,
       "verdict": "none",
-      "marker": null,
       "description": null
     }
   },
   "headers": [
     {
       "name": "Authentication-Results",
-      "value": "samba.jari.turkia.name; dmarc=none (p=none dis=none) header.from=n.ebookers.com"
+      "value": "mta-in.example.com; dmarc=none (p=none dis=none) header.from=n.ebookers.com"
     },
     {
       "name": "Authentication-Results",
-      "value": "samba.jari.turkia.name; dkim=pass (1024-bit key, unprotected) header.d=mailer.ebookers.com header.i=@mailer.ebookers.com header.a=rsa-sha256 header.s=gears header.b=bj6DYbO/"
+      "value": "mta-in.example.com; dkim=pass (1024-bit key, unprotected) header.d=mailer.ebookers.com header.i=@mailer.ebookers.com header.a=rsa-sha256 header.s=gears header.b=bj6DYbO/"
     },
     {
       "name": "Received-SPF",
-      "value": "Pass (mailfrom) identity=mailfrom; client-ip=135.84.217.207; helo=gears217-207.expediamail.com; envelope-from=386506252000143bd1d02-b26245-b3bad030ac564a1188bc98dc129ff89d@mailer.ebookers.com; receiver=jatu.online"
+      "value": "Pass (mailfrom) identity=mailfrom; client-ip=135.84.217.207; helo=gears217-207.expediamail.com; envelope-from=386506252000143bd1d02-b26245-b3bad030ac564a1188bc98dc129ff89d@mailer.ebookers.com; receiver=example.com"
     }
   ],
-  "dkim_from": "fail"
+  "dkim_from": "warn"
 }

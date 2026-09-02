@@ -1,6 +1,6 @@
 {
-  "status": "warn",
-  "summary": "Sender authentication is incomplete or not aligned.",
+  "status": "pass",
+  "summary": "Sender authentication passed.",
   "info": {
     "header-from": "Joel @ ngrok <team@m.ngrok.com>",
     "transport": "Encrypted — TLSv1.2"
@@ -13,18 +13,16 @@
       "domain": "21124867m.ngrok.com",
       "aligned": null,
       "verdict": "pass",
-      "marker": null,
       "description": null
     },
     "dkim": {
       "present": true,
       "verified": true,
       "status": "PASS",
-      "domain": "21124867m.ngrok.com",
-      "aligned": false,
-      "verdict": "warn",
-      "marker": "fail",
-      "description": "does not match From (m.ngrok.com)"
+      "domain": "m.ngrok.com",
+      "aligned": true,
+      "verdict": "pass",
+      "description": "aligned with From"
     },
     "dmarc": {
       "present": false,
@@ -33,7 +31,6 @@
       "domain": "m.ngrok.com",
       "aligned": null,
       "verdict": "none",
-      "marker": null,
       "description": null
     }
   },
@@ -51,5 +48,5 @@
       "value": "Pass (mailfrom) identity=mailfrom; client-ip=158.247.26.177; helo=bid48ar.21124867m.ngrok.com; envelope-from=1axboes5ld001t4lgsbt8hpxno46gs3vee6cfc-ngrok=example.com@21124867m.ngrok.com; receiver=example.com"
     }
   ],
-  "dkim_from": "fail"
+  "dkim_from": "pass"
 }

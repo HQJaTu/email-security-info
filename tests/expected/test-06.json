@@ -13,18 +13,16 @@
       "domain": "bf05x.hubspotemail.net",
       "aligned": null,
       "verdict": "pass",
-      "marker": null,
       "description": null
     },
     "dkim": {
       "present": true,
       "verified": true,
       "status": "PASS",
-      "domain": "bf05x.hubspotemail.net",
-      "aligned": false,
-      "verdict": "warn",
-      "marker": "fail",
-      "description": "does not match From (growthaccelerationpartners.com)"
+      "domain": "growthaccelerationpartners.com",
+      "aligned": true,
+      "verdict": "pass",
+      "description": "aligned with From"
     },
     "dmarc": {
       "present": true,
@@ -33,7 +31,6 @@
       "domain": "growthaccelerationpartners.com",
       "aligned": null,
       "verdict": "pass",
-      "marker": null,
       "description": null
     }
   },
@@ -51,5 +48,5 @@
       "value": "Pass (mailfrom) identity=mailfrom; client-ip=158.247.24.107; helo=bid47ul.bf05x.hubspotemail.net; envelope-from=1axb0pqcwhs1bte61pz9q4ggw4t0h8l0o1a5bo-dotnetconf=example.com@bf05x.hubspotemail.net; receiver=example.com"
     }
   ],
-  "dkim_from": "fail"
+  "dkim_from": "pass"
 }

@@ -13,7 +13,6 @@
       "domain": "lprmo.fi",
       "aligned": null,
       "verdict": "pass",
-      "marker": null,
       "description": null
     },
     "dkim": {
@@ -23,7 +22,6 @@
       "domain": "lprmo-fi.20251104.gappssmtp.com",
       "aligned": false,
       "verdict": "warn",
-      "marker": "fail",
       "description": "does not match From (lprmo.fi)"
     },
     "dmarc": {
@@ -33,7 +31,6 @@
       "domain": "lprmo.fi",
       "aligned": null,
       "verdict": "none",
-      "marker": null,
       "description": null
     }
   },
@@ -51,5 +48,5 @@
       "value": "Pass (mailfrom) identity=mailfrom; client-ip=74.125.224.51; helo=mail-yx1-f51.google.com; envelope-from=musiikkiopisto@lprmo.fi; receiver=turkia.eu"
     }
   ],
-  "dkim_from": "fail"
+  "dkim_from": "warn"
 }

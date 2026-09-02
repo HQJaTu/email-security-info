@@ -13,18 +13,16 @@
       "domain": "emsgrid.com",
       "aligned": null,
       "verdict": "pass",
-      "marker": null,
       "description": null
     },
     "dkim": {
       "present": true,
       "verified": true,
       "status": "PASS",
-      "domain": "smgrid.eu",
-      "aligned": false,
-      "verdict": "warn",
-      "marker": "fail",
-      "description": "does not match From (email3.gog.com)"
+      "domain": "email3.gog.com",
+      "aligned": true,
+      "verdict": "pass",
+      "description": "aligned with From"
     },
     "dmarc": {
       "present": true,
@@ -33,7 +31,6 @@
       "domain": "email3.gog.com",
       "aligned": null,
       "verdict": "pass",
-      "marker": null,
       "description": null
     }
   },
@@ -51,5 +48,5 @@
       "value": "Pass (mailfrom) identity=mailfrom; client-ip=185.54.187.77; helo=ianus.emlgrid.com; envelope-from=sm.5138770744.3f5ada29ba85a3ae55-newsletter=email3.gog.com@emsgrid.com; receiver=example.com"
     }
   ],
-  "dkim_from": "fail"
+  "dkim_from": "pass"
 }

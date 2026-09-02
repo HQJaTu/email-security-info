@@ -13,7 +13,6 @@
       "domain": "bounce.linkedin.com",
       "aligned": null,
       "verdict": "pass",
-      "marker": null,
       "description": null
     },
     "dkim": {
@@ -23,7 +22,6 @@
       "domain": "linkedin.com",
       "aligned": true,
       "verdict": "pass",
-      "marker": "pass",
       "description": "aligned with From"
     },
     "dmarc": {
@@ -33,7 +31,6 @@
       "domain": "linkedin.com",
       "aligned": null,
       "verdict": "pass",
-      "marker": null,
       "description": null
     }
   },

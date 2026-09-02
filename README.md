@@ -16,17 +16,34 @@ another program via `--json`.
     Message Security: ! WARN Sender authentication is incomplete or not aligned.
 
     Authentication results:
-      From                      Joel @ ngrok <team@m.ngrok.com>
-      SPF                       PASS — 21124867m.ngrok.com
-      DKIM                   ✗  PASS — 21124867m.ngrok.com
-                                does not match From (m.ngrok.com)
-      DMARC                     NONE — m.ngrok.com
-      Transport (TLS)           Encrypted — TLSv1.2
+      From                      ebookers Travel Information <noreply@n.ebookers.com>
+      SPF                    ✓  PASS — mailer.ebookers.com
+      DKIM                   !  PASS — mailer.ebookers.com
+                                does not match From (n.ebookers.com)
+      DMARC                  ·  NONE — n.ebookers.com
+      Transport (TLS)           Encrypted — TLSv1.3
 
-      DKIM: signature does not match the sender, or verification failed.
+      DKIM: signed, but the signature does not match the sender address.
 
       Authentication-Results    mta-in.example.com; dmarc=none (p=none …
       Received-SPF              Pass (mailfrom) identity=mailfrom; client-ip=…
+
+SPF passed here, so the message did leave a host the envelope domain authorises
+— but the signature is `mailer.ebookers.com` while the visible sender says
+`n.ebookers.com`, and no DMARC policy tied the two together. That gap is what
+the warning is about, and it is the kind of thing a green "authenticated" badge
+in a webmail client hides.
+
+Each mechanism carries its own glyph and the headline carries the worst of them,
+so the verdict can always be traced to the line that produced it — here, the `!`
+on the headline is the `!` on the DKIM row:
+
+    ✓  pass      the mechanism is satisfied
+    !  warn      a result that verified, but does not add up (an unaligned
+                 signature, a softfail, a neutral)
+    ✗  fail      the mechanism says the message is not what it claims to be
+    ?  unknown   a temporary error, or a signature nobody verified
+    ·  none      nothing was reported — not a failing, and not counted as one
 
 
 What it does and does not do
@@ -54,10 +71,29 @@ Two consequences worth knowing:
   authserv-id so only its verdict is believed. Without it, every such header is
   trusted — convenient, and spoofable.
 
-The verdict itself: DMARC decides when it produced a real result (it already
-implies an aligned SPF or DKIM pass); otherwise the present SPF and DKIM results
-are combined, with anything missing or disabled left out. TLS is informational
-and never changes the verdict.
+The verdict itself is **the worst of the mechanisms**, and nothing else: SPF,
+DKIM and DMARC are independent assertions about the same message, so the weakest
+one governs and the headline can always be traced back to a line printed beneath
+it. A DMARC pass does not excuse a weaker result beside it — DMARC passing means
+the domain owner's policy was met, not that every mechanism agreed, and the
+disagreement is the interesting part. Mechanisms that reported nothing, or that
+you disabled, are left out rather than counted against the message. TLS is
+informational and never changes the verdict.
+
+Within DKIM the opposite rule applies, because it answers a different question: a
+message is commonly signed twice, by the sending platform and by the sender's own
+domain, and those two signatures are alternatives rather than separate claims.
+One signature that verifies and is aligned with the `From:` domain authenticates
+the message, whatever the other one says, so the best of them is the one
+reported.
+
+One consequence is deliberate and worth knowing: **forwarders and mailing lists
+break SPF** while the aligned DKIM signature survives, so relayed mail arrives as
+`spf=fail` + `dkim=pass` + `dmarc=pass` and is reported FAIL on the strength of
+the SPF result alone. That is a false alarm for legitimately relayed mail, and
+the trade is intentional — a rule that silently forgives a failed mechanism is
+worth less than one you can follow. If it proves noisy for the mail you actually
+read, `evaluate()` in the source says what to change.
 
 
 Requirements and installation
@@ -134,6 +170,11 @@ a script:
     0   pass        4   fail
     3   warn        5   unknown
 
+Since the verdict is the worst of the mechanisms, a script that only accepts 0
+also rejects mailing-list and forwarded mail, whose SPF is broken by the relay.
+Accept 0 and 3 if that matters, or turn off the check your server does not stamp
+results for.
+
 ### Configuration file
 
 Anything you would rather not repeat goes in a TOML file, under a
@@ -154,35 +195,35 @@ JSON output
 -----------
 
 `--json` prints one object built for parsing rather than for reading. Its shape
-is fixed: every mechanism entry always carries the same eight keys, whatever the
+is fixed: every mechanism entry always carries the same seven keys, whatever the
 message says.
 
     {
       "status": "warn",
       "summary": "Sender authentication is incomplete or not aligned.",
       "info": {
-        "header-from": "Joel @ ngrok <team@m.ngrok.com>",
-        "transport": "Encrypted — TLSv1.2"
+        "header-from": "ebookers Travel Information <noreply@n.ebookers.com>",
+        "transport": "Encrypted — TLSv1.3"
       },
       "security": {
         "spf": {
           "present": true, "verified": true, "status": "PASS",
-          "domain": "21124867m.ngrok.com", "aligned": null,
-          "verdict": "pass", "marker": null, "description": null
+          "domain": "mailer.ebookers.com", "aligned": null,
+          "verdict": "pass", "description": null
         },
         "dkim": {
           "present": true, "verified": true, "status": "PASS",
-          "domain": "21124867m.ngrok.com", "aligned": false,
-          "verdict": "warn", "marker": "fail",
-          "description": "does not match From (m.ngrok.com)"
+          "domain": "mailer.ebookers.com", "aligned": false,
+          "verdict": "warn",
+          "description": "does not match From (n.ebookers.com)"
         },
         "dmarc": {
           "present": false, "verified": true, "status": "NONE",
-          "domain": "m.ngrok.com", "aligned": null,
-          "verdict": "none", "marker": null, "description": null
+          "domain": "n.ebookers.com", "aligned": null,
+          "verdict": "none", "description": null
         }
       },
-      "dkim_from": "fail",
+      "dkim_from": "warn",
       "headers": [
         {"name": "Authentication-Results", "value": "mta-in.example.com; …"}
       ]
@@ -190,11 +231,11 @@ message says.
 
 | Key | Meaning |
 | --- | --- |
-| `status` | The overall verdict: `pass`, `warn`, `fail` or `unknown`. |
+| `status` | The overall verdict: `pass`, `warn`, `fail` or `unknown`. Always the worst of the `verdict` fields in `security`. |
 | `summary` | The one-sentence version of `status`. |
 | `info` | Descriptive, non-verdict fields, each a display string. |
 | `security` | One entry per **enabled** mechanism, in SPF → DKIM → DMARC order. |
-| `dkim_from` | The DKIM/From marker for the sender: `pass`, `fail` or `none`. Absent when the DKIM check is disabled. |
+| `dkim_from` | The DKIM verdict, lifted out for callers that only want it. Always equal to `security.dkim.verdict`; absent when the DKIM check is disabled. |
 | `headers` | The raw header lines shown below the summary, unfolded. |
 
 And within a `security` entry:
@@ -204,10 +245,9 @@ And within a `security` entry:
 | `present` | The mechanism is in effect for this message. False when nothing was reported, and equally when the result was `none` — no SPF/DKIM/DMARC on the sending side. |
 | `verified` | Your server checked this, rather than the message merely carrying an unverified claim (an unchecked `DKIM-Signature`). |
 | `status` | The raw protocol result, upper case: `PASS`, `FAIL`, `SOFTFAIL`, `NONE`, `TEMPERROR`, … or `null` when there is no result. |
-| `domain` | The domain the result is about: DKIM's signing domain, or the envelope/From domain SPF and DMARC judged. |
+| `domain` | The domain the result is about: DKIM's signing domain, or the envelope/From domain SPF and DMARC judged. When a message carries several DKIM signatures, this is the one that was reported — the best of them. |
 | `aligned` | Whether `domain` matches the From domain. DKIM only — the only mechanism this compares — and `null` where the question cannot be answered. |
-| `verdict` | That mechanism's severity on its own: `pass`, `warn`, `fail`, `unknown` or `none`. |
-| `marker` | The DKIM/From marker, mirroring the top-level `dkim_from`. `null` for SPF and DMARC. |
+| `verdict` | That mechanism's severity on its own: `pass`, `warn`, `fail`, `unknown` or `none`. `none` contributes nothing to `status`. This is also what the report's glyph is drawn from. |
 | `description` | A human-readable note — the alignment note, or why there is no result. `null` when there is nothing to add. |
 
 A mechanism is missing from `security` only when its check is disabled, and
@@ -282,7 +322,7 @@ With pytest, if you want its output and `-k` filtering:
     python -m pytest tests
     python -m pytest tests -k tls
 
-Expect ~175 tests in well under a second. The suite needs no network, no DNS and
+Expect ~190 tests in well under a second. The suite needs no network, no DNS and
 no fixtures beyond the sample messages in `tests/emails/`.
 
 The dotted form (`python -m unittest tests.test_verdict`) deliberately does not
@@ -308,7 +348,7 @@ still in the form the tool writes.
 
 See `tests/README.md` for what each test file covers, how the shared
 `support.py` helpers work, how to add and redact your own sample messages, and
-the two tests that pin down known limitations inherited from the PHP plugin.
+the tests that pin down deliberate behaviour and the one known limitation.
 
 ### Style
 

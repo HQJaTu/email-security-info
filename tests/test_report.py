@@ -35,9 +35,15 @@ class TestFormatReport(unittest.TestCase):
         self.assertTrue(any('SPF' in line and 'PASS — example.com' in line for line in lines))
         self.assertTrue(any(line.strip().startswith('X-Spam-Status') for line in lines))
 
-    def test_the_from_marker_sentence_is_included(self):
-        self.assertIn(msi.i18n_gettext('frommarkerpass'), self.report(PASS_EML))
-        self.assertIn(msi.i18n_gettext('frommarkernone'), self.report(UNVERIFIED_EML))
+    def test_the_dkim_sentence_matches_the_dkim_verdict(self):
+        # One sentence per value the DKIM verdict can take, so a warning never
+        # gets described in the words of a failure.
+        for message, key in ((PASS_EML, 'frommarkerpass'),
+                             (UNALIGNED_EML, 'frommarkerwarn'),
+                             (FAIL_EML, 'frommarkerfail'),
+                             (UNVERIFIED_EML, 'frommarkerunknown')):
+            with self.subTest(key=key):
+                self.assertIn(msi.i18n_gettext(key), self.report(message))
 
     def test_multiline_values_are_aligned_under_the_value_column(self):
         lines = self.report(UNALIGNED_EML).splitlines()
@@ -56,14 +62,20 @@ class TestFormatReport(unittest.TestCase):
         strip = lambda line: line.replace('\033[32m', '').replace('\033[0m', '')  # noqa: E731
         self.assertEqual([strip(line) for line in colored], plain)
 
-    def test_the_marker_column_exists_only_when_a_row_has_a_marker(self):
-        def value_column(report):
-            return next(line.index('Alice') for line in report.splitlines() if 'Alice' in line)
+    def test_every_mechanism_row_carries_its_own_glyph(self):
+        # The reader can follow the headline down to the row that produced it,
+        # which only works if each mechanism draws its own verdict's glyph.
+        lines = self.report(UNALIGNED_EML).splitlines()
+        glyphs = {line.split()[0]: line.split()[1] for line in lines
+                  if line.startswith('  ') and line.split()[0] in ('SPF', 'DKIM', 'DMARC')}
+        self.assertEqual(glyphs, {'SPF': '!', 'DKIM': '!', 'DMARC': '·'})
+        self.assertTrue(lines[0].startswith('Message Security: !'))
 
-        without = self.report(PASS_EML, check_dkim=False)
-        self.assertEqual(value_column(self.report(PASS_EML)) - value_column(without), 2)
-        # The glyph in the headline is not part of a row.
-        self.assertNotIn('✓', without.split('\n', 1)[1])
+    def test_rows_without_a_verdict_align_with_the_ones_that_have_glyphs(self):
+        lines = self.report(PASS_EML).splitlines()
+        sender = next(line for line in lines if 'Alice' in line)
+        spf = next(line for line in lines if 'SPF' in line)
+        self.assertEqual(sender.index('Alice'), spf.index('PASS'))
 
 
 class TestReportRows(unittest.TestCase):
@@ -82,10 +94,12 @@ class TestReportRows(unittest.TestCase):
                                     check_tls=False)],
                          ['From', 'DKIM'])
 
-    def test_only_the_dkim_row_carries_a_marker(self):
-        self.assertEqual([(label, marker) for label, _, marker in self.rows(FAIL_EML)
-                          if marker],
-                         [('DKIM', 'fail')])
+    def test_every_mechanism_row_carries_its_verdict(self):
+        # And only the mechanisms: the sender and the transport are descriptive,
+        # not verdicts, so they carry none.
+        self.assertEqual([(label, verdict) for label, _, verdict in self.rows(UNALIGNED_EML)],
+                         [('From', None), ('SPF', 'warn'), ('DKIM', 'warn'),
+                          ('DMARC', 'none'), ('Transport (TLS)', None)])
 
     def test_values_are_the_displayed_strings(self):
         rows = {label: value for label, value, _ in self.rows(PASS_EML)}
