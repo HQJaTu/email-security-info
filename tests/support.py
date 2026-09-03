@@ -140,6 +140,16 @@ Subject: Your account
 body
 """
 
+RELAYED_EML = b"""Received: from lists.example.net by mx.example.org with ESMTPS id 7q; Tue, 11 Aug 2026 10:00:01 +0200
+Authentication-Results: mx.example.org; dkim=pass header.d=example.com;
+\tspf=fail smtp.mailfrom=lists.example.net;
+\tdmarc=pass header.from=example.com
+From: Alice Example <alice@example.com>
+Subject: [list] Hello
+
+body
+"""
+
 UNVERIFIED_EML = b"""Received: from mail.example.com by mx.example.org with ESMTPA id 2; Tue, 11 Aug 2026 10:00:01 +0200
 DKIM-Signature: v=1; a=rsa-sha256; d=news.example.com; s=k1; b=zzz=
 From: news@news.example.com

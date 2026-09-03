@@ -87,13 +87,21 @@ One signature that verifies and is aligned with the `From:` domain authenticates
 the message, whatever the other one says, so the best of them is the one
 reported.
 
-One consequence is deliberate and worth knowing: **forwarders and mailing lists
-break SPF** while the aligned DKIM signature survives, so relayed mail arrives as
-`spf=fail` + `dkim=pass` + `dmarc=pass` and is reported FAIL on the strength of
-the SPF result alone. That is a false alarm for legitimately relayed mail, and
-the trade is intentional — a rule that silently forgives a failed mechanism is
-worth less than one you can follow. If it proves noisy for the mail you actually
-read, `evaluate()` in the source says what to change.
+There is exactly one exception, and it is applied to the mechanism rather than
+to the headline: **forwarders and mailing lists break SPF** while the aligned
+DKIM signature survives, so relayed mail arrives as `spf=fail` + `dkim=pass` +
+`dmarc=pass`. A DMARC pass beside an SPF fail can only rest on that aligned
+signature, which means the sending domain's own published policy has already
+weighed this exact failure and accepted the message — so the SPF finding is
+demoted to a warning, and says why:
+
+      SPF                    !  FAIL — lists.example.net (DMARC accepted it on
+                                       the signature)
+
+The result itself is untouched and still shown as FAIL. Only the severity read
+from it changes, and it changes on the row, so the headline is still exactly the
+worst of the lines beneath it. Nothing else is ever forgiven: an SPF fail with no
+DMARC pass behind it fails, and a softfail stays a warning.
 
 
 Requirements and installation
@@ -171,8 +179,9 @@ a script:
     3   warn        5   unknown
 
 Since the verdict is the worst of the mechanisms, a script that only accepts 0
-also rejects mailing-list and forwarded mail, whose SPF is broken by the relay.
-Accept 0 and 3 if that matters, or turn off the check your server does not stamp
+rejects more than forgeries: mailing-list and forwarded mail warns (its SPF is
+broken by the relay), as does anything your server reported nothing for. Accept
+0 and 3 if that matters, or turn off the check your server does not stamp
 results for.
 
 ### Configuration file
@@ -248,7 +257,7 @@ And within a `security` entry:
 | `domain` | The domain the result is about: DKIM's signing domain, or the envelope/From domain SPF and DMARC judged. When a message carries several DKIM signatures, this is the one that was reported — the best of them. |
 | `aligned` | Whether `domain` matches the From domain. DKIM only — the only mechanism this compares — and `null` where the question cannot be answered. |
 | `verdict` | That mechanism's severity on its own: `pass`, `warn`, `fail`, `unknown` or `none`. `none` contributes nothing to `status`. This is also what the report's glyph is drawn from. |
-| `description` | A human-readable note — the alignment note, or why there is no result. `null` when there is nothing to add. |
+| `description` | A human-readable note — the alignment note, why there is no result, or why a failed SPF is not counted as a failure. `null` when there is nothing to add. |
 
 A mechanism is missing from `security` only when its check is disabled, and
 `transport` is missing from `info` only under `--no-check-tls`. Nothing else

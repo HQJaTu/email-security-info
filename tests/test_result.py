@@ -10,7 +10,8 @@ See README.md in this directory for how to run these.
 import json
 import unittest
 
-from support import FAIL_EML, PASS_EML, UNALIGNED_EML, UNVERIFIED_EML, headers, info, msi
+from support import (FAIL_EML, PASS_EML, RELAYED_EML, UNALIGNED_EML, UNVERIFIED_EML,
+                     headers, info, msi)
 
 
 class TestInfoFields(unittest.TestCase):
@@ -101,6 +102,44 @@ class TestSecurityFields(unittest.TestCase):
         self.assertTrue(entry['verified'])
         self.assertEqual(entry['status'], 'NONE')
         self.assertEqual(entry['verdict'], 'none')
+
+    def test_a_relayed_spf_fail_is_demoted_but_still_shown(self):
+        # A mailing list breaks SPF and the aligned signature carries DMARC.
+        # The result stays FAIL — that is what the server said — while the
+        # severity read from it drops to warn, with the row saying why.
+        entry = self.fields(RELAYED_EML)['spf']
+        self.assertEqual(entry['status'], 'FAIL')
+        self.assertEqual(entry['verdict'], 'warn')
+        self.assertEqual(entry['description'], msi.i18n_gettext('spfrelayed'))
+
+    def test_a_relayed_spf_fail_is_demoted_with_dkim_switched_off(self):
+        # The demotion rests on the server's DMARC evaluation, not on the DKIM
+        # finding beside it, so switching DKIM off does not bring the fail back.
+        self.assertEqual(self.fields(RELAYED_EML, check_dkim=False)['spf']['verdict'], 'warn')
+
+    def test_an_spf_fail_dmarc_did_not_accept_stays_a_fail(self):
+        # Nothing forgave this one: no DMARC result, so no policy weighed the
+        # SPF failure and there is nothing to demote it on.
+        entry = self.fields('Authentication-Results: mx; spf=fail smtp.mailfrom=list.test; '
+                            'dkim=pass header.d=a.test\n'
+                            'From: a@a.test\n\nbody\n')['spf']
+        self.assertEqual(entry['verdict'], 'fail')
+        self.assertIsNone(entry['description'])
+
+    def test_an_spf_fail_beside_a_failing_dmarc_stays_a_fail(self):
+        entry = self.fields('Authentication-Results: mx; spf=fail smtp.mailfrom=list.test; '
+                            'dmarc=fail header.from=a.test\n'
+                            'From: a@a.test\n\nbody\n')['spf']
+        self.assertEqual(entry['verdict'], 'fail')
+
+    def test_a_dmarc_pass_does_not_touch_a_softfail(self):
+        # Only a fail is demoted. A softfail is already a warn, and a DMARC
+        # pass must not turn any of this into a pass.
+        entry = self.fields('Authentication-Results: mx; spf=softfail smtp.mailfrom=a.test; '
+                            'dmarc=pass header.from=a.test\n'
+                            'From: a@a.test\n\nbody\n')['spf']
+        self.assertEqual(entry['verdict'], 'warn')
+        self.assertNotEqual(entry['description'], msi.i18n_gettext('spfrelayed'))
 
     def test_spf_uses_the_received_spf_fallback(self):
         entry = self.fields('Received-SPF: Pass (mailfrom) envelope-from=a@a.test;\n'
