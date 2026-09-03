@@ -77,7 +77,7 @@ rather than with the function it happens to call.
 
 `support.py` holds everything shared: the module loader, the `headers()` and
 `info()` constructors, the sample header blocks (`PASS_EML`, `FAIL_EML`,
-`UNALIGNED_EML`, `UNVERIFIED_EML`) and `EMAIL_DIR`. Each test file imports it
+`UNALIGNED_EML`, `RELAYED_EML`, `UNVERIFIED_EML`) and `EMAIL_DIR`. Each test file imports it
 plainly:
 
     import unittest
@@ -200,11 +200,14 @@ purpose, so that changing it again is a deliberate act rather than an accident.
   — the verdict is the worst of SPF, DKIM and DMARC, and a DMARC pass does not
   lift a warning beside it. The Roundcube plugin let DMARC decide on its own;
   this does not.
-- `test_verdict.py`, `TestEvaluate.test_a_forwarded_message_is_judged_on_its_broken_spf`
-  — the known cost of the rule above. A mailing list breaks SPF while the aligned
-  signature survives, and such a message is reported `fail`. If that proves too
-  noisy in practice, `evaluate()`'s docstring says what to change; change this
-  test with it.
+- `test_verdict.py`, `TestEvaluate.test_a_forwarded_message_is_not_failed_on_its_broken_spf`
+  and `test_result.py`, `TestSecurityFields.test_a_relayed_spf_fail_is_demoted_but_still_shown`
+  — the single exception to the rule above, and where it is made. A mailing list
+  breaks SPF while the aligned signature survives, and the sending domain's own
+  DMARC policy has already accepted that, so the SPF *finding* is demoted to
+  `warn`. It is demoted there and never in `evaluate()`, because the headline
+  must stay exactly the worst of the verdicts printed beneath it — an exception
+  applied to the headline would put `warn` above a visible `✗ FAIL` row.
 - `test_real_messages.py`,
   `TestRealMessages.test_a_trust_list_drops_all_untrusted_evidence` — a
   `Received-SPF` header carries no authserv-id, so `--trusted-authserv` cannot

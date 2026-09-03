@@ -28,9 +28,13 @@ for a trustworthy result.
 
 The overall status is the *worst* of the per-mechanism verdicts: SPF, DKIM and
 DMARC are independent assertions about the same message, so the weakest one
-governs, and a DMARC pass does not excuse a weaker result beside it. Within DKIM
+governs, and a DMARC pass does not excuse a weaker result beside it. The single
+exception is relayed mail, whose SPF a mailing list breaks and whose own DMARC
+policy has already forgiven that; it is applied to the SPF finding rather than
+to the status, so the headline still reads straight off the rows. Within DKIM
 the rule is reversed — several signatures are alternatives, so the best of them
-is the one reported. `evaluate` and `best_dkim` carry the reasoning.
+is the one reported. `evaluate`, `_soften_relayed_spf` and `best_dkim` carry the
+reasoning.
 
 Differences from the Roundcube plugin
 ------------------------------------
@@ -90,6 +94,7 @@ I18N_LABELS = {
     'aligned': 'aligned with From',
     'notaligned': 'does not match From ($from)',
     'unverified': 'present, not verified by your server',
+    'spfrelayed': 'DMARC accepted it on the signature',
 
     # The DKIM verdict spelled out, one sentence per value it can take.
     'frommarkerpass': 'DKIM: signed and matches the sender address.',
@@ -300,8 +305,10 @@ class MessageSecurityInfo:
     #: The security mechanisms reported, in report order.
     METHODS = ('spf', 'dkim', 'dmarc')
 
-    #: DKIM verdicts from best to worst, for picking between signatures.
-    DKIM_PREFERENCE = ('pass', 'warn', 'unknown', 'fail')
+    #: DKIM verdicts from best to worst, for picking between signatures. 'none'
+    #: is last on purpose: it reports the absence of a signature rather than a
+    #: verdict on one, so any real result outranks it.
+    DKIM_PREFERENCE = ('pass', 'warn', 'unknown', 'fail', 'none')
 
     #: Where to look for each method's domain inside an Authentication-Results
     #: entry.
@@ -362,14 +369,12 @@ class MessageSecurityInfo:
         DMARC passing means the domain owner's policy was met; it does not mean
         every mechanism agreed, and the disagreement is the interesting part.
 
-        Known consequence, left in on purpose: forwarders and mailing lists
-        break SPF while the aligned DKIM signature survives, so such a message
-        arrives as spf=fail + dkim=pass + dmarc=pass and is reported FAIL, on
-        the strength of the SPF result alone. That is a false alarm for the
-        common case of legitimately relayed mail. If it proves noisy, the fix is
-        to demote an SPF fail to 'warn' while the DMARC verdict is 'pass' —
-        DMARC has then already weighed the SPF failure and accepted the message
-        on the signature. Nothing else about this method should need to change.
+        The one case where a mechanism is not taken at face value — relayed
+        mail, whose SPF the sender's own DMARC policy has already forgiven — is
+        settled before this method sees it, in `_soften_relayed_spf`, so that
+        the softened row is the one the reader can see. Nothing may be forgiven
+        here: an exception applied at this point would put a `warn` headline
+        above a visible `✗ FAIL` row, with no rule connecting the two.
         """
         status = self.combine_statuses([entry['verdict'] for entry in security.values()])
 
@@ -386,6 +391,10 @@ class MessageSecurityInfo:
         the best result wins here, which is the exact opposite of how the
         mechanisms combine in `combine_statuses`, where the worst wins.
 
+        A 'none' result is not one of the alternatives: it says the message
+        carried no signature at all, so it ranks below every real result and
+        wins only when it is the only thing reported.
+
         Ties keep the earliest signature. None when the server verified none.
         """
         if not entries:
@@ -397,7 +406,12 @@ class MessageSecurityInfo:
             if sig_domain and not entry.get('domain'):
                 entry = {**entry, 'domain': sig_domain}
 
-            return self.DKIM_PREFERENCE.index(self.method_status('dkim', entry, from_domain))
+            status = self.method_status('dkim', entry, from_domain)
+
+            # A status this does not rank says nothing about a signature, so it
+            # loses to every ranked one rather than raising here.
+            return (self.DKIM_PREFERENCE.index(status) if status in self.DKIM_PREFERENCE
+                    else len(self.DKIM_PREFERENCE))
 
         return min(entries, key=rank)
 
@@ -572,8 +586,9 @@ class MessageSecurityInfo:
                     (none = contributes nothing to the overall status). This is
                     also what the report draws its glyph from, so a finding can
                     never show a glyph that disagrees with its own verdict.
-        description a human-readable note: the alignment note, or why there is
-                    no result. None when there is nothing to add.
+        description a human-readable note: the alignment note, why there is no
+                    result, or why a failed SPF is not counted as a failure.
+                    None when there is nothing to add.
         """
         config = self.config
         from_domain = self.from_domain(headers)
@@ -587,8 +602,41 @@ class MessageSecurityInfo:
             'dmarc': auth['dmarc'][0] if auth['dmarc'] else None,
         }
 
-        return {method: self._security_entry(method, results[method], from_domain, sig_domain)
-                for method in self.METHODS if config.method_enabled(method)}
+        findings = {method: self._security_entry(method, results[method], from_domain,
+                                                 sig_domain)
+                    for method in self.METHODS if config.method_enabled(method)}
+
+        return self._soften_relayed_spf(findings)
+
+    @staticmethod
+    def _soften_relayed_spf(findings: dict) -> dict:
+        """Demote an SPF fail the sender's own DMARC policy has already accepted.
+
+        A forwarder or a mailing list rewrites the envelope and breaks SPF while
+        the aligned signature survives, so legitimately relayed mail arrives as
+        spf=fail + dkim=pass + dmarc=pass. A DMARC pass beside an SPF fail can
+        only rest on that aligned signature, which means the domain owner's
+        published policy has already weighed this exact failure and accepted the
+        message; reporting it as a failure is then a false alarm on the ordinary
+        case of relayed mail.
+
+        DMARC alone decides that, without consulting the DKIM finding: it is the
+        receiving server's own DMARC evaluation, and it stays available when the
+        DKIM check is switched off.
+
+        Only the severity read from the result changes. The raw SPF result is
+        still reported as FAIL, and the row says why it is not counted as one.
+        This belongs here, on the finding, and never in `evaluate`: the headline
+        has to stay exactly the worst of the verdicts printed beneath it, so the
+        row and the headline have to move together.
+        """
+        spf, dmarc = findings.get('spf'), findings.get('dmarc')
+
+        if not (spf and dmarc) or spf['verdict'] != 'fail' or dmarc['verdict'] != 'pass':
+            return findings
+
+        return {**findings,
+                'spf': {**spf, 'verdict': 'warn', 'description': i18n_gettext('spfrelayed')}}
 
     def _security_entry(self, method: str, entry: dict | None, from_domain: str | None,
                         sig_domain: str | None) -> dict:

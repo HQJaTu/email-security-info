@@ -69,6 +69,24 @@ class TestBestDkim(unittest.TestCase):
         good = {'result': 'pass', 'domain': 'esp.test'}
         self.assertIs(self.best([{'result': 'fail', 'domain': 'esp.test'}, good]), good)
 
+    def test_an_unsigned_result_never_outranks_a_real_one(self):
+        # dkim=none says the message carried no signature; it is not a rival
+        # answer to one that verified, and it must not raise on the way past.
+        good = {'result': 'pass', 'domain': 'esp.test'}
+        self.assertIs(self.best([{'result': 'none', 'domain': None}, good]), good)
+
+    def test_an_unsigned_result_is_reported_when_it_is_all_there_is(self):
+        # It still has to come back — that is how the finding learns there was
+        # nothing to check.
+        entry = {'result': 'none', 'domain': None}
+        self.assertIs(self.best([entry]), entry)
+
+    def test_an_unrecognised_result_ranks_last(self):
+        # Anything method_status does not recognise is no evidence either, and
+        # a header this program has never seen before must not crash it.
+        bad = {'result': 'fail', 'domain': 'esp.test'}
+        self.assertIs(self.best([{'result': 'wat', 'domain': 'esp.test'}, bad]), bad)
+
     def test_equally_good_signatures_keep_the_first(self):
         first = {'result': 'pass', 'domain': 'esp.test'}
         self.assertIs(self.best([first, {'result': 'pass', 'domain': 'other.test'}]), first)
@@ -126,15 +144,24 @@ class TestEvaluate(unittest.TestCase):
                                 'From: a@a.test\n\nbody\n')
         self.assertEqual(verdict['status'], 'warn')
 
-    def test_a_forwarded_message_is_judged_on_its_broken_spf(self):
-        # The known cost of the rule above, pinned here rather than left to be
-        # rediscovered: a mailing list breaks SPF while the aligned signature
-        # survives, and this reports fail. See evaluate()'s docstring for what
-        # to change if it proves too noisy.
+    def test_a_forwarded_message_is_not_failed_on_its_broken_spf(self):
+        # The one exception to the rule above, and it is not made here: a
+        # mailing list breaks SPF while the aligned signature survives, and the
+        # sender's own DMARC policy has already accepted that. The SPF finding
+        # is demoted to warn in security_fields, so the headline still reads
+        # straight off the rows. See _soften_relayed_spf.
         verdict = self.evaluate('Authentication-Results: mx; spf=fail smtp.mailfrom=list.test; '
                                 'dkim=pass header.d=a.test; dmarc=pass header.from=a.test\n'
                                 'From: a@a.test\n\nbody\n')
-        self.assertEqual(verdict['status'], 'fail')
+        self.assertEqual(verdict['status'], 'warn')
+
+    def test_an_unsigned_message_is_evaluated_rather_than_refused(self):
+        # dkim=none is what an unsigned message gets, and it is ordinary. The
+        # DKIM finding then contributes nothing and SPF carries the verdict.
+        verdict = self.evaluate('Authentication-Results: mx; spf=pass smtp.mailfrom=a.test; '
+                                'dkim=none\n'
+                                'From: a@a.test\n\nbody\n')
+        self.assertEqual(verdict['status'], 'pass')
 
     def test_dmarc_alone_can_carry_the_verdict(self):
         # Not because DMARC is authoritative — because there is nothing worse
