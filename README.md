@@ -121,6 +121,12 @@ client's "redirect", which keeps the hops that brought it. Nothing is promoted:
 authenticating proves the account, not the address in `From:`, and a message left
 with nothing to judge reads as a warning rather than a pass.
 
+`--no-check-submission` turns this off, and it is the flag to reach for when you
+are reading somebody else's mail through this tool, or when your server's
+submission path is not the same trust boundary as its inbound one. The results
+are then counted exactly as your server reported them, and the `Submission` row
+goes with them.
+
 In both cases the result itself is untouched and still shown as FAIL. Only the
 severity read from it changes, and it changes on the row, so the headline is
 still exactly the worst of the lines beneath it. Nothing else is ever forgiven:
@@ -171,6 +177,10 @@ reports on the first one.
                                      a check that is simply not deployed does
                                      not read as a permanent warning.
     --no-check-tls                   Do not report transport encryption.
+    --no-check-submission            Do not recognise mail you submitted to your
+                                     own server; count its SPF and DMARC results
+                                     as they stand. Unlike the flag above, this
+                                     one changes the verdict.
     --extra-headers HEADER           Also show this raw header below the summary
                                      (e.g. X-Spam-Status). Repeatable; headers
                                      absent from the message are omitted.
@@ -284,9 +294,10 @@ And within a `security` entry:
 | `description` | A human-readable note — the alignment note, why there is no result, or why a failed result is not counted as a failure. `null` when there is nothing to add. |
 
 The `info` fields are `header-from` always, `transport` unless `--no-check-tls`,
-and `submission` only on a message you submitted yourself, where it says who
-authenticated and from where. A mechanism is missing from `security` only when
-its check is disabled. Nothing else appears or disappears based on the message.
+and `submission` only on a message you submitted yourself — where it says who
+authenticated and from where — and never under `--no-check-submission`. A
+mechanism is missing from `security` only when its check is disabled. Nothing
+else appears or disappears based on the message.
 
 
 NeoMutt integration

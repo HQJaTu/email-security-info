@@ -22,9 +22,11 @@ class TestConfig(unittest.TestCase):
 
     def test_method_enabled_defaults_to_true(self):
         config = msi.SecurityInfoConfig()
-        for method in ('spf', 'dkim', 'dmarc', 'tls'):
+        for method in ('spf', 'dkim', 'dmarc', 'tls', 'submission'):
             self.assertTrue(config.method_enabled(method))
         self.assertFalse(msi.SecurityInfoConfig(check_tls=False).method_enabled('tls'))
+        self.assertFalse(
+            msi.SecurityInfoConfig(check_submission=False).method_enabled('submission'))
 
     def test_invalid_header_names_are_rejected(self):
         config = msi.SecurityInfoConfig(extra_headers=['X-Ok', 'bad header!', 'also:bad', '', '   '])
@@ -52,10 +54,13 @@ class TestArguments(unittest.TestCase):
 
     def test_check_flags_default_on_and_can_be_negated(self):
         args = msi._parse_args(['x.eml'])
-        self.assertTrue(args.check_spf and args.check_dkim and args.check_dmarc and args.check_tls)
-        args = msi._parse_args(['--no-check-tls', '--no-check-spf', 'x.eml'])
+        self.assertTrue(args.check_spf and args.check_dkim and args.check_dmarc
+                        and args.check_tls and args.check_submission)
+        args = msi._parse_args(['--no-check-tls', '--no-check-spf', '--no-check-submission',
+                                'x.eml'])
         self.assertFalse(args.check_tls)
         self.assertFalse(args.check_spf)
+        self.assertFalse(args.check_submission)
         self.assertTrue(args.check_dkim)
 
     def test_config_file_settings_are_applied(self):
@@ -63,10 +68,12 @@ class TestArguments(unittest.TestCase):
         config.write_text('[message-security-info]\n'
                           'trusted-authserv = ["mx.example.org"]\n'
                           'check-tls = false\n'
+                          'check-submission = false\n'
                           'extra-headers = ["X-Spam-Status", "Message-ID"]\n')
         args = msi._parse_args(['-c', str(config), 'x.eml'])
         self.assertEqual(args.trusted_authserv, ['mx.example.org'])
         self.assertFalse(args.check_tls)
+        self.assertFalse(args.check_submission)
         self.assertEqual(args.extra_headers, ['X-Spam-Status', 'Message-ID'])
 
     def test_the_command_line_overrides_the_config_file(self):

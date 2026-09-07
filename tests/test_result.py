@@ -166,6 +166,21 @@ class TestSecurityFields(unittest.TestCase):
         self.assertEqual(engine.info_fields(h)['submission'],
                          'Authenticated as joe.user, from 192.168.8.126')
 
+    def test_the_submission_check_can_be_switched_off(self):
+        # The one check here that changes the verdict and can be turned off:
+        # with it off the results are counted exactly as the server reported
+        # them, which is what you want when reading somebody else's mail.
+        fields = self.fields(LOCAL_EML, check_submission=False)
+        self.assertEqual(fields['spf']['verdict'], 'fail')
+        self.assertEqual(fields['dmarc']['verdict'], 'fail')
+        self.assertIsNone(fields['spf']['description'])
+
+    def test_switching_the_submission_check_off_drops_its_row_too(self):
+        # The flag is read in one place, so the row and the verdict cannot
+        # disagree about whether this message was submitted.
+        self.assertNotIn('submission',
+                         info(check_submission=False).info_fields(headers(LOCAL_EML)))
+
     def test_a_local_submissions_passing_mechanism_is_left_alone(self):
         # Only a false alarm is removed. What did hold still gets to say so.
         fields = self.fields(LOCAL_EML.replace(b'spf=fail', b'spf=pass'))

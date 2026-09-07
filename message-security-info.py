@@ -189,6 +189,14 @@ class SecurityInfoConfig:
     #: only: it is shown but never changes the pass/warn/fail verdict.
     check_tls: bool = True
 
+    #: Recognise mail you submitted to your own server, and stop counting the
+    #: SPF and DMARC results made on it — they judged a message that never
+    #: travelled. Unlike check_tls this DOES change the verdict, so it is the
+    #: one to turn off when reading someone else's mail through this tool, or
+    #: when your server's submission and inbound paths are not the same trust
+    #: boundary this assumes. `_excuse_local_submission` is what it gates.
+    check_submission: bool = True
+
     #: Additional raw message headers to show below the parsed SPF / DKIM /
     #: DMARC summary and the Authentication-Results / Received-SPF lines.
     #: Useful for surfacing spam scores, routing, message ids, ... Headers not
@@ -196,7 +204,7 @@ class SecurityInfoConfig:
     extra_headers: list[str] = field(default_factory=list)
 
     def method_enabled(self, method: str) -> bool:
-        """Whether a given check (spf, dkim, dmarc, tls) is enabled."""
+        """Whether a given check (spf, dkim, dmarc, tls, submission) is enabled."""
         return bool(getattr(self, 'check_' + method, True))
 
     def valid_extra_headers(self) -> list[str]:
@@ -560,6 +568,15 @@ class MessageSecurityInfo:
         # A version clause without a recognised transmission type still implies TLS.
         return {'encrypted': True, 'detail': detail} if detail is not None else None
 
+    def _submission(self, headers: MessageHeaders) -> dict | None:
+        """`submission_info`, or None while the check is switched off.
+
+        The one place the flag is read, so the row and the verdict can never
+        disagree about whether this message was submitted.
+        """
+        return (self.submission_info(headers)
+                if self.config.method_enabled('submission') else None)
+
     @staticmethod
     def submission_info(headers: MessageHeaders) -> dict | None:
         """Whether you submitted this message yourself, rather than receiving it.
@@ -624,7 +641,7 @@ class MessageSecurityInfo:
         """
         info = {'header-from': self.from_address(headers) or i18n_gettext('notpresent')}
 
-        submission = self.submission_info(headers)
+        submission = self._submission(headers)
         if submission:
             info['submission'] = self.format_submission(submission)
 
@@ -682,7 +699,7 @@ class MessageSecurityInfo:
         # findings DMARC failed — so the order between them carries no meaning.
         findings = self._soften_relayed_spf(findings)
 
-        return self._excuse_local_submission(findings, self.submission_info(headers))
+        return self._excuse_local_submission(findings, self._submission(headers))
 
     @staticmethod
     def _soften_relayed_spf(findings: dict) -> dict:
@@ -1136,6 +1153,13 @@ def _parse_args(argv: list[str] | None = None) -> configargparse.Namespace:
                         help='Report the transport encryption of the last hop, read from the '
                              'topmost Received header. Informational only — it never changes '
                              'the verdict. Default: enabled')
+    parser.add_argument('--check-submission',
+                        action=argparse.BooleanOptionalAction,
+                        default=True,
+                        help='Recognise mail you submitted to your own server and stop '
+                             'counting the SPF and DMARC results made on it, which judged a '
+                             'message that never travelled. Unlike --check-tls this affects '
+                             'the verdict. Default: enabled')
     parser.add_argument('--extra-headers',
                         action='append',
                         default=[],
@@ -1187,6 +1211,7 @@ def main(argv: list[str] | None = None) -> int:
         check_dkim=args.check_dkim,
         check_dmarc=args.check_dmarc,
         check_tls=args.check_tls,
+        check_submission=args.check_submission,
         extra_headers=args.extra_headers,
     )
 
