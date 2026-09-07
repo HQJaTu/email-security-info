@@ -1,0 +1,52 @@
+{
+  "status": "fail",
+  "summary": "Sender authentication failed — the sender may be forged.",
+  "info": {
+    "header-from": "Sintosen palvelut <myynti@sintosen.com>",
+    "transport": "Encrypted — TLSv1.3"
+  },
+  "security": {
+    "spf": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "mandrillapp.com",
+      "aligned": null,
+      "verdict": "pass",
+      "description": null
+    },
+    "dkim": {
+      "present": true,
+      "verified": true,
+      "status": "PASS",
+      "domain": "mandrillapp.com",
+      "aligned": false,
+      "verdict": "warn",
+      "description": "does not match From (sintosen.com)"
+    },
+    "dmarc": {
+      "present": true,
+      "verified": true,
+      "status": "FAIL",
+      "domain": "sintosen.com",
+      "aligned": null,
+      "verdict": "fail",
+      "description": null
+    }
+  },
+  "headers": [
+    {
+      "name": "Authentication-Results",
+      "value": "mta-in.example.com; dmarc=fail (p=none dis=none) header.from=sintosen.com"
+    },
+    {
+      "name": "Authentication-Results",
+      "value": "mta-in.example.com; dkim=pass (2048-bit key, unprotected) header.d=mandrillapp.com header.i=@mandrillapp.com header.a=rsa-sha256 header.s=mte1 header.b=euADMZBO; dkim=pass (1024-bit key, unprotected) header.d=mandrillapp.com header.i=@mandrillapp.com header.a=rsa-sha256 header.s=mandrill header.b=qPc0/uCA"
+    },
+    {
+      "name": "Received-SPF",
+      "value": "Pass (mailfrom) identity=mailfrom; client-ip=198.2.145.4; helo=mail145-4.atl61.mandrillapp.com; envelope-from=bounce-md_30293360.6a9ab548.v1-969ad4b5ff144ce3913904d6e3e2b0a5@mandrillapp.com; receiver=example.com"
+    }
+  ],
+  "dkim_from": "warn"
+}
