@@ -10,7 +10,7 @@ See README.md in this directory for how to run these.
 import json
 import unittest
 
-from support import (FAIL_EML, PASS_EML, RELAYED_EML, UNALIGNED_EML, UNVERIFIED_EML,
+from support import (FAIL_EML, LOCAL_EML, PASS_EML, RELAYED_EML, UNALIGNED_EML, UNVERIFIED_EML,
                      headers, info, msi)
 
 
@@ -140,6 +140,62 @@ class TestSecurityFields(unittest.TestCase):
                             'From: a@a.test\n\nbody\n')['spf']
         self.assertEqual(entry['verdict'], 'warn')
         self.assertNotEqual(entry['description'], msi.i18n_gettext('spfrelayed'))
+
+    def test_a_local_submissions_spf_and_dmarc_stop_counting(self):
+        # Mail the reader handed to their own server: SPF failed because the
+        # client is a laptop on the LAN, which is not what SPF is a check on.
+        # The results stay exactly as the server reported them; only the
+        # severity read from them goes, and the row says why.
+        fields = self.fields(LOCAL_EML)
+        for method in ('spf', 'dmarc'):
+            with self.subTest(method=method):
+                self.assertEqual(fields[method]['status'], 'FAIL')
+                self.assertEqual(fields[method]['verdict'], 'none')
+                self.assertEqual(fields[method]['description'],
+                                 msi.i18n_gettext('localsubmission'))
+
+    def test_a_local_submission_is_not_promoted_to_a_pass(self):
+        # Authenticating proves the account, not the address in From, so the
+        # message ends up unjudged rather than trusted. This one carries no
+        # signature either, so excusing SPF and DMARC leaves nothing at all to
+        # judge — and combine_statuses answers that with a visible warn, which
+        # is what stops the excuse from being a way to go quiet.
+        engine = info()
+        h = headers(LOCAL_EML)
+        self.assertEqual(engine.evaluate_headers(h)['status'], 'warn')
+        self.assertEqual(engine.info_fields(h)['submission'],
+                         'Authenticated as joe.user, from 192.168.8.126')
+
+    def test_the_submission_check_can_be_switched_off(self):
+        # The one check here that changes the verdict and can be turned off:
+        # with it off the results are counted exactly as the server reported
+        # them, which is what you want when reading somebody else's mail.
+        fields = self.fields(LOCAL_EML, check_submission=False)
+        self.assertEqual(fields['spf']['verdict'], 'fail')
+        self.assertEqual(fields['dmarc']['verdict'], 'fail')
+        self.assertIsNone(fields['spf']['description'])
+
+    def test_switching_the_submission_check_off_drops_its_row_too(self):
+        # The flag is read in one place, so the row and the verdict cannot
+        # disagree about whether this message was submitted.
+        self.assertNotIn('submission',
+                         info(check_submission=False).info_fields(headers(LOCAL_EML)))
+
+    def test_a_local_submissions_passing_mechanism_is_left_alone(self):
+        # Only a false alarm is removed. What did hold still gets to say so.
+        fields = self.fields(LOCAL_EML.replace(b'spf=fail', b'spf=pass'))
+        self.assertEqual(fields['spf']['verdict'], 'pass')
+        self.assertIsNone(fields['spf']['description'])
+
+    def test_a_message_relayed_before_it_arrived_keeps_its_failures(self):
+        # The same submission hop, over a journey that had already happened.
+        # See submission_info: this is the laundering case.
+        fields = self.fields(LOCAL_EML.replace(
+            b'From: Joe User',
+            b'Received: from evil.test by mx.example.org with ESMTPS id 1;'
+            b' Tue, 11 Aug 2026 09:00:00 +0200\nFrom: Joe User'))
+        self.assertEqual(fields['spf']['verdict'], 'fail')
+        self.assertEqual(fields['dmarc']['verdict'], 'fail')
 
     def test_spf_uses_the_received_spf_fallback(self):
         entry = self.fields('Received-SPF: Pass (mailfrom) envelope-from=a@a.test;\n'

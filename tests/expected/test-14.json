@@ -1,0 +1,49 @@
+{
+  "status": "unknown",
+  "summary": "Sender authentication could not be verified.",
+  "info": {
+    "header-from": "Joe User <joe@example.com>",
+    "submission": "Authenticated as joe.user, from 192.168.8.126",
+    "transport": "Encrypted — TLSv1.3"
+  },
+  "security": {
+    "spf": {
+      "present": true,
+      "verified": true,
+      "status": "FAIL",
+      "domain": "example.com",
+      "aligned": null,
+      "verdict": "none",
+      "description": "submitted from your own server, not relayed"
+    },
+    "dkim": {
+      "present": true,
+      "verified": false,
+      "status": null,
+      "domain": "example.com",
+      "aligned": null,
+      "verdict": "unknown",
+      "description": "present, not verified by your server"
+    },
+    "dmarc": {
+      "present": true,
+      "verified": true,
+      "status": "FAIL",
+      "domain": "example.com",
+      "aligned": null,
+      "verdict": "none",
+      "description": "submitted from your own server, not relayed"
+    }
+  },
+  "headers": [
+    {
+      "name": "Authentication-Results",
+      "value": "mta-in.example.com; dmarc=fail (p=quarantine dis=none) header.from=example.com"
+    },
+    {
+      "name": "Authentication-Results",
+      "value": "mta-in.example.com; spf=fail smtp.mailfrom=example.com"
+    }
+  ],
+  "dkim_from": "unknown"
+}

@@ -131,11 +131,22 @@ Subject: Invoice
 body
 """
 
-UNALIGNED_EML = b"""Received: from relay.mailer.net by mx.example.org with ESMTPSA id 9zz; Tue, 11 Aug 2026 10:00:01 +0200
+UNALIGNED_EML = b"""Received: from relay.mailer.net by mx.example.org with ESMTPS id 9zz; Tue, 11 Aug 2026 10:00:01 +0200
 Authentication-Results: mx.example.org; dkim=pass header.d=mailer.net;
 \tspf=softfail smtp.mailfrom=bank.example
 From: =?utf-8?B?QmFuayBTdXBwb3J0?= <support@bank.example>
 Subject: Your account
+
+body
+"""
+
+LOCAL_EML = b"""Received: from smtpclient.apple (unknown [192.168.8.126])
+\t(Authenticated sender: joe.user)
+\tby mx.example.org (Postfix) with ESMTPSA id 77A1; Tue, 11 Aug 2026 10:00:01 +0200
+Authentication-Results: mx.example.org; dmarc=fail (p=quarantine dis=none) header.from=example.com
+Authentication-Results: mx.example.org; spf=fail smtp.mailfrom=example.com
+From: Joe User <joe@example.com>
+Subject: Hello
 
 body
 """
@@ -150,7 +161,7 @@ Subject: [list] Hello
 body
 """
 
-UNVERIFIED_EML = b"""Received: from mail.example.com by mx.example.org with ESMTPA id 2; Tue, 11 Aug 2026 10:00:01 +0200
+UNVERIFIED_EML = b"""Received: from mail.example.com by mx.example.org with ESMTP id 2; Tue, 11 Aug 2026 10:00:01 +0200
 DKIM-Signature: v=1; a=rsa-sha256; d=news.example.com; s=k1; b=zzz=
 From: news@news.example.com
 

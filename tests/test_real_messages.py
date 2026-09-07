@@ -113,8 +113,12 @@ class TestRealMessages(unittest.TestCase):
                 self.assertIn(result['dkim_from'], ('pass', 'warn', 'fail', 'unknown', 'none'))
                 self.assertEqual(result['dkim_from'], result['security']['dkim']['verdict'])
                 self.assertEqual(result['summary'], msi.i18n_gettext('summary' + result['status']))
-                # The sender and the transport, both with something to show.
-                self.assertEqual(set(result['info']), {'header-from', 'transport'})
+                # The sender and the transport always; 'submission' only on the
+                # samples that are a message someone submitted themselves. Every
+                # key present has something to show.
+                self.assertLessEqual({'header-from', 'transport'}, set(result['info']))
+                self.assertLessEqual(set(result['info']),
+                                     {'header-from', 'submission', 'transport'})
                 self.assertTrue(all(result['info'].values()))
                 # Every mechanism reported, each in the documented fixed shape.
                 self.assertEqual(list(result['security']), ['spf', 'dkim', 'dmarc'])

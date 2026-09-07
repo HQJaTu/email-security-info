@@ -2,7 +2,8 @@
 
 # vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=python
 
-"""Detecting the transport encryption of the last hop from the Received header.
+"""Reading the last hop off the Received header: its encryption, and whether it
+was a message the reader submitted themselves.
 
 See README.md in this directory for how to run these.
 """
@@ -59,6 +60,74 @@ class TestTlsInfo(unittest.TestCase):
 
     def test_unrecognised_received_is_undeterminable(self):
         self.assertIsNone(msi.MessageSecurityInfo.tls_info(self.received('via local delivery')))
+
+
+class TestSubmissionInfo(unittest.TestCase):
+    """Recognising a message the reader handed to their own server.
+
+    What this detects is acted on in `_excuse_local_submission`, which stops
+    counting SPF and DMARC, so the false negatives to guard against are messages
+    that arrived some other way and would have their failures excused.
+    """
+
+    def submission(self, eml: str):
+        return msi.MessageSecurityInfo.submission_info(headers(eml))
+
+    def received(self, clause: str, client: str = 'from a.test'):
+        return self.submission('Received: {} by mx.example.org {}; '
+                               'Tue, 11 Aug 2026 10:00:01 +0200\n\nbody\n'.format(client, clause))
+
+    def test_the_authenticated_transmission_types_are_recognised(self):
+        # RFC 3848: the trailing A, with or without the S for TLS before it.
+        for clause in ('with ESMTPA id 1', 'with ESMTPSA id 1',
+                       'with LMTPA id 1', 'with LMTPSA id 1', 'with UTF8SMTPSA id 1'):
+            with self.subTest(clause=clause):
+                self.assertEqual(self.received(clause), {'user': None, 'client': None})
+
+    def test_an_unauthenticated_hop_is_not_a_submission(self):
+        # The whole distinction: same server, same TLS, no login. This is what
+        # ordinary internet mail looks like, and it must keep its verdict.
+        for clause in ('with ESMTP id 1', 'with ESMTPS id 1', 'with LMTP id 1'):
+            with self.subTest(clause=clause):
+                self.assertIsNone(self.received(clause))
+
+    def test_the_authenticated_user_is_read_when_the_mta_logged_it(self):
+        self.assertEqual(self.received('(Authenticated sender: joe.user) with ESMTPSA id 1'),
+                         {'user': 'joe.user', 'client': None})
+
+    def test_the_client_address_is_read_from_the_from_clause(self):
+        self.assertEqual(
+            self.received('with ESMTPSA id 1', 'from client (unknown [192.168.8.126])'),
+            {'user': None, 'client': '192.168.8.126'})
+
+    def test_an_ipv6_client_address_is_read(self):
+        self.assertEqual(self.received('with ESMTPSA id 1', 'from client ([IPv6:2001:db8::1])'),
+                         {'user': None, 'client': '2001:db8::1'})
+
+    def test_the_receiving_servers_own_address_is_not_the_client(self):
+        # Everything past "by" describes this end of the connection.
+        self.assertEqual(
+            msi.MessageSecurityInfo.submission_info(headers(
+                'Received: from client by mx.example.org ([10.0.0.1]) with ESMTPSA id 1; '
+                'Tue, 11 Aug 2026 10:00:01 +0200\n\nbody\n')),
+            {'user': None, 'client': None})
+
+    def test_a_message_with_an_earlier_hop_is_not_a_submission(self):
+        # A message re-injected through your own server — a client's "redirect",
+        # say — is an authenticated submission of something that travelled to
+        # get here, and the results below belong to that journey. Excusing them
+        # would let any forgery be laundered by bouncing it to yourself.
+        self.assertIsNone(self.submission(
+            'Received: from client by mx.example.org with ESMTPSA id 2; '
+            'Tue, 11 Aug 2026 10:00:02 +0200\n'
+            'Received: from evil.test by mx.example.org with ESMTPS id 1; '
+            'Tue, 11 Aug 2026 10:00:01 +0200\n\nbody\n'))
+
+    def test_no_received_header_is_not_a_submission(self):
+        self.assertIsNone(self.submission('From: a@b.test\n\nbody\n'))
+
+    def test_an_unrecognised_received_is_not_a_submission(self):
+        self.assertIsNone(self.received('via local delivery'))
 
 
 if __name__ == '__main__':

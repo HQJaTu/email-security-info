@@ -1,0 +1,58 @@
+From bounce-md_30293360.6a9ab548.v1-969ad4b5ff144ce3913904d6e3e2b0a5@mandrillapp.com  Fri Sep  4 15:10:51 2026
+Return-Path: <bounce-md_30293360.6a9ab548.v1-969ad4b5ff144ce3913904d6e3e2b0a5@mandrillapp.com>
+X-Original-To: sintosen.kauppa@example.com
+Delivered-To: user@example.com
+Received-ASN: AS14782 MailChimp (client 198.2.145.4)
+DMARC-Filter: OpenDMARC Filter v1.4.2 mta-in.example.com 30D9F183FF40
+Authentication-Results: mta-in.example.com; dmarc=fail (p=none dis=none) header.from=sintosen.com
+DKIM-Filter: OpenDKIM Filter v2.11.0 mta-in.example.com 30D9F183FF40
+Authentication-Results: mta-in.example.com;
+	dkim=pass (2048-bit key, unprotected) header.d=mandrillapp.com header.i=@mandrillapp.com header.a=rsa-sha256 header.s=mte1 header.b=euADMZBO;
+	dkim=pass (1024-bit key, unprotected) header.d=mandrillapp.com header.i=@mandrillapp.com header.a=rsa-sha256 header.s=mandrill header.b=qPc0/uCA
+Received-SPF: Pass (mailfrom) identity=mailfrom; client-ip=198.2.145.4; helo=mail145-4.atl61.mandrillapp.com; envelope-from=bounce-md_30293360.6a9ab548.v1-969ad4b5ff144ce3913904d6e3e2b0a5@mandrillapp.com; receiver=example.com 
+Received: from mail145-4.atl61.mandrillapp.com (mail145-4.atl61.mandrillapp.com [198.2.145.4])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange x25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mta-in.example.com (Postfix) with ESMTPS id 30D9F183FF40
+	for <sintosen.kauppa@example.com>; Fri, 04 Sep 2026 15:10:50 +0300 (EEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mandrillapp.com;
+	s=mte1; t=1788523849; x=1788793849;
+	bh=lKJ+AWQM9+OZe5Fj/qjrzQta6ysgISX5Hb8pSXRy0e8=;
+	h=From:Subject:Message-Id:To:Feedback-ID:Date:MIME-Version:
+	 Content-Type:CC:Date:Subject:From;
+	b=euADMZBO+lDTa1TuSShSWmJ+mR1WKps12+pR+hhw1MPNxj/yxexEfJ04WUzuCV/pu
+	 dILKQgQIUA/BNmn91w3pcKEfmz0YGZqjVWuUF0TA1V3lnaQ5AcC29NF5J5hx/tqtSD
+	 z99itgFj3HA0ApfhslTy9ras561vKBft9HX0RQqSft7lQUsaHwqS3Rx7GUlUerMNwk
+	 o8S/L3bKdRTWtIm+H10yfWq2YP6L2YNIQ09CUQv7hEFLemu0DW71nWatfedOf47wpl
+	 +z2kDcmCibV+Ovru7YmLP0KtzccYy1BxllxrxXoJHic8YCHyZ3Lo257WbQcr5UnY+2
+	 HHT9YvqPpJanw==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mandrillapp.com;
+	s=mandrill; t=1788523849; x=1788784349;
+	bh=lKJ+AWQM9+OZe5Fj/qjrzQta6ysgISX5Hb8pSXRy0e8=;
+	h=From:Subject:Message-Id:To:Feedback-ID:Date:MIME-Version:
+	 Content-Type:CC:Date:Subject:From;
+	b=qPc0/uCAc1ZzbwkZCYe3XnPa+qdqtwjZLN+YWP/FUklY3aeELDWbooi/TIK0gw9pH
+	 i7nsj2vMjeZmIAsZsExw2eQnCiMeXENt8sh87ky6cOsdfBomKcCJEds0oeHjejF59U
+	 aFNGm6cSXZNI16OSNaa92GoLD1f6gchMHZvBxU50=
+Received: from mta003-md-use2.delv.a.intuit.com (localhost [127.0.0.1])
+	by mail145-4.atl61.mandrillapp.com (Mailchimp) with ESMTP id 4hbwKP1Ffnz6CQ8kF
+	for <sintosen.kauppa@example.com>; Fri,  4 Sep 2026 12:10:49 +0000 (UTC)
+From: "Sintosen palvelut" <myynti@sintosen.com>
+Subject: =?utf-8?Q?Joe=20-=20Arvostele=20ostoksesi?=
+Received: from [80.69.172.221] by mandrillapp.com id 969ad4b5ff144ce3913904d6e3e2b0a5; Fri, 04 Sep 2026 12:10:48 +0000
+Message-Id: <1788523848.6a9ab5484745f@swift.generated>
+To: "Joe User" <sintosen.kauppa@example.com>
+X-Native-Encoded: 1
+X-Report-Abuse: =?UTF-8?Q?Please=20forward=20a=20copy=20of=20this=20message,=20including=20all=20headers,=20to=20abuse@mandrill.com.=20You=20can=20also=20report=20abuse=20here:=20https://mandrillapp.com/contact/abuse=3Fid=3D30293360.969ad4b5ff144ce3913904d6e3e2b0a5?=
+X-Mandrill-User: md_30293360
+Feedback-ID: 30293360:30293360.20260904:md
+Date: Fri, 04 Sep 2026 12:10:48 +0000
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="_av-XwvDtJNbtK3IOHgjef7DYQ"
+
+--_av-XwvDtJNbtK3IOHgjef7DYQ
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+     Review emails
