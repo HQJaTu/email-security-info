@@ -1,0 +1,32 @@
+From joe@example.com  Mon Sep  7 07:14:07 2026
+Return-Path: <joe@example.com>
+X-Original-To: apple@example.com
+Delivered-To: user@example.com
+Received: from smtpclient.apple (unknown [192.168.8.126])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange x25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	(Authenticated sender: joe.user)
+	by mta-in.example.com (Postfix) with ESMTPSA id 77A101842B06
+	for <apple@example.com>; Mon, 07 Sep 2026 07:14:07 +0300 (EEST)
+DMARC-Filter: OpenDMARC Filter v1.4.2 mta-in.example.com 77A101842B06
+Authentication-Results: mta-in.example.com; dmarc=fail (p=quarantine dis=none) header.from=example.com
+Authentication-Results: mta-in.example.com; spf=fail smtp.mailfrom=example.com
+DKIM-Filter: OpenDKIM Filter v2.11.0 mta-in.example.com 77A101842B06
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=example.com; s=mail;
+	t=1788754447; bh=yj+hOlWPAYJBpzAO15gt49j/tX9vqHOptn70LUpC5Ck=;
+	h=From:Date:Subject:To:From;
+	b=DuZUOZaGhGpLSUo1w0wmrAbt35ph72gUMnec2cGuGYEBtGBu4BTjG1B1SruScN1Uz
+	 4IEn+yHZZJEoQEVsQp0PkhDWsmHFRXVFSClomVzAh7k+v8Tjf+R09Qe/fY4l6kNYZr
+	 n56k880v3SPf+Eyajs8L0nFI/EOpi6PDqXrVLwfk=
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: quoted-printable
+From: Joe User <joe@example.com>
+Mime-Version: 1.0 (1.0)
+Date: Mon, 7 Sep 2026 07:13:57 +0300
+Subject: Skills
+Message-Id: <01D79345-7081-4B88-A496-C3B51938B363@example.com>
+To: apple@example.com
+X-Mailer: iPad Mail (23G83)
+
+A link here

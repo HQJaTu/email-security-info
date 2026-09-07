@@ -77,7 +77,7 @@ rather than with the function it happens to call.
 
 `support.py` holds everything shared: the module loader, the `headers()` and
 `info()` constructors, the sample header blocks (`PASS_EML`, `FAIL_EML`,
-`UNALIGNED_EML`, `RELAYED_EML`, `UNVERIFIED_EML`) and `EMAIL_DIR`. Each test file imports it
+`UNALIGNED_EML`, `LOCAL_EML`, `RELAYED_EML`, `UNVERIFIED_EML`) and `EMAIL_DIR`. Each test file imports it
 plainly:
 
     import unittest
@@ -202,12 +202,30 @@ purpose, so that changing it again is a deliberate act rather than an accident.
   this does not.
 - `test_verdict.py`, `TestEvaluate.test_a_forwarded_message_is_not_failed_on_its_broken_spf`
   and `test_result.py`, `TestSecurityFields.test_a_relayed_spf_fail_is_demoted_but_still_shown`
-  — the single exception to the rule above, and where it is made. A mailing list
-  breaks SPF while the aligned signature survives, and the sending domain's own
-  DMARC policy has already accepted that, so the SPF *finding* is demoted to
+  — one of the two exceptions to the rule above, and where it is made. A mailing
+  list breaks SPF while the aligned signature survives, and the sending domain's
+  own DMARC policy has already accepted that, so the SPF *finding* is demoted to
   `warn`. It is demoted there and never in `evaluate()`, because the headline
   must stay exactly the worst of the verdicts printed beneath it — an exception
-  applied to the headline would put `warn` above a visible `✗ FAIL` row.
+  applied to the headline would put `warn` above a visible `✗ FAIL` row. The
+  other exception, below, is made in the same place for the same reason.
+- `test_result.py`,
+  `TestSecurityFields.test_a_local_submissions_spf_and_dmarc_stop_counting` and
+  `test_transport.py`,
+  `TestSubmissionInfo.test_a_message_with_an_earlier_hop_is_not_a_submission` —
+  mail the reader submitted to their own server never travelled, so SPF and
+  DMARC never judged it and both findings go to `none`. Two things hold this
+  down. It is recognised only from the topmost `Received` header, on a message
+  that has exactly one — anything else carries the hops that brought it, so a
+  message re-injected through your own server cannot launder its failures this
+  way. And nothing is promoted: `test_a_local_submission_is_not_promoted_to_a_pass`
+  pins that a message with nothing left to judge comes back `warn`, which is
+  what stops the excuse from being a route to silence.
+- `test_transport.py`, `TestSubmissionInfo.test_an_unauthenticated_hop_is_not_a_submission`
+  — `ESMTPS` and `ESMTPSA` differ by one letter and by everything else: the
+  RFC 3848 `A` is the receiving server recording that the client logged in.
+  Two sample blocks in `support.py` once carried a stray `A` and were quietly
+  treated as submissions when this landed, which is what this test is for.
 - `test_real_messages.py`,
   `TestRealMessages.test_a_trust_list_drops_all_untrusted_evidence` — a
   `Received-SPF` header carries no authserv-id, so `--trusted-authserv` cannot

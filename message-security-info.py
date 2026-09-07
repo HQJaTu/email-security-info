@@ -28,13 +28,15 @@ for a trustworthy result.
 
 The overall status is the *worst* of the per-mechanism verdicts: SPF, DKIM and
 DMARC are independent assertions about the same message, so the weakest one
-governs, and a DMARC pass does not excuse a weaker result beside it. The single
-exception is relayed mail, whose SPF a mailing list breaks and whose own DMARC
-policy has already forgiven that; it is applied to the SPF finding rather than
-to the status, so the headline still reads straight off the rows. Within DKIM
-the rule is reversed — several signatures are alternatives, so the best of them
-is the one reported. `evaluate`, `_soften_relayed_spf` and `best_dkim` carry the
-reasoning.
+governs, and a DMARC pass does not excuse a weaker result beside it. Two kinds
+of message are the exception, and both are settled on the finding rather than on
+the status, so the headline still reads straight off the rows: relayed mail,
+whose SPF a mailing list breaks and whose own DMARC policy has already forgiven
+that, and mail the reader submitted themselves, which never travelled and so was
+never the thing SPF and DMARC are a check on. Within DKIM the rule is reversed —
+several signatures are alternatives, so the best of them is the one reported.
+`evaluate`, `_soften_relayed_spf`, `_excuse_local_submission` and `best_dkim`
+carry the reasoning.
 
 Differences from the Roundcube plugin
 ------------------------------------
@@ -95,6 +97,7 @@ I18N_LABELS = {
     'notaligned': 'does not match From ($from)',
     'unverified': 'present, not verified by your server',
     'spfrelayed': 'DMARC accepted it on the signature',
+    'localsubmission': 'submitted from your own server, not relayed',
 
     # The DKIM verdict spelled out, one sentence per value it can take.
     'frommarkerpass': 'DKIM: signed and matches the sender address.',
@@ -102,6 +105,13 @@ I18N_LABELS = {
     'frommarkerfail': 'DKIM: signature verification failed.',
     'frommarkerunknown': 'DKIM: signed, but your server did not verify the signature.',
     'frommarkernone': 'DKIM: this message is not signed.',
+
+    # How the message was handed to your server (informational; shown only for
+    # mail you submitted yourself).
+    'submission': 'Submission',
+    'submissionuser': 'Authenticated as $user',
+    'submissionanon': 'Authenticated client',
+    'submissionfrom': '$what, from $client',
 
     # Transport encryption (informational; does not affect the verdict)
     'tls': 'Transport (TLS)',
@@ -369,12 +379,14 @@ class MessageSecurityInfo:
         DMARC passing means the domain owner's policy was met; it does not mean
         every mechanism agreed, and the disagreement is the interesting part.
 
-        The one case where a mechanism is not taken at face value — relayed
-        mail, whose SPF the sender's own DMARC policy has already forgiven — is
-        settled before this method sees it, in `_soften_relayed_spf`, so that
-        the softened row is the one the reader can see. Nothing may be forgiven
-        here: an exception applied at this point would put a `warn` headline
-        above a visible `✗ FAIL` row, with no rule connecting the two.
+        The cases where a mechanism is not taken at face value — relayed mail,
+        whose SPF the sender's own DMARC policy has already forgiven, and the
+        reader's own submitted mail, which SPF and DMARC never judged — are
+        settled before this method sees them, in `_soften_relayed_spf` and
+        `_excuse_local_submission`, so that the adjusted row is the one the
+        reader can see. Nothing may be forgiven here: an exception applied at
+        this point would put a `warn` headline above a visible `✗ FAIL` row,
+        with no rule connecting the two.
         """
         status = self.combine_statuses([entry['verdict'] for entry in security.values()])
 
@@ -548,14 +560,73 @@ class MessageSecurityInfo:
         # A version clause without a recognised transmission type still implies TLS.
         return {'encrypted': True, 'detail': detail} if detail is not None else None
 
+    @staticmethod
+    def submission_info(headers: MessageHeaders) -> dict | None:
+        """Whether you submitted this message yourself, rather than receiving it.
+
+        Mail a user hands to their own server over an authenticated SMTP
+        session never travels the internet, so the SPF and DMARC checks made on
+        it answer a question that was not asked: SPF is a rule about *relay*
+        from an arbitrary address, and the client here is one that logged in.
+        `_excuse_local_submission` is what acts on that; this method only reads.
+
+        Two conditions, and both are required:
+
+        * The message has exactly one Received hop. A message that reached the
+          server any other way carries the hops that brought it, so this is what
+          separates a fresh submission from one re-injected through the same
+          server — a client's "redirect"/"bounce" keeps the original chain and
+          prepends to it, and its inner results must keep their verdict.
+        * That hop is an authenticated submission: the RFC 3848 transmission
+          type ends in "A" (ESMTPA, ESMTPSA, LMTPA, LMTPSA), which is a
+          receiving MTA recording that the client authenticated (RFC 4954).
+
+        Both are read from the header the receiving MTA wrote itself, and a
+        forged Received can only ever appear *below* it, so neither can be
+        claimed by the message. The reverse is not true: a server that hands
+        local mail to a separate delivery agent adds a second hop, and this then
+        reports nothing. That is the safe direction to be wrong in.
+
+        Returns {user, client} — both None when the MTA logged neither — or None
+        when this is not a message you submitted.
+        """
+        received = headers.get('Received')
+        if not received or len(received) != 1:
+            return None
+
+        top = re.sub(r'\s+', ' ', received[0])
+
+        # RFC 3848: the trailing "A" is the authenticated form, with an optional
+        # "S" before it for TLS. tls_info reads the same clause for the "S".
+        if not re.search(r'\bwith\s+(?:UTF8)?(?:ESMTP|SMTP|LMTP)S?A\b', top, re.I):
+            return None
+
+        # Everything the client is described by precedes the "by <our host>"
+        # clause; past that point the addresses belong to the server itself.
+        client_part = re.split(r'\bby\s', top, maxsplit=1)[0]
+        address = re.search(r'\[(?:IPv6:)?([0-9a-fA-F.:]+)\]', client_part)
+
+        # Postfix names the account it authenticated. Other MTAs word this
+        # differently or not at all, which is why it is not what we match on.
+        user = re.search(r'\bAuthenticated sender:\s*([^)\s]+)', top, re.I)
+
+        return {'user': user.group(1) if user else None,
+                'client': address.group(1) if address else None}
+
     def info_fields(self, headers: MessageHeaders) -> dict:
         """Descriptive facts about the message, as ready-to-display strings.
 
         Not verdicts — just what the message says about itself. 'header-from' is
         the sender address the SPF/DKIM/DMARC results are judged against;
-        'transport' is present only while the TLS check is enabled.
+        'transport' is present only while the TLS check is enabled; and
+        'submission' only for a message you submitted yourself, where it names
+        the evidence the findings were read in the light of.
         """
         info = {'header-from': self.from_address(headers) or i18n_gettext('notpresent')}
+
+        submission = self.submission_info(headers)
+        if submission:
+            info['submission'] = self.format_submission(submission)
 
         if self.config.method_enabled('tls'):
             info['transport'] = self.format_tls(self.tls_info(headers))
@@ -587,7 +658,7 @@ class MessageSecurityInfo:
                     also what the report draws its glyph from, so a finding can
                     never show a glyph that disagrees with its own verdict.
         description a human-readable note: the alignment note, why there is no
-                    result, or why a failed SPF is not counted as a failure.
+                    result, or why a failed result is not counted as a failure.
                     None when there is nothing to add.
         """
         config = self.config
@@ -606,7 +677,12 @@ class MessageSecurityInfo:
                                                  sig_domain)
                     for method in self.METHODS if config.method_enabled(method)}
 
-        return self._soften_relayed_spf(findings)
+        # The two cases where a result does not mean what it says. They cannot
+        # both apply — one needs DMARC to have passed and the other reaches
+        # findings DMARC failed — so the order between them carries no meaning.
+        findings = self._soften_relayed_spf(findings)
+
+        return self._excuse_local_submission(findings, self.submission_info(headers))
 
     @staticmethod
     def _soften_relayed_spf(findings: dict) -> dict:
@@ -637,6 +713,49 @@ class MessageSecurityInfo:
 
         return {**findings,
                 'spf': {**spf, 'verdict': 'warn', 'description': i18n_gettext('spfrelayed')}}
+
+    @staticmethod
+    def _excuse_local_submission(findings: dict, submission: dict | None) -> dict:
+        """Stop counting SPF and DMARC on a message the reader submitted themselves.
+
+        Mail handed to your own server over an authenticated session is not
+        relayed mail, and SPF is a rule about relay: it asks whether the
+        connecting address may send for the domain, and the answer for a laptop
+        on the LAN is no — correctly, and about nothing. DMARC then fails as an
+        arithmetic consequence of that SPF failure rather than as a finding of
+        its own. Reporting either as evidence of forgery is a false alarm on the
+        reader's own outgoing mail. `submission_info` says what is required
+        before this applies, and why a message cannot claim it for itself.
+
+        These verdicts become 'none' rather than a softer failure, because the
+        claim is not that the failure was forgiven — nothing weighed it — but
+        that the mechanism did not judge this message at all. 'none' is already
+        the value for that, and `combine_statuses` already answers a message
+        with nothing left to judge with a visible 'warn', so no message can go
+        quiet by this route. The raw result is untouched and still shown, with a
+        description saying why it is not counted.
+
+        Only adverse verdicts are dropped. A mechanism that passed is left to
+        speak for itself: this is here to remove a false alarm, not to withhold
+        what did hold.
+
+        The reader's account, not their identity, is what authenticated — so
+        this never promotes anything to 'pass'. A server that does not bind the
+        login to the From address lets an authenticated user write any sender
+        they like, and nothing in the message says whether yours does.
+        """
+        if not submission:
+            return findings
+
+        excused = dict(findings)
+        for method in ('spf', 'dmarc'):
+            finding = excused.get(method)
+
+            if finding and finding['verdict'] in ('fail', 'warn'):
+                excused[method] = {**finding, 'verdict': 'none',
+                                   'description': i18n_gettext('localsubmission')}
+
+        return excused
 
     def _security_entry(self, method: str, entry: dict | None, from_domain: str | None,
                         sig_domain: str | None) -> dict:
@@ -695,6 +814,15 @@ class MessageSecurityInfo:
                 out.append({'name': name, 'value': value})
 
         return out
+
+    @staticmethod
+    def format_submission(submission: dict) -> str:
+        """Format the submission line: who authenticated, and from where."""
+        who = (i18n_gettext('submissionuser', {'user': submission['user']})
+               if submission.get('user') else i18n_gettext('submissionanon'))
+
+        return (i18n_gettext('submissionfrom', {'what': who, 'client': submission['client']})
+                if submission.get('client') else who)
 
     @staticmethod
     def format_tls(tls: dict | None) -> str:
@@ -892,7 +1020,8 @@ def report_rows(result: dict) -> list[tuple[str, str, str | None]]:
     """The result as (label, value, verdict) display rows, in report order.
 
     The verdict is what the row's glyph is drawn from, and None for the rows
-    that carry no verdict at all — the From address and the transport.
+    that carry no verdict at all — the From address, the submission and the
+    transport.
     """
     info = result.get('info', {})
     rows = []
@@ -902,6 +1031,9 @@ def report_rows(result: dict) -> list[tuple[str, str, str | None]]:
 
     for method, entry in result.get('security', {}).items():
         rows.append((i18n_gettext(method), security_line(entry), entry['verdict']))
+
+    if 'submission' in info:
+        rows.append((i18n_gettext('submission'), info['submission'], None))
 
     if 'transport' in info:
         rows.append((i18n_gettext('tls'), info['transport'], None))
